@@ -1,90 +1,160 @@
+# settaggio librerie
 library(readxl)
 library(readr)
+library(forecast)
 
-Ristorazione <- read_excel("C:/Users/Stefano/Desktop/dslab/Ristorazione.xls")
-Ristorazione<-Ristorazione[-c(1),-c(2,3,4,5,7,10)]
-colnames(Ristorazione)[1]<- "data"
-colnames(Ristorazione)[2]<- "data_anno_prec"
-colnames(Ristorazione)[3]<- "vendite1"
-colnames(Ristorazione)[4]<- "scontrini1"
-colnames(Ristorazione)[5]<- "vendite2"
-colnames(Ristorazione)[6]<- "scontrini2"
-colnames(Ristorazione)[7]<- "vendite3"
-colnames(Ristorazione)[8]<- "scontrini3"
-colnames(Ristorazione)[9]<- "vendite4"
-colnames(Ristorazione)[10]<- "scontrini4"
-colnames(Ristorazione)[11]<- "vendite5"
-colnames(Ristorazione)[12]<- "scontrini5"
-colnames(Ristorazione)[13]<- "vendite6"
-colnames(Ristorazione)[14]<- "scontrini6"
+# lettura dataset
+ristorazione_original <- read_excel("C:/Users/Stefano/Desktop/dslab/Ristorazione.xls")
 
-Ristorazione$vendite1 <- as.numeric(Ristorazione$vendite1)
-Ristorazione$scontrini1 <- as.numeric(Ristorazione$scontrini1)
-Ristorazione$vendite2 <- as.numeric(Ristorazione$vendite2)
-Ristorazione$scontrini2 <- as.numeric(Ristorazione$scontrini2)
-Ristorazione$vendite3 <- as.numeric(Ristorazione$vendite3)
-Ristorazione$scontrini3 <- as.numeric(Ristorazione$scontrini3)
-Ristorazione$vendite4 <- as.numeric(Ristorazione$vendite4)
-Ristorazione$scontrini4 <- as.numeric(Ristorazione$scontrini4)
-Ristorazione$vendite5 <- as.numeric(Ristorazione$vendite5)
-Ristorazione$scontrini5 <- as.numeric(Ristorazione$scontrini5)
-Ristorazione$vendite6 <- as.numeric(Ristorazione$vendite6)
-Ristorazione$scontrini6 <- as.numeric(Ristorazione$scontrini6)
+# sistemazione dataset
+ristorazione <- ristorazione_original # lavoro su una copia del dataset originale
+ristorazione<-ristorazione[-c(1),-c(2,3,4,5,7,10)]  # header e colonne prive di dati
+colnames(ristorazione)[1]<- "data"
+colnames(ristorazione)[2]<- "data_anno_prec"
+colnames(ristorazione)[3]<- "vendite1"
+colnames(ristorazione)[4]<- "scontrini1"
+colnames(ristorazione)[5]<- "vendite2"
+colnames(ristorazione)[6]<- "scontrini2"
+colnames(ristorazione)[7]<- "vendite3"
+colnames(ristorazione)[8]<- "scontrini3"
+colnames(ristorazione)[9]<- "vendite4"
+colnames(ristorazione)[10]<- "scontrini4"
+colnames(ristorazione)[11]<- "vendite5"
+colnames(ristorazione)[12]<- "scontrini5"
+colnames(ristorazione)[13]<- "vendite6"
+colnames(ristorazione)[14]<- "scontrini6"
 
-Ristorazione["giorno"] <- substr(Ristorazione$data, 1, 2)
-Ristorazione$data <- substr(Ristorazione$data, 3, 100)
-Ristorazione$data <- parse_date(Ristorazione$data, "%d %b %Y", locale = locale("it"))
-Ristorazione$data_anno_prec <- parse_date(Ristorazione$data_anno_prec, "%d %b %Y", locale = locale("it"))
-View(Ristorazione)
+# coversione da char a numeric delle colonne vendite e scontrini
+ristorazione[3:14] <- lapply(ristorazione[3:14], as.numeric)
 
-ristorante1 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite1, Ristorazione$scontrini1)
-colnames(ristorante1)[1]<- "data"
-colnames(ristorante1)[2]<- "data_anno_prec"
-colnames(ristorante1)[3]<- "giorno"
-colnames(ristorante1)[4]<- "vendite"
-colnames(ristorante1)[5]<- "scontrini"
+# sistemazione date
+ristorazione$data <- substr(ristorazione$data, 3, 100)
+ristorazione$data <- parse_date(ristorazione$data, "%d %b %Y", locale = locale("it"))
+ristorazione$data_anno_prec <- parse_date(ristorazione$data_anno_prec, "%d %b %Y", locale = locale("it"))
+ristorazione["giorno_settimana"] <- format(as.Date(ristorazione$data), "%a")  # ricavo il giorno_settimana della settimana
+ristorazione <- ristorazione[c(1,2,15,3,4,5,6,7,8,9,10,11,12,13,14)]  # cambio ordine colonne
 
-ristorante2 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite2, Ristorazione$scontrini2)
-colnames(ristorante2)[1]<- "data"
-colnames(ristorante2)[2]<- "data_anno_prec"
-colnames(ristorante2)[3]<- "giorno"
-colnames(ristorante2)[4]<- "vendite"
-colnames(ristorante2)[5]<- "scontrini"
+# creo un dataframe per ciascun ristorante
+col_date <- subset(ristorazione, select = c(1, 2, 3)) # data, data_anno_prec, giorno_settimana, uguali per ogni ristorante
+col_nomi <- c("data", "data_anno_prec", "giorno_settimana", "vendite", "scontrini")
 
-ristorante3 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite3, Ristorazione$scontrini3)
-colnames(ristorante3)[1]<- "data"
-colnames(ristorante3)[2]<- "data_anno_prec"
-colnames(ristorante3)[3]<- "giorno"
-colnames(ristorante3)[4]<- "vendite"
-colnames(ristorante3)[5]<- "scontrini"
+#ristorante1
+ristorante1 <- data.frame(col_date, ristorazione$vendite1, ristorazione$scontrini1)
+colnames(ristorante1) <- col_nomi
 
-ristorante4 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite4, Ristorazione$scontrini4)
-colnames(ristorante4)[1]<- "data"
-colnames(ristorante4)[2]<- "data_anno_prec"
-colnames(ristorante4)[3]<- "giorno"
-colnames(ristorante4)[4]<- "vendite"
-colnames(ristorante4)[5]<- "scontrini"
+#ristorante2
+ristorante2 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
+colnames(ristorante2) <- col_nomi
 
-ristorante5 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite5, Ristorazione$scontrini5)
-colnames(ristorante5)[1]<- "data"
-colnames(ristorante5)[2]<- "data_anno_prec"
-colnames(ristorante5)[3]<- "giorno"
-colnames(ristorante5)[4]<- "vendite"
-colnames(ristorante5)[5]<- "scontrini"
+#ristorante3
+ristorante3 <- data.frame(col_date, ristorazione$vendite3, ristorazione$scontrini3)
+colnames(ristorante3) <- col_nomi
 
+#ristorante4
+ristorante4 <- data.frame(col_date,ristorazione$vendite4, ristorazione$scontrini4)
+colnames(ristorante4) <- col_nomi
 
-ristorante6 <- data.frame(Ristorazione$data, Ristorazione$data_anno_prec,Ristorazione$giorno, Ristorazione$vendite6, Ristorazione$scontrini6)
-colnames(ristorante6)[1]<- "data"
-colnames(ristorante6)[2]<- "data_anno_prec"
-colnames(ristorante6)[3]<- "giorno"
-colnames(ristorante6)[4]<- "vendite"
-colnames(ristorante6)[5]<- "scontrini"
+#ristorante5
+ristorante5 <- data.frame(col_date, ristorazione$vendite5, ristorazione$scontrini5)
+colnames(ristorante5) <- col_nomi
 
-rist <- ristorante1[1:365, ]
+#ristorante6
+ristorante6 <- data.frame(col_date, ristorazione$vendite6, ristorazione$scontrini6)
+colnames(ristorante6) <- col_nomi
+
+# rimuovo le variabili che mi sono servite nella fase sopra
+rm(list = c('col_date','col_nomi'))
+
+# prova esplorazione
+rist <- ristorante1
 plot(rist$data, rist$vendite, xlab = "data", ylab = "vendite", type="l")
 abline(h=mean(as.integer(rist$vendite)))
 
-summary(Ristorazione)
+summary(ristorazione)
+
+
+# decomposizione serie primo ristorante
+vendite1<-ristorante1[, 4]
+vendite1[is.na(vendite1)] <- 0
+vendite1<-ts(vendite1,start=2017,frequency=365) 
+plot(vendite1)
+
+
+vendite1.fit<-stl(vendite1,s.window="periodic")
+#attributes(vendite1.fit)
+trend.vendite1<-vendite1.fit$time.series[,2]
+stag.vendite1<-vendite1.fit$time.series[,1]
+res.vendite1<-vendite1.fit$time.series[,3]
+plot(vendite1.fit,main="Decomposizione con la funzione 'stl'")
 
 
 
+# decomposizione serie secondo ristorante
+vendite2<-ristorante2[, 4]
+vendite2[is.na(vendite2)] <- 0
+vendite2<-ts(vendite2,start=2017,frequency=365) 
+plot(vendite2)
+
+
+vendite2.fit<-stl(vendite2,s.window="periodic")
+attributes(vendite2.fit)
+trend.vendite2<-vendite2.fit$time.series[,2]
+stag.vendite2<-vendite2.fit$time.series[,1]
+res.vendite2<-vendite2.fit$time.series[,3]
+plot(vendite2.fit,main="Decomposizione con la funzione 'stl'")
+
+
+# #decomposizione covid
+# rist1 <- ristorante1
+# rist_pre_covid<-rist1[1:1164, 4]
+# rist_pre_covid[is.na(rist_pre_covid)] <- 0
+# rist_pre_covid<-ts(rist_pre_covid,start=2017,frequency=365) 
+# plot(rist_pre_covid)
+# 
+# 
+# stl.fit_pre<-stl(rist_pre_covid,s.window="periodic")
+# attributes(stl.fit_pre)
+# trend.stl<-stl.fit_pre$time.series[,2]
+# stag.stl<-stl.fit_pre$time.series[,1]
+# res.stl<-stl.fit_pre$time.series[,3]
+# plot(stl.fit_pre,main="Decomposizione con la funzione 'stl'")
+# 
+# rist_post_covid<-rist1[1164:1563, 4]
+# summary(rist_post_covid)
+# rist_post_covid[is.na(rist_post_covid)] <- 0
+# rist_post_covid<-ts(rist_post_covid, start = 2020, frequency = 365) 
+# plot(rist_post_covid)
+# rist_post_covid
+# 
+# 
+# stl.fit_post<-stl(rist_post_covid,s.window="periodic")
+# attributes(stl.fit_pre)
+# trend.stl<-stl.fit_pre$time.series[,2]
+# stag.stl<-stl.fit_pre$time.series[,1]
+# res.stl<-stl.fit_pre$time.series[,3]
+# plot(stl.fit_post,main="Decomposizione con la funzione 'stl'")
+
+
+
+
+
+# aggregare ristorante 1 per mese
+vendite_agg1<-ristorante1
+vendite_agg1$mo <- strftime(vendite_agg1$data, "%m")
+vendite_agg1$yr <- strftime(vendite_agg1$data, "%Y")
+vendite_agg1<-ts(vendite_agg1$vendite,start=2017,frequency=12) 
+vendite_agg1 <- aggregate(vendite ~ mo + yr, vendite_agg1, FUN = mean)
+
+monthplot(ristm)
+plot(vendite_agg1)
+
+vendite_agg1.fit<-stl(vendite_agg1,s.window="periodic")
+attributes(vendite_agg1.fit)
+trend.vendite_agg1<-vendite_agg1.fit$time.series[,2]
+stag.vendite_agg1<-vendite_agg1.fit$time.series[,1]
+res.vendite_agg1<-vendite_agg1.fit$time.series[,3]
+plot(vendite_agg1.fit,main="Decomposizione con la funzione 'stl'")
+
+
+acf(res.vendite_agg1,type="correlation",plot=TRUE,main="Correlogramma della serie dei residui")
+pacf(res.vendite_agg1,plot=TRUE,main="Grafico delle correlazioni parziali")
