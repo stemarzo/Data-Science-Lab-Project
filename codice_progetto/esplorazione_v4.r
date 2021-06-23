@@ -12,8 +12,8 @@ library(devtools)
 library("dplyr") 
 
 # lettura dataset
-#ristorazione_original <- read_excel("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/Ristorazione.xls")
-ristorazione_original <- read_excel("/Users/lorenzolorgna/Desktop/ds lab/Ristorazione.xls")
+ristorazione_original <- read_excel("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/Ristorazione.xls")
+#ristorazione_original <- read_excel("/Users/lorenzolorgna/Desktop/ds lab/Ristorazione.xls")
 
 # sistemazione dataset
 ristorazione <- ristorazione_original # lavoro su una copia del dataset originale
@@ -73,7 +73,8 @@ ristorazione <- ristorazione %>%
   )
 
 # colore zona in base alla data
-colori_zone <- read_csv("/Users/lorenzolorgna/Desktop/dataset.csv")
+#colori_zone <- read_csv("/Users/lorenzolorgna/Desktop/dataset.csv")
+colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
 
 # selezione regioni
 colori_zone <- colori_zone %>% filter(
@@ -96,6 +97,19 @@ ristorazione <- ristorazione %>%
   )        
 
 ristorazione <- ristorazione[c(1,2,15,16,17,18,19,20,21,22,3,4,5,6,7,8,9,10,11,12,13,14)]  # cambio ordine colonne
+
+#inserimento delle colonne che riguardano gli eventi sportivi
+eventi_sportivi <- read_delim("dati/eventi_sportivi.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+eventi_sportivi <- eventi_sportivi[, -c(1)]
+ristorazione<-merge(x=ristorazione,y=eventi_sportivi,by="data",all.x=TRUE)
+
+#inserimento colonne riguardanti il meteo
+meteo <- read_delim("dati/meteo.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+meteo <- meteo[, -c(1)]
+meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
+ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
+
+ristorazione <- ristorazione[c(1,2,3,4,5,6,7,8,9,10, 23:32,11:22)]  # cambio ordine colonne
 
 #check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
