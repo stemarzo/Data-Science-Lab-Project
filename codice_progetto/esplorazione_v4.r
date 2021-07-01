@@ -10,8 +10,9 @@ library(lubridate)
 library(RQuantLib)
 library(devtools)
 library("dplyr") 
+# test
 
-# lettura dataset
+# lettura dataset 
 ristorazione_original <- read_excel("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/Ristorazione.xls")
 #ristorazione_original <- read_excel("/Users/lorenzolorgna/Desktop/ds lab/Ristorazione.xls")
 
