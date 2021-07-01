@@ -116,7 +116,7 @@ ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
-sum(is.na(ristorazione$data_anno_prec))  # 68 NA - DA SISTEMARE!
+sum(is.na(ristorazione$data_anno_prec))  # 68 NA - DA SISTEMARE!!!
 sum(is.na(ristorazione$giorno_settimana))  # 0 NA 
 # nelle vendite e scontrini sostituire gli NA CON 0 ?
 
