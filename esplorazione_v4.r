@@ -231,9 +231,6 @@ plot(vendite2.fit,main="Decomposizione con la funzione 'stl'")
 # plot(stl.fit_post,main="Decomposizione con la funzione 'stl'")
 
 
-
-
-
 # aggregare ristorante 1 per mese
 vendite_agg1<-ristorante1
 vendite_agg1$mo <- strftime(vendite_agg1$data, "%m")
