@@ -124,7 +124,6 @@ sum(is.na(ristorazione$giorno_settimana))  # 0 NA
 #### CREAZIONE DF PER CIASCUN RISTORANTE ####
 
 # creo un dataframe per ciascun ristorante
-
 col_date <- subset(ristorazione, select = c(1, 2))
 col_nomi <- c("data", "data_anno_prec", "vendite", "scontrini")
 
@@ -136,10 +135,10 @@ ristorante1 <- data.frame(col_date, ristorazione$vendite1, ristorazione$scontrin
 colnames(ristorante1) <- col_nomi
 ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 
-#ristorante2
-ristorante2 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
-colnames(ristorante2) <- col_nomi
-ristorante2$rapprto_v_s <- ristorante2$vendite/ristorante2$scontrini
+#ristorante4
+ristorante4 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
+colnames(ristorante4) <- col_nomi
+ristorante4$rapprto_v_s <- ristorante4$vendite/ristorante4$scontrini
 
 #ristorante3
 ristorante3 <- data.frame(col_date, ristorazione$vendite3, ristorazione$scontrini3)
@@ -165,11 +164,28 @@ ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 rm(list = c('col_date','col_nomi'))
 
 
-#### PRIMA ESPLORAZIONE ####
+#### PRIMA ESPLORAZIONE #### ---> aggiungere codice stefano
 
 # prova esplorazione, primo ristorante, andamento vendite nei diversi anni, considerando il dato giornaliero
-plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l")
+par(mfrow=c(3,2))
+
+plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 abline(h=mean(as.integer(ristorante1$vendite)))
+  
+plot(ristorante2$data, ristorante2$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 2")
+abline(h=mean(as.integer(ristorante2$vendite)))
+
+plot(ristorante3$data, ristorante3$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 3")
+abline(h=mean(as.integer(ristorante3$vendite)))
+
+plot(ristorante4$data, ristorante4$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 4")
+abline(h=mean(as.integer(ristorante4$vendite)))
+
+plot(ristorante5$data, ristorante5$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 5")
+abline(h=mean(as.integer(ristorante5$vendite)))
+
+plot(ristorante6$data, ristorante6$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 6")
+abline(h=mean(as.integer(ristorante6$vendite)))
 # è possibile notare la presenza di valori NA
 
 # decomposizione serie primo ristorante
@@ -187,7 +203,7 @@ plot(vendite1.fit,main="Decomposizione con la funzione 'stl'")
 
 
 # decomposizione serie secondo ristorante
-vendite2<-ristorante2[, 4]
+vendite2<-ristorante4[, 4]
 vendite2[is.na(vendite2)] <- 0
 vendite2<-ts(vendite2,start=2017,frequency=365) 
 plot(vendite2)
