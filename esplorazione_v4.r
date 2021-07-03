@@ -170,9 +170,9 @@ ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 rm(list = c('col_date','col_nomi'))
 
 
-#### PRIMA ESPLORAZIONE #### ---> aggiungere codice stefano
+#### ESPLORAZIONE #### 
 
-# prova esplorazione, primo ristorante, andamento vendite nei diversi anni, considerando il dato giornaliero
+# andamento delle vendite negli anni considerati, per ciascun ristorante
 par(mfrow=c(3,2))
 
 plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
@@ -195,39 +195,81 @@ abline(h=mean(as.integer(ristorante6$vendite)))
 # è possibile notare la presenza di valori NA
 
 
+# decomposizione serie per ciascun ristorante (considerando le vendite)
+par(mfrow=c(1,1))
 
-
-
-
-
-# decomposizione serie primo ristorante
-vendite1 <- ristorante1[, 4]
-vendite1[is.na(vendite1)] <- 0  # sostiuisco i valori NA con 0
-vendite1 <- ts(vendite1,start=2017,frequency=365) 
+vendite1 <- ts(ristorante1[, 3],start=2017,frequency=365) 
 plot(vendite1)
-
 vendite1.fit<-stl(vendite1,s.window="periodic")
 attributes(vendite1.fit)
 trend.vendite1<-vendite1.fit$time.series[,2]
 stag.vendite1<-vendite1.fit$time.series[,1]
 res.vendite1<-vendite1.fit$time.series[,3]
-plot(vendite1.fit,main="Decomposizione con la funzione 'stl'")
+plot(vendite1.fit,main="Decomposizione con la funzione 'stl' per il ristorante 1")
 
 
-# decomposizione serie secondo ristorante
-vendite2<-ristorante4[, 4]
-vendite2[is.na(vendite2)] <- 0
-vendite2<-ts(vendite2,start=2017,frequency=365) 
+vendite2 <- ts(ristorante2[, 3],start=2017,frequency=365) 
 plot(vendite2)
-
 vendite2.fit<-stl(vendite2,s.window="periodic")
 attributes(vendite2.fit)
 trend.vendite2<-vendite2.fit$time.series[,2]
 stag.vendite2<-vendite2.fit$time.series[,1]
 res.vendite2<-vendite2.fit$time.series[,3]
-plot(vendite2.fit,main="Decomposizione con la funzione 'stl'")
+plot(vendite2.fit,main="Decomposizione con la funzione 'stl' per il ristorante 2")
 
 
+vendite3 <- ts(ristorante3[, 3],start=2017,frequency=365) 
+plot(vendite3)
+vendite3.fit<-stl(vendite3,s.window="periodic")
+attributes(vendite3.fit)
+trend.vendite3<-vendite3.fit$time.series[,2]
+stag.vendite3<-vendite3.fit$time.series[,1]
+res.vendite3<-vendite3.fit$time.series[,3]
+plot(vendite3.fit,main="Decomposizione con la funzione 'stl' per il ristorante 3")
+
+
+vendite4 <- ts(ristorante4[, 3],start=2017,frequency=365) 
+plot(vendite4)
+vendite4.fit<-stl(vendite4,s.window="periodic")
+attributes(vendite4.fit)
+trend.vendite4<-vendite4.fit$time.series[,2]
+stag.vendite4<-vendite4.fit$time.series[,1]
+res.vendite4<-vendite4.fit$time.series[,3]
+plot(vendite4.fit,main="Decomposizione con la funzione 'stl' per il ristorante 4")
+
+
+vendite5 <- ts(ristorante5[, 3],start=2017,frequency=365) 
+plot(vendite5)
+vendite5.fit<-stl(vendite5,s.window="periodic")
+attributes(vendite5.fit)
+trend.vendite5<-vendite5.fit$time.series[,2]
+stag.vendite5<-vendite5.fit$time.series[,1]
+res.vendite5<-vendite5.fit$time.series[,3]
+plot(vendite5.fit,main="Decomposizione con la funzione 'stl' per il ristorante 5")
+
+
+vendite6 <- ts(ristorante6[, 3],start=2017,frequency=365) 
+plot(vendite6)
+vendite6.fit<-stl(vendite6,s.window="periodic")
+attributes(vendite6.fit)
+trend.vendite6<-vendite6.fit$time.series[,2]
+stag.vendite6<-vendite6.fit$time.series[,1]
+res.vendite6<-vendite6.fit$time.series[,3]
+plot(vendite6.fit,main="Decomposizione con la funzione 'stl' per il ristorante 6")
+
+
+
+
+
+
+
+
+
+
+
+
+
+# da escludere
 # #decomposizione covid
 # rist1 <- ristorante1
 # rist_pre_covid<-rist1[1:1164, 4]
@@ -260,22 +302,22 @@ plot(vendite2.fit,main="Decomposizione con la funzione 'stl'")
 
 
 # aggregare ristorante 1 per mese
-vendite_agg1<-ristorante1
-vendite_agg1$mo <- strftime(vendite_agg1$data, "%m")
-vendite_agg1$yr <- strftime(vendite_agg1$data, "%Y")
-vendite_agg1<-ts(vendite_agg1$vendite,start=2017,frequency=12) 
-vendite_agg1 <- aggregate(vendite ~ mo + yr, vendite_agg1, FUN = mean)
-
-monthplot(ristm)
-plot(vendite_agg1)
-
-vendite_agg1.fit<-stl(vendite_agg1,s.window="periodic")
-attributes(vendite_agg1.fit)
-trend.vendite_agg1<-vendite_agg1.fit$time.series[,2]
-stag.vendite_agg1<-vendite_agg1.fit$time.series[,1]
-res.vendite_agg1<-vendite_agg1.fit$time.series[,3]
-plot(vendite_agg1.fit,main="Decomposizione con la funzione 'stl'")
-
-
-acf(res.vendite_agg1,type="correlation",plot=TRUE,main="Correlogramma della serie dei residui")
-pacf(res.vendite_agg1,plot=TRUE,main="Grafico delle correlazioni parziali")
+# vendite_agg1<-ristorante1
+# vendite_agg1$mo <- strftime(vendite_agg1$data, "%m")
+# vendite_agg1$yr <- strftime(vendite_agg1$data, "%Y")
+# vendite_agg1<-ts(vendite_agg1$vendite,start=2017,frequency=12) 
+# vendite_agg1 <- aggregate(vendite ~ mo + yr, vendite_agg1, FUN = mean)
+# 
+# monthplot(ristm)
+# plot(vendite_agg1)
+# 
+# vendite_agg1.fit<-stl(vendite_agg1,s.window="periodic")
+# attributes(vendite_agg1.fit)
+# trend.vendite_agg1<-vendite_agg1.fit$time.series[,2]
+# stag.vendite_agg1<-vendite_agg1.fit$time.series[,1]
+# res.vendite_agg1<-vendite_agg1.fit$time.series[,3]
+# plot(vendite_agg1.fit,main="Decomposizione con la funzione 'stl'")
+# 
+# 
+# acf(res.vendite_agg1,type="correlation",plot=TRUE,main="Correlogramma della serie dei residui")
+# pacf(res.vendite_agg1,plot=TRUE,main="Grafico delle correlazioni parziali")
