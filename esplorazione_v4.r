@@ -137,7 +137,7 @@ ristorante1$vendite[is.na(ristorante1$vendite)] <- 0  # sostiuisco i valori NA c
 ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 
 #ristorante2
-ristorante42 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
+ristorante2 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
 colnames(ristorante2) <- col_nomi
 ristorante2$vendite[is.na(ristorante2$vendite)] <- 0 
 ristorante2$rapprto_v_s <- ristorante2$vendite/ristorante2$scontrini
@@ -275,8 +275,8 @@ autoplot(vendite1_day) +
   ylab("vendite")
 
 # VENDITE SETTIMANALI
-week <- as.Date(cut(ristorante1_pre$data, "week"))
-vendite1_sett <- aggregate(vendite ~ week, ristorante1_pre, sum)
+week <- as.Date(cut(vendite1_pre$data, "week"))
+vendite1_sett <- aggregate(vendite ~ week, vendite1_pre, sum)
 vendite1_sett <- vendite1_sett$vendite
 vendite1_sett <- ts(vendite1_sett,start=2017,frequency=52) 
 
