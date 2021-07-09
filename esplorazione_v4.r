@@ -12,7 +12,7 @@ library(devtools)
 library("dplyr") 
 
 # setting working directory
-working_dir = "C:/Users/Lorenzo/Desktop/codice_progetto/dati"
+working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
@@ -117,8 +117,11 @@ ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
 sum(is.na(ristorazione$data_anno_prec))  # 68 NA - DA SISTEMARE!!!
+which(is.na(ristorazione$data_anno_prec))
 sum(is.na(ristorazione$giorno_settimana))  # 0 NA 
 # nelle vendite e scontrini sostituire gli NA CON 0 ?
+
+# procedo aggiungendo le date mancanti per data_anno_prec
 
 
 #### CREAZIONE DF PER CIASCUN RISTORANTE ####
