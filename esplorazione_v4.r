@@ -12,11 +12,11 @@ library(devtools)
 library("dplyr") 
 
 # setting working directory
-working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
+# working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
+working_dir = "C:/Users/Lorenzo/Desktop/codice_progetto/dati"
 setwd(working_dir)
 
 # lettura dataset
-# ristorazione_original <- read_excel("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/Ristorazione.xls")
 ristorazione_original <- read_excel("Ristorazione.xls")
 
 #### SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES ####
@@ -116,12 +116,50 @@ ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
-sum(is.na(ristorazione$data_anno_prec))  # 68 NA - DA SISTEMARE!!!
+sum(is.na(ristorazione$data_anno_prec))  # 68 NA
 which(is.na(ristorazione$data_anno_prec))
 sum(is.na(ristorazione$giorno_settimana))  # 0 NA 
-# nelle vendite e scontrini sostituire gli NA CON 0 ?
+
+# si procede nella sistemazione degli NA presenti in "data_anno_prec"
 
 # procedo aggiungendo le date mancanti per data_anno_prec
+
+first_date = ristorazione[421,"data_anno_prec"]+1
+last_date = ristorazione[427,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(422:426),"data_anno_prec"] <- dates
+
+ristorazione[516, "data_anno_prec"] <-  as.Date("2017-06-01", format = "%Y-%m-%d")
+
+first_date = ristorazione[1166,"data_anno_prec"]+1
+last_date = ristorazione[1223,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(1167:1222),"data_anno_prec"] <- dates
+
+
+first_date = ristorazione[1503,"data_anno_prec"]+1
+last_date = ristorazione[1508,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(1504:1507),"data_anno_prec"] <- dates
+
+
+first_date = ristorazione[1517,"data_anno_prec"]+1
+last_date = ristorazione[1520,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(1518,1519),"data_anno_prec"] <- dates
+
+
+first_date = ristorazione[1527,"data_anno_prec"]+1
+last_date = ristorazione[1530,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(1528, 1529),"data_anno_prec"] <- dates
+
+first_date = ristorazione[1703,"data_anno_prec"]+1
+last_date = ristorazione[1708,"data_anno_prec"]-1
+dates <- seq(first_date, last_date, by = "1 day")
+ristorazione[c(1704:1707),"data_anno_prec"] <- dates
+
+
 
 
 #### CREAZIONE DF PER CIASCUN RISTORANTE ####
@@ -196,6 +234,14 @@ abline(h=mean(as.integer(ristorante5$vendite)))
 plot(ristorante6$data, ristorante6$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 6")
 abline(h=mean(as.integer(ristorante6$vendite)))
 # è possibile notare la presenza di valori NA
+
+# insights: osservando l'andamento delle vendite a livello giornaliero si può notare l'effetto
+# del covid: nella prima metà del 2020 non state registrate infatti vendite.
+#
+#
+#
+#
+#
 
 
 #### decomposizione serie per ciascun ristorante (considerando le vendite) ####
