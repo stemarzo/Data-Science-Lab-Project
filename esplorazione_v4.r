@@ -21,6 +21,8 @@ ristorazione_original <- read_excel("Ristorazione.xls")
 
 #### SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES ####
 
+
+
 # sistemazione dataset
 ristorazione <- ristorazione_original # lavoro su una copia del dataset originale
 ristorazione<-ristorazione[-c(1),-c(2,3,4,5,7,10)]  # header e colonne prive di dati
@@ -116,9 +118,22 @@ ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
+
 sum(is.na(ristorazione$data_anno_prec))  # 68 NA
 which(is.na(ristorazione$data_anno_prec))
+
 sum(is.na(ristorazione$giorno_settimana))  # 0 NA 
+
+sum(is.na(ristorazione$vendite1))  # 74 NA
+which(is.na(ristorazione$vendite1))
+
+
+
+# e cosi via per le altre variabili: bisogna capire cosa si vuole fare.
+# potrebbero esserci dei NA che corrispondono alle 0 vendite in periodo covid,
+# ma anche degli NA che sono magari dovuti alla registrazione non corretta del 
+# valore
+
 
 # si procede nella sistemazione degli NA presenti in "data_anno_prec"
 
@@ -218,7 +233,23 @@ par(mfrow=c(3,2))
 
 plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 abline(h=mean(as.integer(ristorante1$vendite)))
+
+# per maggiori dettagli
+ggplot(ristorante1, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante1$data[yday(ristorante1$data)==1]), size=1.2, color= "red") +
   
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+
+
 plot(ristorante2$data, ristorante2$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 2")
 abline(h=mean(as.integer(ristorante2$vendite)))
 
@@ -308,15 +339,15 @@ plot(vendite6.fit,main="Decomposizione con la funzione 'stl' per il ristorante 6
 
 
 #### si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 ####
-reference_date <- as.Date("2012-02-22", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
 vendite1_pre <- ristorante1 %>%
-  filter(ristorante1$vendite < reference_date) %>%
-  select(vendite)
+  filter(ristorante1$data < reference_date) %>%
+  select(vendite, data)
 
 # VENDITE GIORNALIERE
-vendite1_day <- ts(vendite1,start=2017,frequency=365)
+vendite1_day <- ts(vendite1_pre$vendite,start=2017,frequency=365)
 
 autoplot(vendite1_day) +
   ggtitle("Ristorante 1: vendite giornaliere pre-covid") +
@@ -369,6 +400,16 @@ autoplot(vendite1_mens_avg) +
   ylab("vendite")
 
 
+# ULTERIORI ANALISI DA FARE PER CIASCUN RISTORANTE
+
+# autocorrleation plots
+par(mfrow = c(1,2))
+acf(as.ts(ristorante1$vendite), main = "Sales")
+pacf(as.ts(ristorante1$vendite), main = "Sales")
+
+# we apply auto.arima function, that searches the best ARIMA model
+arima1 <- auto.arima(as.ts(ristorante1$vendite))
+arima1
 
 # ripetere con gli altri ristoranti
 
