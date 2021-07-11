@@ -1,3 +1,5 @@
+# SETTING PROGETTO --------------------------------------------------------
+
 # setting librerie
 library(readxl)
 library(readr)
@@ -16,10 +18,12 @@ working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
-# ristorazione_original <- read_excel("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/Ristorazione.xls")
 ristorazione_original <- read_excel("Ristorazione.xls")
 
-#### SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES ####
+
+
+
+# SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES --------------------------
 
 # sistemazione dataset
 ristorazione <- ristorazione_original # lavoro su una copia del dataset originale
@@ -124,7 +128,9 @@ sum(is.na(ristorazione$giorno_settimana))  # 0 NA
 # procedo aggiungendo le date mancanti per data_anno_prec
 
 
-#### CREAZIONE DF PER CIASCUN RISTORANTE ####
+
+
+# CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
 
 # creo un dataframe per ciascun ristorante
 col_date <- subset(ristorazione, select = c(1, 2))
@@ -173,9 +179,12 @@ ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 rm(list = c('col_date','col_nomi'))
 
 
-#### ESPLORAZIONE #### 
 
-#### andamento delle vendite negli anni considerati, per ciascun ristorante ####
+
+# ESPLORAZIONE DATASET ------------------------------------------------------------
+
+
+## andamento delle vendite negli anni considerati, per ciascun ristorante 
 par(mfrow=c(3,2))
 
 plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
@@ -198,7 +207,7 @@ abline(h=mean(as.integer(ristorante6$vendite)))
 # è possibile notare la presenza di valori NA
 
 
-#### decomposizione serie per ciascun ristorante (considerando le vendite) ####
+## decomposizione serie per ciascun ristorante (considerando le vendite)
 par(mfrow=c(1,1))
 
 vendite1 <- ts(ristorante1[, 3],start=2017,frequency=365) 
@@ -261,7 +270,26 @@ res.vendite6<-vendite6.fit$time.series[,3]
 plot(vendite6.fit,main="Decomposizione con la funzione 'stl' per il ristorante 6")
 
 
-#### si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 ####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
 reference_date <- as.Date("2012-02-22", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
@@ -391,4 +419,20 @@ autoplot(vendite1_mens_avg) +
 # 
 # acf(res.vendite_agg1,type="correlation",plot=TRUE,main="Correlogramma della serie dei residui")
 # pacf(res.vendite_agg1,plot=TRUE,main="Grafico delle correlazioni parziali")
+
+
+
+
+# PREVISIONE FATTURATO NO COVID -------------------------------------------
+
+
+
+
+# CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
+
+
+
+
+# CLUSTERING RISTORANTI ---------------------------------------------------
+
 
