@@ -226,6 +226,14 @@ rm(list = c('col_date','col_nomi'))
 # ESPLORAZIONE DATASET ------------------------------------------------------------
 
 
+# Time series consist of four components:
+# (1) Seasonal variations: that repeat over a specific period such as a day, week, month, season, etc.,
+# (2) Trend: Trend is defined as long term increase or decrease in the data. It can be linear or non-linear
+# (3) Cyclical variations: A cyclic pattern exists when data exhibit rises and falls that are not of fixed period.
+# (4) Random variations: that do not fall under any of the above three classifications.
+
+
+
 ## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante 
 par(mfrow=c(3,2))
 
@@ -557,11 +565,26 @@ arima1
 
 # PREVISIONE FATTURATO NO COVID -------------------------------------------
 
+# bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
+
+# Lo scopo di ARIMA è di trovare il modello che meglio rappresenti i valori di una serie storica.
+# 
+# Un modello ARIMA può essere espresso come ARIMA (p, d, q), dove, come abbiamo già visto, p è l’ordine del modello autoregressivo, d indica il grado di differenziazione e q indica l’ordine della media mobile..
+# 
+# Operativamente, possiamo definire cinque passaggi per adattare le serie storiche a un modello ARIMA:
+#   
+# Visualizzare le serie temporali con un grafico.
+# Differenziare le serie storiche non stazionarie per ottenere serie temporali stazionarie.
+# Tracciare grafici ACF e PACF per trovare i valori ottimali di p e q, oppure ricavarli usando la funzione auto.arima.
+# Costruire il modello ARIMA.
+# Fare la previsione.
 
 
 
 # CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
 
+# seleziono un periodo temporale che corrisponde all'estate
+# ricavo due serie storiche, per 2019 e 2020
 
 
 
