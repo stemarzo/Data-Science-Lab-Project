@@ -9,6 +9,39 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Date importanti:
+
+31 dicembre 2019: Le autorità cinesi riferiscono all'oms l'emergenza di diversi
+casi di una misteriosa polmonite il 31 dicembre 2019.
+
+Gennaio 2020: è il mese in cui tutto inizia
+
+31 gennaio 2020: primi due casi di contagi in Italia, PRIMA ONDATA
+
+23 febbraio 2020: istituite zone rosse in Lombardia e Veneto
+
+Marzo 2020: la situazione precipita, tutta Italia chiusa. Dal 9 marzo tutta Italia
+è in lockdown
+
+Maggio 2020: si riapre lentamente. Il 4 maggio prende il via la "fase 2". Il 18 maggio 
+bar e ristoranti riaprono.
+
+Giugno 2020: inzia l'11 giugno la "fase 3", cadono molte restrizioni.
+
+Luglio e Agosto 2020: pochi contagi, poche restrizioni
+
+Ottobre 2020: l'Italia a partire dal 18 ottobre entra nella SECONDA ONDATA. IL 19 
+ottobre si hanno misure restrittive per bar e ristoranti. Il 26 ottobre la frequentazione 
+di bar e ristoranti è consentita fino alle 18.00.
+
+4 novembre 2020: l'Italia viene divisa in zone colorate.
+
+Dicembre 2020: da metà dicembre 2020 fino a febbraio 2021 vi è una situazione di
+stallo
+
+Febbraio 2021: a partire dal 26 febbraio esplode la TERZA ONDATA
+
+
 ## SETTING PROGETTO
 
 

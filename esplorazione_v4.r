@@ -226,26 +226,12 @@ rm(list = c('col_date','col_nomi'))
 # ESPLORAZIONE DATASET ------------------------------------------------------------
 
 
-## andamento delle vendite negli anni considerati, per ciascun ristorante 
+## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante 
 par(mfrow=c(3,2))
 
+# ristorante 1
 plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 abline(h=mean(as.integer(ristorante1$vendite)))
-
-# per maggiori dettagli
-ggplot(ristorante1, aes(data, vendite)) +
-  geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante1$data[yday(ristorante1$data)==1]), size=1.2, color= "red") +
-  
-  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
-               date_breaks="month", expand=c(0,0)) +
-  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
-  theme_bw() +
-  theme(strip.placement = "outside",
-        strip.background = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.border = element_rect(colour="grey70"),
-        panel.spacing=unit(0,"cm"))
 
 plot(ristorante2$data, ristorante2$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 2")
 abline(h=mean(as.integer(ristorante2$vendite)))
@@ -262,6 +248,106 @@ abline(h=mean(as.integer(ristorante5$vendite)))
 plot(ristorante6$data, ristorante6$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 6")
 abline(h=mean(as.integer(ristorante6$vendite)))
 
+
+# si analizza singolarmente ciascun ristorante più nel dettaglio
+
+# ristorante 1
+ggplot(ristorante1, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante1$data[yday(ristorante1$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 1")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+
+# ristorante 2
+ggplot(ristorante2, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante2$data[yday(ristorante2$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 2")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+
+
+# ristorante 3
+ggplot(ristorante3, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante3$data[yday(ristorante3$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 3")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+
+# ristorante 4
+plot_ <- ggplot(ristorante4, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante4$data[yday(ristorante4$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 4")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+print(ris)
+
+# ristorante 5
+ggplot(ristorante5, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante5$data[yday(ristorante5$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 5")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
+
+# ristorante 6
+ggplot(ristorante6, aes(data, vendite)) +
+  geom_line() +
+  geom_vline(xintercept=as.numeric(ristorante6$data[yday(ristorante6$data)==1]), size=1.2, color= "red") +
+  
+  scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
+               date_breaks="month", expand=c(0,0)) +
+  facet_grid(~ year(data), space="free_x", scales="free_x", switch="x") +
+  theme_bw() +
+  ggtitle("Ristorante 6")  +
+  theme(strip.placement = "outside",
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.border = element_rect(colour="grey70"),
+        panel.spacing=unit(0,"cm"))
 
 ## decomposizione serie per ciascun ristorante (considerando le vendite)
 par(mfrow=c(1,1))
@@ -324,25 +410,6 @@ trend.vendite6<-vendite6.fit$time.series[,2]
 stag.vendite6<-vendite6.fit$time.series[,1]
 res.vendite6<-vendite6.fit$time.series[,3]
 plot(vendite6.fit,main="Decomposizione con la funzione 'stl' per il ristorante 6")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ## si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
