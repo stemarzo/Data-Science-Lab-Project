@@ -148,10 +148,37 @@ date_range[!date_range %in% d]
 # nei giorni "2020-12-28" "2020-12-29" "2020-12-30" "2021-01-01" non sono state
 # resgistrate vaccinazioni
 
+# aggiungo date mancanti
+data_somministrazione <- seq(as.Date("2020-12-28", format = "%Y-%m-%d"), as.Date("2020-12-30", format = "%Y-%m-%d"), by = 1)
+area = rep("EMR", times = 3)
+totale = rep(0, times = 3)
+missing_dates_28_30 <- data.frame(data_somministrazione, area, totale)
 
-# da integrare nel dataset finale
-# potrei ridenominare totale_lombardia e totale_emilia_romagna e poi integrare
+# aggiungo date mancanti
+data_somministrazione <- as.Date("2021-01-01", format = "%Y-%m-%d")
+area = "EMR"
+totale = 0
+missing_dates_01_01 <- data.frame(data_somministrazione, area, totale)
 
+# aggiorno i dati per EMR
+vaccini_emilia_romagna = rbind(vaccini_emilia_romagna[1,],  # ora non ci sono più date mancanti
+                               missing_dates_28_30,
+                               vaccini_emilia_romagna[2,],
+                               missing_dates_01_01, 
+                               vaccini_emilia_romagna[-(1:2),])
+# sistemazione colonne
+names(vaccini_lombardia)[3] <- "tot_vaccini_lombardia"
+names(vaccini_lombardia)[1] <- "data"
+vaccini_lombardia$area <- NULL
+
+names(vaccini_emilia_romagna)[3] <- "tot_vaccini_emilia_romagna"
+names(vaccini_emilia_romagna)[1] <- "data"
+vaccini_emilia_romagna$area <- NULL
+
+
+# integro con il file ristorazione (ci saranno righe duplicate perchè bisogna ancora scegliere tra Lombardia e Emilia Romagna cosa tenere in colori regioni)
+ristorazione <- merge(x = ristorazione, y = vaccini_lombardia, by = "data", all.x = TRUE)
+ristorazione <- merge(x = ristorazione, y = vaccini_emilia_romagna, by = "data", all.x = TRUE)
 
 
 # check NA values
