@@ -118,6 +118,42 @@ meteo <- meteo[, -c(1)]
 meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
 ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
+# aggiunta colonna somministrazioni vaccini
+vaccini <- read_csv("somministrazioni_vaccini.csv")
+
+vaccini <- vaccini %>%
+  filter(area=="LOM" | area=="EMR") %>%
+  filter(data_somministrazione <= as.Date("2021-04-12", format = "%Y-%m-%d")) %>%
+  select(data_somministrazione, area, totale)
+
+vaccini_lombardia <- vaccini %>%
+  filter(area=="LOM") %>%
+  select(data_somministrazione, area, totale)
+
+# per capire se ci sono dei giorni in cui non ci sono stati vaccini
+d <- vaccini_lombardia$data_somministrazione
+d <- as.Date(d)
+date_range <- seq(min(d), max(d), by = 1) 
+date_range[!date_range %in% d]  # non vi sono missing values
+
+vaccini_emilia_romagna <- vaccini %>%
+  filter(area=="EMR") %>%
+  select(data_somministrazione, area, totale)
+
+# per capire se ci sono dei giorni in cui non ci sono stati vaccini
+d <- vaccini_emilia_romagna$data_somministrazione
+d <- as.Date(d)
+date_range <- seq(min(d), max(d), by = 1) 
+date_range[!date_range %in% d] 
+# nei giorni "2020-12-28" "2020-12-29" "2020-12-30" "2021-01-01" non sono state
+# resgistrate vaccinazioni
+
+
+# da integrare nel dataset finale
+# potrei ridenominare totale_lombardia e totale_emilia_romagna e poi integrare
+
+
+
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
 
