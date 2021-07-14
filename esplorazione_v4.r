@@ -87,21 +87,32 @@ colori_zone <- read_csv("colori_zone.csv")
 # colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
 
 # selezione regioni
-colori_zone <- colori_zone %>% filter(
-  denominazione_regione == "Lombardia" | denominazione_regione == "Emilia-Romagna"  #  ci sono date in cui Lombardia e Emilaia-Romagna hanno colori diversi (quindi ci sono date duplicate)
-)
-# faccio il join con ristorazione su data
-ristorazione<-merge(x=ristorazione,y=colori_zone,by="data",all.x=TRUE)
+colori_lombardia <- colori_zone %>% filter(
+  denominazione_regione == "Lombardia")
+names(colori_lombardia)[3] <- "colore_lombardia"
 
-# colonna asporto 
+
+colori_emilia_romagna <- colori_zone %>% filter(
+  denominazione_regione == "Emilia-Romagna")
+names(colori_emilia_romagna)[3] <- "colore_emilia_romagna"
+
+
+colori_lombardia_emilia_romagna <- merge(x = colori_lombardia, y = colori_emilia_romagna, by = "data", all.x = TRUE)
+colori_lombardia_emilia_romagna <- colori_lombardia_emilia_romagna[,-c(2,4)]
+
+
+# faccio il join con ristorazione su data
+ristorazione<-merge(x=ristorazione,y=colori_lombardia_emilia_romagna,by="data",all.x=TRUE)
+
+# colonna asporto (per Lombardia, bisogna decidere quale regione)
 # zona rossa: solo asporto e consegne a domicilio senza limiti
 # zona arancione: solo asporto e consegne a domicilio senza limiti
 # zona gialla: si può mangiare in presenza e consegne a domicilio senza limiti
 ristorazione <- ristorazione %>%
   mutate(solo_asporto = case_when(
-    (colore == "rosso") ~ TRUE
-    ,(colore == "arancione") ~ TRUE
-    , (colore == "giallo") ~ FALSE
+    (colore_lombardia == "rosso") ~ TRUE
+    ,(colore_lombardia == "arancione") ~ TRUE
+    , (colore_lombardia == "giallo") ~ FALSE
     , TRUE ~ FALSE
   ) 
   )        
@@ -210,27 +221,20 @@ dates <- seq(first_date, last_date, by = "1 day")
 ristorazione[c(1167:1222),"data_anno_prec"] <- dates
 
 
-first_date = ristorazione[1503,"data_anno_prec"]+1
-last_date = ristorazione[1508,"data_anno_prec"]-1
+first_date = ristorazione[1454,"data_anno_prec"]+1
+last_date = ristorazione[1457,"data_anno_prec"]-1
 dates <- seq(first_date, last_date, by = "1 day")
-ristorazione[c(1504:1507),"data_anno_prec"] <- dates
+ristorazione[c(1455:1456),"data_anno_prec"] <- dates
+
+ristorazione[1462 , "data_anno_prec"] <-  as.Date("2020-01-03", format = "%Y-%m-%d")
+
+ristorazione[1467 , "data_anno_prec"] <-  as.Date("2020-01-08", format = "%Y-%m-%d")
 
 
-first_date = ristorazione[1517,"data_anno_prec"]+1
-last_date = ristorazione[1520,"data_anno_prec"]-1
+first_date = ristorazione[1554,"data_anno_prec"]+1
+last_date = ristorazione[1557,"data_anno_prec"]-1
 dates <- seq(first_date, last_date, by = "1 day")
-ristorazione[c(1518,1519),"data_anno_prec"] <- dates
-
-
-first_date = ristorazione[1527,"data_anno_prec"]+1
-last_date = ristorazione[1530,"data_anno_prec"]-1
-dates <- seq(first_date, last_date, by = "1 day")
-ristorazione[c(1528, 1529),"data_anno_prec"] <- dates
-
-first_date = ristorazione[1703,"data_anno_prec"]+1
-last_date = ristorazione[1708,"data_anno_prec"]-1
-dates <- seq(first_date, last_date, by = "1 day")
-ristorazione[c(1704:1707),"data_anno_prec"] <- dates
+ristorazione[c(1555:1556),"data_anno_prec"] <- dates
 
 
 
