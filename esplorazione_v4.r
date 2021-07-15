@@ -82,6 +82,10 @@ ristorazione <- ristorazione %>%
   )
   )
 
+# conversione true/false -> 1/0
+ristorazione$holiday <- as.integer(ristorazione$holiday)
+
+
 # colore zona in base alla data
 colori_zone <- read_csv("colori_zone.csv")
 # colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
@@ -115,7 +119,11 @@ ristorazione <- ristorazione %>%
     , (colore_lombardia == "giallo") ~ FALSE
     , TRUE ~ FALSE
   ) 
-  )        
+  )      
+
+# conversione true/false -> 1/0
+ristorazione$solo_asporto <- as.integer(ristorazione$solo_asporto)
+
 
 
 # inserimento delle colonne che riguardano gli eventi sportivi
@@ -233,7 +241,7 @@ ristorazione[1467 , "data_anno_prec"] <-  as.Date("2020-01-08", format = "%Y-%m-
 
 first_date = ristorazione[1554,"data_anno_prec"]+1
 last_date = ristorazione[1557,"data_anno_prec"]-1
-dates <- seq(first_date, last_date, by = "1 day")
+dates <- seq(first_date, last_date, by = "1 day") 
 ristorazione[c(1555:1556),"data_anno_prec"] <- dates
 
 
