@@ -238,12 +238,13 @@ ristorazione[c(1555:1556),"data_anno_prec"] <- dates
 
 
 # aggiunta manuale vacanze scolastiche/ festività straniere/ blackfriday ecc.
-other_dates <- read_excel("vacanze_scolastiche.xls")
+other_dates <- read_excel("vacanze_scolastiche_saldi.xls")
 other_dates <- other_dates[-1,21:24]
 names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi Lombardia",
                         "Vacanze scolastiche Emilia-Romagna", "Black Friday e saldi  Emilia-Romagna")
 
 ristorazione <- cbind(ristorazione, other_dates)
+
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
 
