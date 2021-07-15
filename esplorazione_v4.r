@@ -14,8 +14,8 @@ library(devtools)
 library("dplyr") 
 
 # setting working directory
-working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
-setwd(working_dir)
+# working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
+# setwd(working_dir)
 
 # lettura dataset
 ristorazione_original <- read_excel("Ristorazione.xls")
@@ -237,7 +237,13 @@ dates <- seq(first_date, last_date, by = "1 day")
 ristorazione[c(1555:1556),"data_anno_prec"] <- dates
 
 
+# aggiunta manuale vacanze scolastiche/ festività straniere/ blackfriday ecc.
+other_dates <- read_excel("vacanze_scolastiche.xls")
+other_dates <- other_dates[-1,21:24]
+names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi Lombardia",
+                        "Vacanze scolastiche Emilia-Romagna", "Black Friday e saldi  Emilia-Romagna")
 
+ristorazione <- cbind(ristorazione, other_dates)
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
 
