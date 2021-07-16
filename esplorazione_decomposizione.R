@@ -178,7 +178,7 @@ p15<-autoplot(vendite1_mens_avg) +
 
 print(p11+p12+p13+p14+p15)
 
-### grafici stagionalità
+### grafici stagionalitÃ 
 
 ps12 <- ggseasonplot(vendite1_sett, year.labels=TRUE, year.labels.left=TRUE) +
   ylab("euro") +
@@ -199,7 +199,7 @@ ps15 <- ggseasonplot(vendite1_mens_avg, year.labels=TRUE, year.labels.left=TRUE)
 print(ps12+ps13+ps14+ps15)
 
 
-### time plot e stagionalità
+### time plot e stagionalitÃ 
 print(p12+ps12)
 print(p13+ps13)
 print(p14+ps14)
@@ -236,8 +236,8 @@ print(qplot(vendite, scontrini, data=as.data.frame(ristorante1)) +
 
 
 ### autocorrelazione 
-### per una serie con trend, l'auto correlazione è alta a lag vicini, 
-### e si abbassa piano piano se c'è stagionalità l'autocorrelazione presenta lag ogni tot
+### per una serie con trend, l'auto correlazione Ã¨ alta a lag vicini, 
+### e si abbassa piano piano se c'Ã¨ stagionalitÃ  l'autocorrelazione presenta lag ogni tot
 
 #gglagplot(vendite1_mens_avg)
 
@@ -255,7 +255,7 @@ pa15 <- ggAcf(vendite1_mens_avg, lag=24)+
 
 print(pa11 +pa12 +pa13 +pa14 +pa15)
 
-### time plot e stagionalità e acf 
+### time plot e stagionalitÃ  e acf 
 print(p11+pa11)
 print(p12+ps12+pa12)
 print(p13+ps13+pa13)
@@ -270,10 +270,10 @@ print(p15+ps15+pa15)
 #### DECOMPOSIZIONE DELLA PRIMA SERIE ####
 library(KFAS)
 
-# studio la serie giornaliera, creo praticamente un modello (tipo quando facevamo la reg lin) formato però da trend, stagionalità 
+# studio la serie giornaliera, creo praticamente un modello (tipo quando facevamo la reg lin) formato perÃ² da trend, stagionalitÃ  
 # e H sarebbero i residui
 
-# creo una variabile mese per catturare anche la stagionalità mensile, che poi andrò ad aggiungere al modello come regressore
+# creo una variabile mese per catturare anche la stagionalitÃ  mensile, che poi andrÃ² ad aggiungere al modello come regressore
 # per catturare la stag mensile all'interno di questa variabile
 mese<-as.factor(month(ymd(ristorante1$data)))
 y=vendite1_day
@@ -281,23 +281,23 @@ y=vendite1_day
 # creo il modello con i regressori che ho detto prima 
 mod3<-SSModel(y ~ mese+SSMtrend(degree = 2, Q=list(NA,NA))+SSMseasonal(period = 7, sea.type = "dummy", Q=NA), H=NA)
 
-# faccio fittare il modello creato ai miei dati, quindi scelgo i "parametri", cioè tutti quelli che nel modello sono NA
+# faccio fittare il modello creato ai miei dati, quindi scelgo i "parametri", cioÃ¨ tutti quelli che nel modello sono NA
 # che permettono di "ricreare meglio" i miei dati, penso sia una roba iterativa che parte da 0 0 0 0 e sceglie i migliori
 fit3<-fitSSM(mod3,inits = c(0,0,0,0))
-fit3$optim.out$convergence # se è zero il modello converge
+fit3$optim.out$convergence # se Ã¨ zero il modello converge
 
-# faccio smooting, cioè liscio un pelo i cambiamenti del mio modello, non so come dirlo meglio a parole (smussa?)
+# faccio smooting, cioÃ¨ liscio un pelo i cambiamenti del mio modello, non so come dirlo meglio a parole (smussa?)
 smo3 <- KFS(fit3$model, smoothing = c("state", "disturbance", "mean"))
 smo3$alphahat #alphahat non so bene cosa voglia dire, ma qui ci sono tutti i valori dei parametri del modello
 
 
-## ci sono 11 variabili mese, il valore è quello della stagionalità mensile, ovvero gennaio ha valore 0, mese 2 = febbraio
-## ed è -150.8482 da gennaio, mentre marzo è -1171.085 da gennaio etc etc....
-## level è il trend, slope fa sempre parte del trend e se sommi level e slope trovi il level successivo
-## sea dummy catturano la stagionalità settimanale, infatti sono 6 una in meno dei giorni della settimana.
-## qui però bisogna vederne solo una perchè le altre sono la prima shiftata di uno, questa si somma al trend per avere
+## ci sono 11 variabili mese, il valore Ã¨ quello della stagionalitÃ  mensile, ovvero gennaio ha valore 0, mese 2 = febbraio
+## ed Ã¨ -150.8482 da gennaio, mentre marzo Ã¨ -1171.085 da gennaio etc etc....
+## level Ã¨ il trend, slope fa sempre parte del trend e se sommi level e slope trovi il level successivo
+## sea dummy catturano la stagionalitÃ  settimanale, infatti sono 6 una in meno dei giorni della settimana.
+## qui perÃ² bisogna vederne solo una perchÃ¨ le altre sono la prima shiftata di uno, questa si somma al trend per avere
 ## il valore, sesi prendono i primi 7 valori della colonna "sea_dummy1" si notano che quelli col meno sono i giorni in 
-## settimana dove si vende meno, poi ci sono tre giorni positivi che è il weekend
+## settimana dove si vende meno, poi ci sono tre giorni positivi che Ã¨ il weekend
 
 
 # Time Series:
@@ -325,25 +325,25 @@ smo3$alphahat #alphahat non so bene cosa voglia dire, ma qui ci sono tutti i val
 
 
 
-## questo è il nostro trend in rosso
+## questo Ã¨ il nostro trend in rosso
 plot(smo3$alphahat[,12], col=2,ylim=c(0,12000))
 lines(y)
 
 ## questi sono i residui nelle varie componenti che abbiamo riscontrato nel modello, essendo distribuiti come normali, 
 ## ci dobbiamo preoccupare se gi errori sono sopra o sotto 3 e -3, nel caso del periodo covid si poteva vedere anche nel 
-## grafico prima che il trend si abbassava, ma di poco, perchè tende a smussare tutto. vediamo infatti nei
+## grafico prima che il trend si abbassava, ma di poco, perchÃ¨ tende a smussare tutto. vediamo infatti nei
 ## residui del level (il trend) che i valori vanno fino a -10 e +10, male male, ma no prob fra :-)
 auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
 
-## inseriamo nel modello principale un altro regressore, che è la data di inizio del covid, creiamo una time series booleana,
-## tutta zero fino all'inizio delle chiusure, in questo caso, ho messo come inizio degli 1 il valore con errore più grande del
+## inseriamo nel modello principale un altro regressore, che Ã¨ la data di inizio del covid, creiamo una time series booleana,
+## tutta zero fino all'inizio delle chiusure, in questo caso, ho messo come inizio degli 1 il valore con errore piÃ¹ grande del
 ## grafico precedente, ma sarebbe meglio mettere la data della chiusra, dopo cerco di recuperarla
 ndx<-which.min(auxres_ls[,1])
 step <- y
 step[] <- 0
 step[(ndx+1):length(y)] <- 1
-step ## questa è la serie storica booleana
+step ## questa Ã¨ la serie storica booleana
 
 
 ## ricreo il modello con anche la componente step, e rifaccio tutto come prima...
@@ -365,8 +365,8 @@ smo3$alphahat
 # 2017.016 -5156.508 6566.625  -7.01184471  4509.300062    61.940610 -1419.635993 -1062.635741 -1804.473662 -1788.061678
 
 
-## in qesto caso le variabili sono le stesse del caso precedente, ma abbiamo in più step, che sarebbe da queando sono state 
-## chiuse le attività, questa ci dice di quando si è abbassato il trend, il trend a causa delle chiusure ha avuto un 
+## in qesto caso le variabili sono le stesse del caso precedente, ma abbiamo in piÃ¹ step, che sarebbe da queando sono state 
+## chiuse le attivitÃ , questa ci dice di quando si Ã¨ abbassato il trend, il trend a causa delle chiusure ha avuto un 
 ## abbassamento di 5156.508 (questo potrebbe essere carino da dire)
 
 
@@ -374,7 +374,7 @@ plot(step*smo3$alphahat[,12]+smo3$alphahat[,13], col=2,ylim=c(0,12000))
 lines(y)
 
 auxres_ls <- rstandard(smo3, "state")
-plot(auxres_ls) #adesso l'errore peggiore è con le riaperture, allora devo catturare anche quello con un'altro step.1
+plot(auxres_ls) #adesso l'errore peggiore Ã¨ con le riaperture, allora devo catturare anche quello con un'altro step.1
 
 ndx.1<-which.max(auxres_ls[,1])
 step.1 <- y
@@ -396,8 +396,8 @@ lines(y)
 auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
 
-## ci sarebbero altri errori sulla stagionalità e sul level, ma essendoci così tanti dati, i peggiori gli abbiamo 
+## ci sarebbero altri errori sulla stagionalitÃ  e sul level, ma essendoci cosÃ¬ tanti dati, i peggiori gli abbiamo 
 ## tolti
 
-## un'altra roba che si può dire è che la varianza dopo le riaperture è minore rispetto a prima, 
-## mentre il trend è partito dallo stesso livello dopo le riaperture.
+## un'altra roba che si puÃ² dire Ã¨ che la varianza dopo le riaperture Ã¨ minore rispetto a prima, 
+## mentre il trend Ã¨ partito dallo stesso livello dopo le riaperture.
