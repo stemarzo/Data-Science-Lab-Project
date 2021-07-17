@@ -401,3 +401,43 @@ plot(auxres_ls)
 
 ## un'altra roba che si puÃ² dire Ã¨ che la varianza dopo le riaperture Ã¨ minore rispetto a prima, 
 ## mentre il trend Ã¨ partito dallo stesso livello dopo le riaperture.
+
+
+
+
+#### DIFFERENCING E ARIMA ####
+
+### differenzio la serie giornaliera
+### funzioni che mi dicono di quanto differenziare
+
+ndiffs(vendite1_day) #differenziazione normale
+nsdiffs(vendite1_day) #differenziazione stagionale
+
+#anche questo per capire se differenziare o meno
+library(urca)
+vendite1_day %>% ur.kpss() %>% summary()
+
+vendite1_day_diff <- diff(vendite1_day)
+
+cbind("vendite giornaliere" = vendite1_day,
+      "vendite diff" = vendite1_day_diff) %>%
+  autoplot(facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("Differencing")
+
+ggAcf(diff(vendite1_day), lag=20)
+ggPacf(diff(vendite1_day), lag=20)
+
+Box.test(vendite1_day_diff, lag=312, type = "Ljung-Box") # sono correlati è un problema
+
+# arima e previsione, usando come training tutto quello che ho (per ora ho fatto così, ma non credo sia giusto)
+fit <- auto.arima(vendite1_day_diff, seasonal=FALSE) #in teoria non ci dovrebbe essere bisogno qui della stag, ma mi sa di si
+fit
+fit %>% forecast(h=30) %>% autoplot(include=100)
+
+checkresiduals(fit) # errori sono correlati, vuol dire che c'è dell'info nei residui e non va bene
+Box.test(residuals(fit), lag=312) #312= tutti/5
+
+
+
+
