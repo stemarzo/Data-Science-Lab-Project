@@ -661,14 +661,33 @@ arima1
 # Costruire il modello ARIMA.
 # Fare la previsione.
 
+# quindi per rispondere a questa domanda creiamo un modello arima che ci permette poi
+# di fare delle previsioni
 
 
 # CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
 
 # seleziono un periodo temporale che corrisponde all'estate
 # ricavo due serie storiche, per 2019 e 2020
+inizio_estate_2019 <- as.Date("2019-06-21", format = "%Y-%m-%d")
+fine_estate_2019 <- as.Date("2019-09-23", format = "%Y-%m-%d")
+
+inizio_estate_2020 <- as.Date("2020-06-20", format = "%Y-%m-%d")
+fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
 
 
+ristorante1_estate_2019 <- subset(ristorante1, data >= inizio_estate_2019 & data <= fine_estate_2019)
+ristorante1_estate_2020 <- subset(ristorante1, data >= inizio_estate_2020 & data <= fine_estate_2020)
+
+# scale per essere sulla stessa scala e percepire meglio le differenze
+par(mfrow=c(1,2))
+plot(ristorante1_estate_2019$data, scale(ristorante1_estate_2019$vendite), xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 - estate 2019")
+plot(ristorante1_estate_2020$data, scale(ristorante1_estate_2020$vendite), xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 - estate 2020")
+
+# si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
+# alla domanda di ricerca: ovvero nel 2020 c'era pochissime restrizioni, quasi 
+# zero però si vuole dimostrare che non è stata un'estate normale come lo può 
+# essere quella del 2019
 
 # CLUSTERING RISTORANTI ---------------------------------------------------
 
