@@ -11,11 +11,12 @@ library(forcats)
 library(lubridate)
 library(RQuantLib)
 library(devtools)
-library("dplyr") 
+library(patchwork)
+library(KFAS)
 
 # setting working directory
-# working_dir = "/Users/lorenzolorgna/Desktop/Progetto ds lab/progetto_dslab/dati"
-# setwd(working_dir)
+working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
+setwd(working_dir)
 
 # lettura dataset
 ristorazione_original <- read_excel("Ristorazione.xls")
@@ -125,7 +126,6 @@ ristorazione <- ristorazione %>%
 ristorazione$solo_asporto <- as.integer(ristorazione$solo_asporto)
 
 
-
 # inserimento delle colonne che riguardano gli eventi sportivi
 eventi_sportivi <- read_delim("eventi_sportivi.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 eventi_sportivi <- eventi_sportivi[, -c(1)]
@@ -203,19 +203,82 @@ ristorazione <- merge(x = ristorazione, y = vaccini_emilia_romagna, by = "data",
 # check NA values
 sum(is.na(ristorazione$data))  # 0 NA 
 
-sum(is.na(ristorazione$data_anno_prec))  # 68 NA
+sum(is.na(ristorazione$data_anno_prec))  # 68 NA, viene 
 which(is.na(ristorazione$data_anno_prec))
 
-sum(is.na(ristorazione$giorno_settimana))  # 0 NA 
+# per ogni ristorante viene verificata la presenza di valori NA o meno
+# i seguenti NA potrebbero essere dovuti a giorni senza vendite oppure ad errori di imputazione
 
-sum(is.na(ristorazione$vendite1))  # 74 NA
+sum(is.na(ristorazione$vendite1))  # 68 NA
 which(is.na(ristorazione$vendite1))
+subset(ristorazione[,c(1,3)], is.na(ristorazione$vendite1))
+# 26 febbraio 2018 - 2 marzo 2018: ondata di gelo e neve
+# 31 maggio 2018: ?
+# 12 marzo 2020 - 6 maggio 2020: covid
+# 25-26 dicembre 2020, 1,6 gennaio 2021: feste
+# 4-5 aprile 2021: pasqua
 
-# e cosi via per le altre variabili: bisogna capire cosa si vuole fare.
-# potrebbero esserci dei NA che corrispondono alle 0 vendite in periodo covid,
-# ma anche degli NA che sono magari dovuti alla registrazione non corretta del 
-# valore
+sum(is.na(ristorazione$vendite2))  # 55 NA
+which(is.na(ristorazione$vendite2))
+subset(ristorazione[,c(1,5)], is.na(ristorazione$vendite2))
+# 12 marzo 2020 - 3 maggio 2020: covid
+# 25 dicembre 2020: festa
+# 4 aprile 2021: pasqua
 
+
+sum(is.na(ristorazione$vendite3))  # 1096 NA
+which(is.na(ristorazione$vendite3))
+subset(ristorazione[,c(1,7)], is.na(ristorazione$vendite3))
+# fino al 8 novembre 2019: ristorante non attivo, se non per alcuni giorni (test)
+# 12 marzo 2020 - 6 maggio 2020: covid
+# 25-26 dicembre 2020, 1 gennaio 2021: feste
+# 4-5 aprile 2021: pasqua
+
+sum(is.na(ristorazione$vendite4))  # 108 NA
+which(is.na(ristorazione$vendite4))
+subset(ristorazione[,c(1,9)], is.na(ristorazione$vendite4))
+# 1 gennaio 2014: feste
+# 16-17 aprile 2017: pasqua
+# 15 agosto 2017: ferragosto
+# 25-26 dicembre 2017, 1 gennaio 2018: feste
+# 1-2 aprile 2018: pasqua
+# 15 maggio 2018: ?
+# 15 agosto 2018: ferragosto
+# 25-26 dicembre 2018, 1 gennaio 2019: feste
+# 21-22 aprile 2019: pasqua
+# 15 agosto 2019: ferragosto
+# 25-26 dicembre 2019, 1 gennaio 2020: feste
+# 12 marzo 2020 - 2 giungo 2020: covid
+# 15-16 agosto 2020: ferragosto
+# 25-26 dicembre 2020: feste
+# 4-5 aprile 2021: pasqua
+
+
+sum(is.na(ristorazione$vendite5))  # 62 NA
+which(is.na(ristorazione$vendite5))
+subset(ristorazione[,c(1,11)], is.na(ristorazione$vendite5))
+# 9 aprile - 13 aprile 2018: ?
+# 16 maggio 2018: ?
+# 5 giugno 2018: ?
+# 12 marzo 2020 - 3 maggio 2020: covid
+# 25 dicembre 2020: festa
+# 4 aprile 2021: pasqua
+
+
+sum(is.na(ristorazione$vendite6))  # 319 NA
+which(is.na(ristorazione$vendite6))
+subset(ristorazione[,c(1,13)], is.na(ristorazione$vendite6))
+# 1 gennaio - 20 settembre 2017: ristorante non attivo
+# 14 maggio 2018: ?
+# 12 marzo 2020 - 3 maggio 2020: covid
+# 25 dicembre 2020: festa
+# 4 aprile 2021: pasqua
+
+# il numero di scontrini NA per ciascun ristorante corrisponde con il numero di vendite NA
+# effettuare check di consistenza: agli scontrini con vendite pari a 0 devono corrispondere 0 scontrini e cosi via 
+
+
+# sistemazione NA data_anno_prec
 first_date = ristorazione[421,"data_anno_prec"]+1
 last_date = ristorazione[427,"data_anno_prec"]-1
 dates <- seq(first_date, last_date, by = "1 day")
@@ -254,6 +317,8 @@ names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi L
 ristorazione <- cbind(ristorazione, other_dates)
 
 
+
+
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
 
 # creo un dataframe per ciascun ristorante
@@ -266,7 +331,7 @@ col_nomi <- c("data", "data_anno_prec", "vendite", "scontrini")
 #ristorante1
 ristorante1 <- data.frame(col_date, ristorazione$vendite1, ristorazione$scontrini1)
 colnames(ristorante1) <- col_nomi
-ristorante1$vendite[is.na(ristorante1$vendite)] <- 0  # sostiuisco i valori NA con 0
+ristorante1$vendite[is.na(ristorante1$vendite)] <- 0  # sostiuisco i valori NA con 0 (per alcuni casi si potrebbe sostituire con valori quali la media)
 ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 
 #ristorante2
@@ -307,16 +372,7 @@ rm(list = c('col_date','col_nomi'))
 
 # ESPLORAZIONE DATASET ------------------------------------------------------------
 
-
-# Time series consist of four components:
-# (1) Seasonal variations: that repeat over a specific period such as a day, week, month, season, etc.,
-# (2) Trend: Trend is defined as long term increase or decrease in the data. It can be linear or non-linear
-# (3) Cyclical variations: A cyclic pattern exists when data exhibit rises and falls that are not of fixed period.
-# (4) Random variations: that do not fall under any of the above three classifications.
-
-
-
-## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante 
+## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante ----
 par(mfrow=c(3,2))
 
 # ristorante 1
@@ -391,7 +447,7 @@ ggplot(ristorante3, aes(data, vendite)) +
         panel.spacing=unit(0,"cm"))
 
 # ristorante 4
-plot_ <- ggplot(ristorante4, aes(data, vendite)) +
+ggplot(ristorante4, aes(data, vendite)) +
   geom_line() +
   geom_vline(xintercept=as.numeric(ristorante4$data[yday(ristorante4$data)==1]), size=1.2, color= "red") +
   
@@ -405,7 +461,6 @@ plot_ <- ggplot(ristorante4, aes(data, vendite)) +
         panel.grid.minor.x = element_blank(),
         panel.border = element_rect(colour="grey70"),
         panel.spacing=unit(0,"cm"))
-print(ris)
 
 # ristorante 5
 ggplot(ristorante5, aes(data, vendite)) +
@@ -439,84 +494,141 @@ ggplot(ristorante6, aes(data, vendite)) +
         panel.border = element_rect(colour="grey70"),
         panel.spacing=unit(0,"cm"))
 
-## decomposizione serie per ciascun ristorante (considerando le vendite)
-par(mfrow=c(1,1))
 
-vendite1 <- ts(ristorante1[, 3],start=2017,frequency=365) 
-plot(vendite1)
-vendite1.fit<-stl(vendite1,s.window="periodic")
-attributes(vendite1.fit)
-trend.vendite1<-vendite1.fit$time.series[,2]
-stag.vendite1<-vendite1.fit$time.series[,1]
-res.vendite1<-vendite1.fit$time.series[,3]
-plot(vendite1.fit,main="Decomposizione con la funzione 'stl' per il ristorante 1")
+## Ristorante1 ----
+# si prende in considerazione per le successive analisi il primo ristorante
 
+### analisi vendite considerando tutti gli anni ----
 
-vendite2 <- ts(ristorante2[, 3],start=2017,frequency=365) 
-plot(vendite2)
-vendite2.fit<-stl(vendite2,s.window="periodic")
-attributes(vendite2.fit)
-trend.vendite2<-vendite2.fit$time.series[,2]
-stag.vendite2<-vendite2.fit$time.series[,1]
-res.vendite2<-vendite2.fit$time.series[,3]
-plot(vendite2.fit,main="Decomposizione con la funzione 'stl' per il ristorante 2")
+# vendite giornaliere primo ristorante 
+vendite1_day <- ts(ristorante1$vendite,start=2017,frequency=365) 
 
+# vendite settimanali medie primo ristorante 
+week <- as.Date(cut(ristorante1$data, "week"))
 
-vendite3 <- ts(ristorante3[, 3],start=2017,frequency=365) 
-plot(vendite3)
-vendite3.fit<-stl(vendite3,s.window="periodic")
-attributes(vendite3.fit)
-trend.vendite3<-vendite3.fit$time.series[,2]
-stag.vendite3<-vendite3.fit$time.series[,1]
-res.vendite3<-vendite3.fit$time.series[,3]
-plot(vendite3.fit,main="Decomposizione con la funzione 'stl' per il ristorante 3")
+vendite1_sett <- aggregate(vendite ~ week, ristorante1, sum)
+vendite1_sett <- vendite1_sett$vendite
+vendite1_sett <- ts(vendite1_sett,start=2017,frequency=52) 
 
+vendite1_sett_avg <- aggregate(vendite ~ week, ristorante1, mean)
+vendite1_sett_avg <- vendite1_sett_avg$vendite
+vendite1_sett_avg <- ts(vendite1_sett_avg,start=2017,frequency=52) 
 
-vendite4 <- ts(ristorante4[, 3],start=2017,frequency=365) 
-plot(vendite4)
-vendite4.fit<-stl(vendite4,s.window="periodic")
-attributes(vendite4.fit)
-trend.vendite4<-vendite4.fit$time.series[,2]
-stag.vendite4<-vendite4.fit$time.series[,1]
-res.vendite4<-vendite4.fit$time.series[,3]
-plot(vendite4.fit,main="Decomposizione con la funzione 'stl' per il ristorante 4")
+# vendite mensili medie  primo ristorante 
+month <- as.Date(cut(ristorante1$data, "month"))
 
+vendite1_mens <- aggregate(vendite ~ month, ristorante1, sum)
+vendite1_mens <- vendite1_mens$vendite
+vendite1_mens <- ts(vendite1_mens,start=2017,frequency=12) 
 
-vendite5 <- ts(ristorante5[, 3],start=2017,frequency=365) 
-plot(vendite5)
-vendite5.fit<-stl(vendite5,s.window="periodic")
-attributes(vendite5.fit)
-trend.vendite5<-vendite5.fit$time.series[,2]
-stag.vendite5<-vendite5.fit$time.series[,1]
-res.vendite5<-vendite5.fit$time.series[,3]
-plot(vendite5.fit,main="Decomposizione con la funzione 'stl' per il ristorante 5")
+vendite1_mens_avg <- aggregate(vendite ~ month, ristorante1, mean)
+vendite1_mens_avg <- vendite1_mens_avg$vendite
+vendite1_mens_avg <- ts(vendite1_mens_avg,start=2017,frequency=12) 
+
+# plot delle diverse serie trovate sopra
+autoplot(vendite1_day) +
+  ggtitle("Ristorante 1: vendite giornaliere") +
+  xlab("anno") +
+  ylab("vendite")
+
+autoplot(vendite1_sett_avg) +
+  ggtitle("Ristorante 1: vendite medie settimanali") +
+  xlab("anno") +
+  ylab("vendite")
+
+autoplot(vendite1_mens_avg) +
+  ggtitle("Ristorante 1: vendite medie mensili") +
+  xlab("anno") +
+  ylab("vendite")
 
 
-vendite6 <- ts(ristorante6[, 3],start=2017,frequency=365) 
-plot(vendite6)
-vendite6.fit<-stl(vendite6,s.window="periodic")
-attributes(vendite6.fit)
-trend.vendite6<-vendite6.fit$time.series[,2]
-stag.vendite6<-vendite6.fit$time.series[,1]
-res.vendite6<-vendite6.fit$time.series[,3]
-plot(vendite6.fit,main="Decomposizione con la funzione 'stl' per il ristorante 6")
 
+### analisi vendite considerando il periodo pre covid ----
 
-## si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
+# si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
-vendite1_pre <- ristorante1 %>%
+ristorante1_pre_covid <- ristorante1 %>%
   filter(ristorante1$data < reference_date) %>%
   select(vendite, data)
 
-# VENDITE GIORNALIERE
-vendite1_day <- ts(vendite1_pre$vendite,start=2017,frequency=365)
+# vendite giornaliere primo ristorante pre covid
+vendite1_day_pre <- ts(ristorante1_pre_covid$vendite,start=2017,frequency=365) 
 
-autoplot(vendite1_day) +
-  ggtitle("Ristorante 1: vendite giornaliere pre-covid") +
+# vendite settimanali medie primo ristorante pre covid
+week <- as.Date(cut(ristorante1_pre_covid$data, "week"))
+vendite1_sett_avg_pre <- aggregate(vendite ~ week, ristorante1_pre_covid, mean)
+vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
+vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
+
+# vendite mensili medie  primo ristorante pre covid
+month <- as.Date(cut(ristorante1_pre_covid$data, "month"))
+vendite1_mens_avg_pre <- aggregate(vendite ~ month, ristorante1_pre_covid, mean)
+vendite1_mens_avg_pre <- vendite1_mens_avg_pre$vendite
+vendite1_mens_avg_pre <- ts(vendite1_mens_avg_pre,start=2017,frequency=12) 
+
+# plot delle diverse serie pre covid trovate sopra 
+autoplot(vendite1_day_pre) +
+  ggtitle("Ristorante 1: vendite giornaliere pre covid") +
   xlab("anno") +
   ylab("vendite")
+
+autoplot(vendite1_sett_avg_pre) +
+  ggtitle("Ristorante 1: vendite medie settimanali pre covid") +
+  xlab("anno") +
+  ylab("vendite")
+
+autoplot(vendite1_mens_avg_pre) +
+  ggtitle("Ristorante 1: vendite medie mensili pre covid") +
+  xlab("anno") +
+  ylab("vendite")
+
+
+### analisi scontrini considerando tutti gli anni ----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # VENDITE SETTIMANALI
 week <- as.Date(cut(vendite1_pre$data, "week"))
@@ -645,6 +757,110 @@ arima1
 
 
 
+### analisi scontrini considerando il periodo pre covid ----
+
+### analisi stagionalità considerando tutti gli anni ----
+ggseasonplot(vendite1_sett, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab("euro") +
+  ggtitle("Seasonal plot: vendite settimanale")
+
+ggseasonplot(vendite1_mens, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab("euro") +
+  ggtitle("Seasonal plot: vendite mensili")
+
+### seasonal sub series plot
+ggsubseriesplot(vendite1_mens_avg) +
+  ylab("$ million") +
+  ggtitle("Seasonal subseries plot: vendite medie mensili")
+
+### analisi stagionalità considerando il periodo pre covid ----
+### analisi correlazione tra vendite e scontrini ----
+scontrini_sett_avg <- aggregate(scontrini ~ week, ristorante1, mean)
+scontrini_sett_avg <- scontrini_sett_avg$scontrini
+scontrini_sett_avg <- ts(scontrini_sett_avg,start=2017,frequency=52) 
+sc_ven1_sett_avg <-ts.intersect(vendite1_sett_avg, scontrini_sett_avg)
+
+
+print(autoplot(sc_ven1_sett_avg, facets=TRUE) +
+        xlab("Anni") + ylab("") +
+        ggtitle("Confronto scontrini e vendite"))
+
+print(qplot(vendite, scontrini, data=as.data.frame(ristorante1)) +
+        ylab("scontrini") + xlab("vendite")+
+        ggtitle("Correlazione scontrini e vendite"))
+
+
+
+
+### analisi autocorrelazione ----
+# per una serie con trend, l'autocorrelazione è alta a lag vicini, 
+# e si abbassa piano piano se c'è stagionalità l'autocorrelazione presenta lag ogni tot
+
+#gglagplot(vendite1_mens_avg)
+
+ggAcf(vendite1_day, lag=7) +
+  ggtitle("Autocorrelation vendite giornaliere")
+
+ggAcf(vendite1_sett_avg, lag=52)+
+  ggtitle("Autocorrelation vendite medie settimanali")
+
+ggAcf(vendite1_mens_avg, lag=24)+
+  ggtitle("Autocorrelation vendite medie mensili")
+### decomposizione ----
+# decomposizione giornaliera 
+vendite1_day.fit<-stl(vendite1_day,s.window="periodic")
+trend.vendite1_day<-vendite1_day.fit$time.series[,2]
+stag.vendite1_day<-vendite1_day.fit$time.series[,1]
+res.vendite1_day<-vendite1_day.fit$time.series[,3]
+print(autoplot(vendite1_day.fit))
+
+# decomposizione settimanale
+vendite1_sett.fit<-stl(vendite1_sett_avg,s.window="periodic")
+trend.vendite1_sett<-vendite1_sett.fit$time.series[,2]
+stag.vendite1_sett<-vendite1_sett.fit$time.series[,1]
+res.vendite1_sett<-vendite1_sett.fit$time.series[,3]
+print(autoplot(vendite1_sett.fit))
+
+# decomposizione mensile 
+vendite1_mens.fit<-stl(vendite1_mens_avg,s.window="periodic")
+trend.vendite1_mens<-vendite1_mens.fit$time.series[,2]
+stag.vendite1_mens<-vendite1_mens.fit$time.series[,1]
+res.vendite1_mens<-vendite1_mens.fit$time.series[,3]
+print(autoplot(vendite1_mens.fit))
+
+components.ts = decompose(vendite1_mens_avg)
+plot(components.ts)
+
+
+
+### decomposizione pre covid ----
+
+### decomposizione approfondita ----
+
+mese<-as.factor(month(ymd(ristorante1$data)))
+y=vendite1_day
+step.c <- y
+step.a <- y
+step.c[] <- 0
+step.a[] <- 0
+step.c[(1167+1):length(y)] <- 1 #non so se vuoi usare la tua funzione per le date sono 12 mar  2020
+step.a[(1222+1):length(y)] <- 1 #6 mag 2020
+step.c
+step.a
+
+mod3<-SSModel(y ~mese+step.c+step.a+SSMtrend(degree = 2, Q=list(NA,NA))+SSMseasonal(period = 7, sea.type = "dummy", Q=NA), H=NA)
+fit3<-fitSSM(mod3,inits = c(0,0,0,0))
+fit3$optim.out$convergence
+
+smo3 <- KFS(fit3$model, smoothing = c("state", "disturbance", "mean"))
+smo3$alphahat
+
+
+plot(step.a*smo3$alphahat[,13]+step.c*smo3$alphahat[,12]+smo3$alphahat[,14], col=2,ylim=c(0,12000))
+lines(y)
+
+auxres_ls <- rstandard(smo3, "state")
+plot(auxres_ls)
 # PREVISIONE FATTURATO NO COVID -------------------------------------------
 
 # bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
@@ -700,6 +916,8 @@ p <- p + facet_grid(facets = Year ~ ., margins = FALSE) + theme_bw()
 p + scale_y_continuous() + scale_x_discrete(labels=labels) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8))
 
+plot(ristorante1_estate_2019$vendite, type="l")
+line(ristorante1_estate_2020$vendite)
 
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
