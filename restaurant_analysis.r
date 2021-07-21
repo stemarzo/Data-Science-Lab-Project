@@ -597,7 +597,7 @@ autoplot(vendite1_mens_avg_pre) +
 
 ### analisi scontrini considerando tutti gli anni ----
 
-# eventualmente da mettere a confronto con l'andamento delle vendite
+# eventualmente da mettere a confronto con l'andamento delle vendite (grafico sopra vendite e sotto scontrini)
 
 # scontrini giornalieri primo ristorante 
 scontrini1_day <- ts(ristorante1$scontrini,start=2017,frequency=365) 
@@ -841,7 +841,7 @@ auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
 
 
-# PREVISIONE FATTURATO NO COVID -------------------------------------------
+# PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
 
 # bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
 
@@ -860,6 +860,7 @@ plot(auxres_ls)
 # quindi per rispondere a questa domanda creiamo un modello arima che ci permette poi
 # di fare delle previsioni
 
+# PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
 
 # CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
 
