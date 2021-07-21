@@ -745,6 +745,21 @@ ggAcf(vendite1_sett_avg, lag=52)+
 
 ggAcf(vendite1_mens_avg, lag=24)+
   ggtitle("Autocorrelation vendite medie mensili")
+
+
+### analisi autocorrelazione pre covid ----
+
+ggAcf(vendite1_day_pre, lag=7) +
+  ggtitle("Autocorrelation vendite giornaliere pre covid")
+
+ggAcf(vendite1_sett_avg_pre, lag=52)+
+  ggtitle("Autocorrelation vendite medie settimanali pre covid")
+
+ggAcf(vendite1_mens_avg_pre, lag=24)+
+  ggtitle("Autocorrelation vendite medie mensili pre covid")
+
+
+
 ### decomposizione ----
 # decomposizione giornaliera 
 vendite1_day.fit<-stl(vendite1_day,s.window="periodic")
@@ -773,6 +788,30 @@ plot(components.ts)
 
 
 ### decomposizione pre covid ----
+# decomposizione giornaliera 
+vendite1_day_pre.fit<-stl(vendite1_day_pre,s.window="periodic")
+trend.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,2]
+stag.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,1]
+res.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,3]
+print(autoplot(vendite1_day_pre.fit))
+
+# decomposizione settimanale
+vendite1_sett.fit_pre<-stl(vendite1_sett_avg_pre,s.window="periodic")
+trend.vendite1_sett_pre<-vendite1_sett.fit_pre$time.series[,2]
+stag.vendite1_sett_pre<-vendite1_sett.fit_pre$time.series[,1]
+res.vendite1_sett_pre<-vendite1_sett.fit_pre$time.series[,3]
+print(autoplot(vendite1_sett.fit_pre))
+
+# decomposizione mensile 
+vendite1_mens.fit_pre<-stl(vendite1_mens_avg_pre,s.window="periodic")
+trend.vendite1_mens_pre<-vendite1_mens.fit_pre$time.series[,2]
+stag.vendite1_mens_pre<-vendite1_mens.fit_pre$time.series[,1]
+res.vendite1_mens_pre<-vendite1_mens.fit_pre$time.series[,3]
+print(autoplot(vendite1_mens.fit_pre))
+
+components.ts_pre = decompose(vendite1_mens_avg_pre)
+plot(components.ts_pre)
+
 
 ### decomposizione approfondita ----
 
@@ -800,6 +839,8 @@ lines(y)
 
 auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
+
+
 # PREVISIONE FATTURATO NO COVID -------------------------------------------
 
 # bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
