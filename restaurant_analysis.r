@@ -587,177 +587,92 @@ autoplot(vendite1_mens_avg_pre) +
 
 ### analisi scontrini considerando tutti gli anni ----
 
+# eventualmente da mettere a confronto con l'andamento delle vendite
 
+# scontrini giornalieri primo ristorante 
+scontrini1_day <- ts(ristorante1$scontrini,start=2017,frequency=365) 
 
+# scontrini settimanali medie primo ristorante 
+week <- as.Date(cut(ristorante1$data, "week"))
 
+scontrini1_sett <- aggregate(scontrini ~ week, ristorante1, sum)
+scontrini1_sett <- scontrini1_sett$scontrini
+scontrini1_sett <- ts(scontrini1_sett,start=2017,frequency=52) 
 
+scontrini1_sett_avg <- aggregate(scontrini ~ week, ristorante1, mean)
+scontrini1_sett_avg <- scontrini1_sett_avg$scontrini
+scontrini1_sett_avg <- ts(scontrini1_sett_avg,start=2017,frequency=52) 
 
+# scontrini mensili medie  primo ristorante 
+month <- as.Date(cut(ristorante1$data, "month"))
 
+scontrini1_mens <- aggregate(scontrini ~ month, ristorante1, sum)
+scontrini1_mens <- scontrini1_mens$scontrini
+scontrini1_mens <- ts(scontrini1_mens,start=2017,frequency=12) 
 
+scontrini1_mens_avg <- aggregate(scontrini ~ month, ristorante1, mean)
+scontrini1_mens_avg <- scontrini1_mens_avg$scontrini
+scontrini1_mens_avg <- ts(scontrini1_mens_avg,start=2017,frequency=12) 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# VENDITE SETTIMANALI
-week <- as.Date(cut(vendite1_pre$data, "week"))
-vendite1_sett <- aggregate(vendite ~ week, vendite1_pre, sum)
-vendite1_sett <- vendite1_sett$vendite
-vendite1_sett <- ts(vendite1_sett,start=2017,frequency=52) 
-
-autoplot(vendite1_sett) +
-  ggtitle("Ristorante 1: vendite settimanali pre-covid") +
+# plot delle diverse serie trovate sopra
+autoplot(scontrini1_day) +
+  ggtitle("Ristorante 1: scontrini giornalieri") +
   xlab("anno") +
-  ylab("vendite")
+  ylab("scontrini")
 
-# VENDITE SETTIMANALI AVG 
-week <- as.Date(cut(ristorante1_pre$data, "week"))
-vendite1_sett_avg <- aggregate(vendite ~ week, ristorante1_pre, mean)
-vendite1_sett_avg <- vendite1_sett_avg$vendite
-vendite1_sett_avg <- ts(vendite1_sett_avg,start=2017,frequency=52) 
-
-autoplot(vendite1_sett_avg) +
-  ggtitle("Ristorante 1: vendite medie settimanali pre-covid") +
+autoplot(scontrini1_sett_avg) +
+  ggtitle("Ristorante 1: scontrini medi settimanali") +
   xlab("anno") +
-  ylab("vendite")
+  ylab("scontrini")
 
-# VENDITE MENSILI
-month <- as.Date(cut(ristorante1_pre$data, "month"))
-vendite1_mens <- aggregate(vendite ~ month, ristorante1_pre, sum)
-vendite1_mens <- vendite1_mens$vendite
-vendite1_mens <- ts(vendite1_mens,start=2017,frequency=12) 
-
-autoplot(vendite1_mens) +
-  ggtitle("Ristorante 1: vendite mensili pre-covid") +
+autoplot(scontrini1_mens_avg) +
+  ggtitle("Ristorante 1: scontrini medi mensili") +
   xlab("anno") +
-  ylab("vendite")
-
-
-# VENDITE MENSILI AVG
-month <- as.Date(cut(ristorante1_pre$data, "month"))
-vendite1_mens_avg <- aggregate(vendite ~ month, ristorante1_pre, mean)
-vendite1_mens_avg <- vendite1_mens_avg$vendite
-vendite1_mens_avg <- ts(vendite1_mens_avg,start=2017,frequency=12) 
-
-autoplot(vendite1_mens_avg) +
-  ggtitle("Ristorante 1: vendite medie mensili pre-covid") +
-  xlab("anno") +
-  ylab("vendite")
-
-
-
-# ripetere con gli altri ristoranti
-
-# aggiungere altri grafici:
-# - GRAFICI STAGIONALITA
-# - ALTRI ASPETTI SULLA STAGIONALITA'
-# - CORRELAZIONE TRA SCONTRINI E VENDITE
-# - AUTOCORRELAZIONE
-# - FORECAST
-
-
-
-# ULTERIORI ANALISI DA FARE PER CIASCUN RISTORANTE
-
-# autocorrleation plots
-par(mfrow = c(1,2))
-acf(as.ts(ristorante1$vendite), main = "Sales")
-pacf(as.ts(ristorante1$vendite), main = "Sales")
-
-# we apply auto.arima function, that searches the best ARIMA model
-arima1 <- auto.arima(as.ts(ristorante1$vendite))
-arima1
-
-
-
-# da escludere
-# #decomposizione covid
-# rist1 <- ristorante1
-# rist_pre_covid<-rist1[1:1164, 4]
-# rist_pre_covid[is.na(rist_pre_covid)] <- 0
-# rist_pre_covid<-ts(rist_pre_covid,start=2017,frequency=365) 
-# plot(rist_pre_covid)
-# 
-# 
-# stl.fit_pre<-stl(rist_pre_covid,s.window="periodic")
-# attributes(stl.fit_pre)
-# trend.stl<-stl.fit_pre$time.series[,2]
-# stag.stl<-stl.fit_pre$time.series[,1]
-# res.stl<-stl.fit_pre$time.series[,3]
-# plot(stl.fit_pre,main="Decomposizione con la funzione 'stl'")
-# 
-# rist_post_covid<-rist1[1164:1563, 4]
-# summary(rist_post_covid)
-# rist_post_covid[is.na(rist_post_covid)] <- 0
-# rist_post_covid<-ts(rist_post_covid, start = 2020, frequency = 365) 
-# plot(rist_post_covid)
-# rist_post_covid
-# 
-# 
-# stl.fit_post<-stl(rist_post_covid,s.window="periodic")
-# attributes(stl.fit_pre)
-# trend.stl<-stl.fit_pre$time.series[,2]
-# stag.stl<-stl.fit_pre$time.series[,1]
-# res.stl<-stl.fit_pre$time.series[,3]
-# plot(stl.fit_post,main="Decomposizione con la funzione 'stl'")
-
-
-# aggregare ristorante 1 per mese
-# vendite_agg1<-ristorante1
-# vendite_agg1$mo <- strftime(vendite_agg1$data, "%m")
-# vendite_agg1$yr <- strftime(vendite_agg1$data, "%Y")
-# vendite_agg1<-ts(vendite_agg1$vendite,start=2017,frequency=12) 
-# vendite_agg1 <- aggregate(vendite ~ mo + yr, vendite_agg1, FUN = mean)
-# 
-# monthplot(ristm)
-# plot(vendite_agg1)
-# 
-# vendite_agg1.fit<-stl(vendite_agg1,s.window="periodic")
-# attributes(vendite_agg1.fit)
-# trend.vendite_agg1<-vendite_agg1.fit$time.series[,2]
-# stag.vendite_agg1<-vendite_agg1.fit$time.series[,1]
-# res.vendite_agg1<-vendite_agg1.fit$time.series[,3]
-# plot(vendite_agg1.fit,main="Decomposizione con la funzione 'stl'")
-# 
-# 
-# acf(res.vendite_agg1,type="correlation",plot=TRUE,main="Correlogramma della serie dei residui")
-# pacf(res.vendite_agg1,plot=TRUE,main="Grafico delle correlazioni parziali")
-
-
-
+  ylab("scontrini")
 
 ### analisi scontrini considerando il periodo pre covid ----
+
+# si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
+reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+
+# scontrini ristorante 1 pre covid
+ristorante1_pre_covid <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(scontrini, data)
+
+# scontrini giornalieri primo ristorante pre covid
+scontrini1_day_pre <- ts(ristorante1_pre_covid$scontrini,start=2017,frequency=365) 
+
+# scontrini settimanali medi primo ristorante pre covid
+week <- as.Date(cut(ristorante1_pre_covid$data, "week"))
+scontrini1_sett_avg_pre <- aggregate(scontrini ~ week, ristorante1_pre_covid, mean)
+scontrini1_sett_avg_pre <- scontrini1_sett_avg_pre$scontrini
+scontrini1_sett_avg_pre <- ts(scontrini1_sett_avg_pre,start=2017,frequency=52) 
+
+# scontrini mensili medi  primo ristorante pre covid
+month <- as.Date(cut(ristorante1_pre_covid$data, "month"))
+scontrini1_mens_avg_pre <- aggregate(scontrini ~ month, ristorante1_pre_covid, mean)
+scontrini1_mens_avg_pre <- scontrini1_mens_avg_pre$scontrini
+scontrini1_mens_avg_pre <- ts(scontrini1_mens_avg_pre,start=2017,frequency=12) 
+
+# plot delle diverse serie pre covid trovate sopra 
+autoplot(scontrini1_day_pre) +
+  ggtitle("Ristorante 1: scontrini giornalieri pre covid") +
+  xlab("anno") +
+  ylab("scontrini")
+
+autoplot(scontrini1_sett_avg_pre) +
+  ggtitle("Ristorante 1: vendite medi settimanali pre covid") +
+  xlab("anno") +
+  ylab("scontrini")
+
+autoplot(scontrini1_mens_avg_pre) +
+  ggtitle("Ristorante 1: scontrini medi mensili pre covid") +
+  xlab("anno") +
+  ylab("scontrini")
+
+
+
 
 ### analisi stagionalità considerando tutti gli anni ----
 ggseasonplot(vendite1_sett, year.labels=TRUE, year.labels.left=TRUE) +
