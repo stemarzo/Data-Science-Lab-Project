@@ -69,9 +69,16 @@ getSeason <- function(DATES) {  # funzione per convertire da data a stagione
                   ifelse (d >= SS & d < FE, "Estate", "Autunno")))
 }
 ristorazione$stagione <- getSeason(ristorazione$data)
+# conversione in numeric
+ristorazione$stagione[ristorazione$stagione == "Primavera"] <- 1
+ristorazione$stagione[ristorazione$stagione == "Estate"] <- 2
+ristorazione$stagione[ristorazione$stagione == "Autunno"] <- 3
+ristorazione$stagione[ristorazione$stagione == "Inverno"] <- 4
 
 # aggiunta colonna mese
-ristorazione$mese <- format(ristorazione$data,"%B")
+# ristorazione$mese <- format(ristorazione$data,"%B")
+ristorazione$mese <- month(ristorazione$data)
+
 
 # colonna giorni festivi e feriali
 ristorazione <- ristorazione %>%
@@ -219,6 +226,7 @@ subset(ristorazione[,c(1,3)], is.na(ristorazione$vendite1))
 # 25-26 dicembre 2020, 1,6 gennaio 2021: feste
 # 4-5 aprile 2021: pasqua
 
+
 sum(is.na(ristorazione$vendite2))  # 55 NA
 which(is.na(ristorazione$vendite2))
 subset(ristorazione[,c(1,5)], is.na(ristorazione$vendite2))
@@ -275,6 +283,7 @@ subset(ristorazione[,c(1,13)], is.na(ristorazione$vendite6))
 # 25 dicembre 2020: festa
 # 4 aprile 2021: pasqua
 
+# i seguenti valori NA verranno trattati nelle fasi di creazioni di df per ciascun ristorante
 # il numero di scontrini NA per ciascun ristorante corrisponde con il numero di vendite NA
 # effettuare check di consistenza: agli scontrini con vendite pari a 0 devono corrispondere 0 scontrini e cosi via 
 
