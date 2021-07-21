@@ -896,8 +896,6 @@ p <- p + facet_grid(facets = Year ~ ., margins = FALSE) + theme_bw()
 p + scale_y_continuous() + scale_x_discrete(labels=labels) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8))
 
-plot(ristorante1_estate_2019$vendite, type="l")
-line(ristorante1_estate_2020$vendite)
 
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
