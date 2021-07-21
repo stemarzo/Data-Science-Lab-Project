@@ -558,12 +558,22 @@ vendite1_day_pre <- ts(ristorante1_pre_covid$vendite,start=2017,frequency=365)
 
 # vendite settimanali medie primo ristorante pre covid
 week <- as.Date(cut(ristorante1_pre_covid$data, "week"))
+
+vendite1_sett_pre <- aggregate(vendite ~ week, ristorante1_pre_covid, sum)
+vendite1_sett_pre <- vendite1_sett_pre$vendite
+vendite1_sett_pre <- ts(vendite1_sett_pre,start=2017,frequency=52) 
+
 vendite1_sett_avg_pre <- aggregate(vendite ~ week, ristorante1_pre_covid, mean)
 vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
 vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
 
 # vendite mensili medie  primo ristorante pre covid
 month <- as.Date(cut(ristorante1_pre_covid$data, "month"))
+
+vendite1_mens_pre <- aggregate(vendite ~ month, ristorante1_pre_covid, sum)
+vendite1_mens_pre <- vendite1_mens_pre$vendite
+vendite1_mens_pre <- ts(vendite1_mens_pre,start=2017,frequency=12) 
+
 vendite1_mens_avg_pre <- aggregate(vendite ~ month, ristorante1_pre_covid, mean)
 vendite1_mens_avg_pre <- vendite1_mens_avg_pre$vendite
 vendite1_mens_avg_pre <- ts(vendite1_mens_avg_pre,start=2017,frequency=12) 
@@ -673,7 +683,6 @@ autoplot(scontrini1_mens_avg_pre) +
 
 
 
-
 ### analisi stagionalità considerando tutti gli anni ----
 ggseasonplot(vendite1_sett, year.labels=TRUE, year.labels.left=TRUE) +
   ylab("euro") +
@@ -688,7 +697,22 @@ ggsubseriesplot(vendite1_mens_avg) +
   ylab("$ million") +
   ggtitle("Seasonal subseries plot: vendite medie mensili")
 
+
 ### analisi stagionalità considerando il periodo pre covid ----
+ggseasonplot(vendite1_sett_pre, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab("euro") +
+  ggtitle("Seasonal plot: vendite settimanale pre covid")
+
+ggseasonplot(vendite1_mens_pre, year.labels=TRUE, year.labels.left=TRUE) +
+  ylab("euro") +
+  ggtitle("Seasonal plot: vendite mensili pre covid")
+
+### seasonal sub series plot
+ggsubseriesplot(vendite1_mens_avg_pre) +
+  ylab("$ million") +
+  ggtitle("Seasonal subseries plot: vendite medie mensili pre covid")
+
+
 ### analisi correlazione tra vendite e scontrini ----
 scontrini_sett_avg <- aggregate(scontrini ~ week, ristorante1, mean)
 scontrini_sett_avg <- scontrini_sett_avg$scontrini
