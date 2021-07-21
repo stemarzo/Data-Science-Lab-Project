@@ -407,7 +407,6 @@ rm(list = c('col_date','col_nomi'))
 
 # ESPLORAZIONE DATASET ------------------------------------------------------------
 
-
 # un aspetto da osservare potrebbe essere: i ristoranti aperti da più tempo hanno reagito meglio o peggio rispetto al covid , rispetto a ristoranti magari aperti da poco ? 
 
 ## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante ----
@@ -879,6 +878,9 @@ auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
 
 
+
+# PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE -------------------------------------------
+
 # PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
 
 # bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
@@ -897,6 +899,7 @@ plot(auxres_ls)
 
 # quindi per rispondere a questa domanda creiamo un modello arima che ci permette poi
 # di fare delle previsioni
+
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
 
