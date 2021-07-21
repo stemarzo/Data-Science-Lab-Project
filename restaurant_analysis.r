@@ -15,7 +15,8 @@ library(patchwork)
 library(KFAS)
 
 # setting working directory
-working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
+working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
+#working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
