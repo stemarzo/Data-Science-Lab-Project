@@ -345,6 +345,9 @@ ristorante1$vendite[is.na(ristorante1$vendite)] <- 0  # sostiuisco i valori NA c
 ristorante1$scontrini[is.na(ristorante1$scontrini)] <- 0  
 ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 ristorante1$rapprto_v_s[is.na(ristorante1$rapprto_v_s)] <- 0
+ristorante1$chiuso <- 0
+ristorante1$chiuso <- ifelse(ristorante1$rapprto_v_s == 0, 1, 0)
+
 
 #ristorante2
 ristorante2 <- data.frame(col_date, ristorazione$vendite2, ristorazione$scontrini2)
@@ -353,7 +356,8 @@ ristorante2$vendite[is.na(ristorante2$vendite)] <- 0
 ristorante2$scontrini[is.na(ristorante2$scontrini)] <- 0  
 ristorante2$rapprto_v_s <- ristorante2$vendite/ristorante2$scontrini
 ristorante2$rapprto_v_s[is.na(ristorante2$rapprto_v_s)] <- 0
-
+ristorante2$chiuso <- 0
+ristorante2$chiuso <- ifelse(ristorante2$rapprto_v_s == 0, 1, 0)
 
 #ristorante3
 ristorante3 <- data.frame(col_date, ristorazione$vendite3, ristorazione$scontrini3)
@@ -362,6 +366,8 @@ ristorante3$vendite[is.na(ristorante3$vendite)] <- 0
 ristorante3$scontrini[is.na(ristorante3$scontrini)] <- 0  
 ristorante3$rapprto_v_s <- ristorante3$vendite/ristorante3$scontrini
 ristorante3$rapprto_v_s[is.na(ristorante3$rapprto_v_s)] <- 0
+ristorante3$chiuso <- 0
+ristorante3$chiuso <- ifelse(ristorante3$rapprto_v_s == 0, 1, 0)
 
 #ristorante4
 ristorante4 <- data.frame(col_date,ristorazione$vendite4, ristorazione$scontrini4)
@@ -370,6 +376,8 @@ ristorante4$vendite[is.na(ristorante4$vendite)] <- 0
 ristorante4$scontrini[is.na(ristorante4$scontrini)] <- 0  
 ristorante4$rapprto_v_s <- ristorante4$vendite/ristorante4$scontrini
 ristorante4$rapprto_v_s[is.na(ristorante4$rapprto_v_s)] <- 0
+ristorante4$chiuso <- 0
+ristorante4$chiuso <- ifelse(ristorante4$rapprto_v_s == 0, 1, 0)
 
 #ristorante5
 ristorante5 <- data.frame(col_date, ristorazione$vendite5, ristorazione$scontrini5)
@@ -378,6 +386,8 @@ ristorante5$vendite[is.na(ristorante5$vendite)] <- 0
 ristorante5$scontrini[is.na(ristorante5$scontrini)] <- 0  
 ristorante5$rapprto_v_s <- ristorante5$vendite/ristorante5$scontrini
 ristorante5$rapprto_v_s[is.na(ristorante5$rapprto_v_s)] <- 0
+ristorante5$chiuso <- 0
+ristorante5$chiuso <- ifelse(ristorante5$rapprto_v_s == 0, 1, 0)
 
 #ristorante6
 ristorante6 <- data.frame(col_date, ristorazione$vendite6, ristorazione$scontrini6)
@@ -386,6 +396,8 @@ ristorante6$vendite[is.na(ristorante6$vendite)] <- 0
 ristorante6$scontrini[is.na(ristorante6$scontrini)] <- 0  
 ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 ristorante6$rapprto_v_s[is.na(ristorante6$rapprto_v_s)] <- 0
+ristorante6$chiuso <- 0
+ristorante6$chiuso <- ifelse(ristorante6$rapprto_v_s == 0, 1, 0)
 
 # rimuovo le variabili che mi sono servite nella fase sopra
 rm(list = c('col_date','col_nomi'))
@@ -394,6 +406,9 @@ rm(list = c('col_date','col_nomi'))
 
 
 # ESPLORAZIONE DATASET ------------------------------------------------------------
+
+
+# un aspetto da osservare potrebbe essere: i ristoranti aperti da più tempo hanno reagito meglio o peggio rispetto al covid , rispetto a ristoranti magari aperti da poco ? 
 
 ## andamento giornaliero delle vendite negli anni considerati, per ciascun ristorante ----
 par(mfrow=c(3,2))
