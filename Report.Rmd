@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Date importanti:
+## Date importanti:
 
 31 dicembre 2019: Le autorità cinesi riferiscono all'oms l'emergenza di diversi
 casi di una misteriosa polmonite il 31 dicembre 2019.
@@ -51,10 +51,16 @@ Febbraio 2021: a partire dal 26 febbraio esplode la TERZA ONDATA
 ## CREAZIONE DF PER CIASCUN RISTORANTE
 
 
-## ESPLORAZIONE
+## ESPLORAZIONE DATASET
 
 
-## PREVISIONE FATTURATO NO COVID
+## PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE
+
+
+## PREVISIONE FATTURATO NO COVID ARIMA
+
+
+## PREVISIONE FATTURATO NO COVID RANDOM FOREST
 
 
 ## CONFRONTO ESTATE COVID & ESTATE NO COVID
