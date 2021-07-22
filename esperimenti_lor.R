@@ -86,3 +86,13 @@ ggplot(ristorante1, aes(data, vendite)) + geom_line() + scale_x_date('month')  +
 
 vendite1_day_pre
 
+
+# tentativo 2 ----
+# lisciamento esponenziale 
+# https://webs.rete.toscana.it/lso/c/document_library/get_file?uuid=dcfe244a-3038-4e00-a2c6-fff1aa19be72&groupId=38526
+
+
+# altri link da vedere ----
+# https://rpubs.com/riazakhan94/arima_with_example
+
+
