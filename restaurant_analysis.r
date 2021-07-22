@@ -768,7 +768,7 @@ print(qplot(vendite, scontrini, data=as.data.frame(ristorante1)) +
 
 
 
-### analisi autocorrelazione ----
+### analisi autocorrelazione considerando tutti gli anni ----
 # per una serie con trend, l'autocorrelazione è alta a lag vicini, 
 # e si abbassa piano piano se c'è stagionalità l'autocorrelazione presenta lag ogni tot
 
@@ -797,7 +797,7 @@ ggAcf(vendite1_mens_avg_pre, lag=24)+
 
 
 
-### decomposizione ----
+### decomposizione considerando tutti gli anni ----
 # decomposizione giornaliera 
 vendite1_day.fit<-stl(vendite1_day,s.window="periodic")
 trend.vendite1_day<-vendite1_day.fit$time.series[,2]
@@ -850,7 +850,7 @@ components.ts_pre = decompose(vendite1_mens_avg_pre)
 plot(components.ts_pre)
 
 
-### decomposizione approfondita ----
+### decomposizione approfondita considerando tutti gli anni----
 
 mese<-as.factor(month(ymd(ristorante1$data)))
 y=vendite1_day
