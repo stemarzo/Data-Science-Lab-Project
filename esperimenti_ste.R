@@ -13,7 +13,7 @@ vendite1_pre_des <- vendite1_day_pre- giornaliera
 
 k<-diff(vendite1_day_pre, 365)
 plot(k)
-
+par(mfrow=c(1,2))
 acf(k)
 pacf(k)
 
@@ -22,7 +22,7 @@ summary(M4)
 acf(M4$residuals)
 pacf(M4$residuals)
 
-par(mfrow=c(1,2))
+
 pacf(vendite1_pre_des)
 plot(vendite1_pre_des)
 

@@ -881,6 +881,26 @@ plot(auxres_ls)
 
 # PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE -------------------------------------------
 
+## identificazione modello (s)arima per la modellazione dei dati fino al 2020
+
+vendite1_day_pre_diff <- diff(vendite1_day_pre, 365)
+par(mfrow=c(1,1))
+plot(vendite1_day_pre_diff)
+require(gridExtra)
+acf<-ggAcf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+
+M4 <- Arima(vendite1_day_pre_diff, order = c(1,0,1),seasonal = list(order=c(1,0,1),period=7))
+summary(M4)
+ggAcf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+ggPacf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+
+auto.arima(vendite1_day_pre, D=1)
+
+checkresiduals(M4)
+
+
 # PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
 
 # bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
