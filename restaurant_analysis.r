@@ -15,8 +15,8 @@ library(patchwork)
 library(KFAS)
 
 # setting working directory
-working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
-#working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
+# working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
+working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
@@ -538,7 +538,7 @@ ggplot(ristorante6, aes(data, vendite)) +
 ### analisi vendite considerando tutti gli anni ----
 
 # vendite giornaliere primo ristorante 
-vendite1_day <- ts(ristorante1$vendite,start=2017,frequency=365) 
+vendite1_day <- ts(ristorante1$vendite, start=2017, frequency=365) 
 
 # vendite settimanali medie primo ristorante 
 week <- as.Date(cut(ristorante1$data, "week"))
@@ -586,32 +586,32 @@ autoplot(vendite1_mens_avg) +
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
-ristorante1_pre_covid <- ristorante1 %>%
+ristorante1_pre_covid_vendite <- ristorante1 %>%
   filter(ristorante1$data < reference_date) %>%
   select(vendite, data)
 
 # vendite giornaliere primo ristorante pre covid
-vendite1_day_pre <- ts(ristorante1_pre_covid$vendite,start=2017,frequency=365) 
+vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequency=365) 
 
 # vendite settimanali medie primo ristorante pre covid
-week <- as.Date(cut(ristorante1_pre_covid$data, "week"))
+week_pre_covid <- as.Date(cut(ristorante1_pre_covid_vendite$data, "week"))
 
-vendite1_sett_pre <- aggregate(vendite ~ week, ristorante1_pre_covid, sum)
+vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid, ristorante1_pre_covid_vendite, sum)
 vendite1_sett_pre <- vendite1_sett_pre$vendite
 vendite1_sett_pre <- ts(vendite1_sett_pre,start=2017,frequency=52) 
 
-vendite1_sett_avg_pre <- aggregate(vendite ~ week, ristorante1_pre_covid, mean)
+vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid, ristorante1_pre_covid_vendite, mean)
 vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
 vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
 
 # vendite mensili medie  primo ristorante pre covid
-month <- as.Date(cut(ristorante1_pre_covid$data, "month"))
+month_pre_covid <- as.Date(cut(ristorante1_pre_covid_vendite$data, "month"))
 
-vendite1_mens_pre <- aggregate(vendite ~ month, ristorante1_pre_covid, sum)
+vendite1_mens_pre <- aggregate(vendite ~ month_pre_covid, ristorante1_pre_covid_vendite, sum)
 vendite1_mens_pre <- vendite1_mens_pre$vendite
 vendite1_mens_pre <- ts(vendite1_mens_pre,start=2017,frequency=12) 
 
-vendite1_mens_avg_pre <- aggregate(vendite ~ month, ristorante1_pre_covid, mean)
+vendite1_mens_avg_pre <- aggregate(vendite ~ month_pre_covid, ristorante1_pre_covid_vendite, mean)
 vendite1_mens_avg_pre <- vendite1_mens_avg_pre$vendite
 vendite1_mens_avg_pre <- ts(vendite1_mens_avg_pre,start=2017,frequency=12) 
 
@@ -683,22 +683,23 @@ autoplot(scontrini1_mens_avg) +
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
 
 # scontrini ristorante 1 pre covid
-ristorante1_pre_covid <- ristorante1 %>%
+ristorante1_pre_covid_scontrini <- ristorante1 %>%
   filter(ristorante1$data < reference_date) %>%
   select(scontrini, data)
 
 # scontrini giornalieri primo ristorante pre covid
-scontrini1_day_pre <- ts(ristorante1_pre_covid$scontrini,start=2017,frequency=365) 
+scontrini1_day_pre <- ts(ristorante1_pre_covid_scontrini$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medi primo ristorante pre covid
-week1 <- as.Date(cut(ristorante1_pre_covid$data, "week"))
-scontrini1_sett_avg_pre <- aggregate(scontrini ~ week1, ristorante1_pre_covid, mean)
+week_pre_covid <- as.Date(cut(ristorante1_pre_covid_scontrini$data, "week"))
+
+scontrini1_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid, ristorante1_pre_covid_scontrini, mean)
 scontrini1_sett_avg_pre <- scontrini1_sett_avg_pre$scontrini
 scontrini1_sett_avg_pre <- ts(scontrini1_sett_avg_pre,start=2017,frequency=52) 
 
 # scontrini mensili medi  primo ristorante pre covid
-month1 <- as.Date(cut(ristorante1_pre_covid$data, "month"))
-scontrini1_mens_avg_pre <- aggregate(scontrini ~ month1, ristorante1_pre_covid, mean)
+month_pre_covid <- as.Date(cut(ristorante1_pre_covid_scontrini$data, "month"))
+scontrini1_mens_avg_pre <- aggregate(scontrini ~ month_pre_covid, ristorante1_pre_covid_scontrini, mean)
 scontrini1_mens_avg_pre <- scontrini1_mens_avg_pre$scontrini
 scontrini1_mens_avg_pre <- ts(scontrini1_mens_avg_pre,start=2017,frequency=12) 
 
