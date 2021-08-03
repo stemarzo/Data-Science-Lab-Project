@@ -691,14 +691,14 @@ ristorante1_pre_covid <- ristorante1 %>%
 scontrini1_day_pre <- ts(ristorante1_pre_covid$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medi primo ristorante pre covid
-week <- as.Date(cut(ristorante1_pre_covid$data, "week"))
-scontrini1_sett_avg_pre <- aggregate(scontrini ~ week, ristorante1_pre_covid, mean)
+week1 <- as.Date(cut(ristorante1_pre_covid$data, "week"))
+scontrini1_sett_avg_pre <- aggregate(scontrini ~ week1, ristorante1_pre_covid, mean)
 scontrini1_sett_avg_pre <- scontrini1_sett_avg_pre$scontrini
 scontrini1_sett_avg_pre <- ts(scontrini1_sett_avg_pre,start=2017,frequency=52) 
 
 # scontrini mensili medi  primo ristorante pre covid
-month <- as.Date(cut(ristorante1_pre_covid$data, "month"))
-scontrini1_mens_avg_pre <- aggregate(scontrini ~ month, ristorante1_pre_covid, mean)
+month1 <- as.Date(cut(ristorante1_pre_covid$data, "month"))
+scontrini1_mens_avg_pre <- aggregate(scontrini ~ month1, ristorante1_pre_covid, mean)
 scontrini1_mens_avg_pre <- scontrini1_mens_avg_pre$scontrini
 scontrini1_mens_avg_pre <- ts(scontrini1_mens_avg_pre,start=2017,frequency=12) 
 
@@ -881,24 +881,6 @@ plot(auxres_ls)
 
 # PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE -------------------------------------------
 
-## identificazione modello (s)arima per la modellazione dei dati fino al 2020
-
-vendite1_day_pre_diff <- diff(vendite1_day_pre, 365)
-par(mfrow=c(1,1))
-plot(vendite1_day_pre_diff)
-require(gridExtra)
-acf<-ggAcf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-grid.arrange(acf, pacf, ncol=2)
-
-M4 <- Arima(vendite1_day_pre_diff, order = c(1,0,1),seasonal = list(order=c(1,0,1),period=7))
-summary(M4)
-ggAcf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-ggPacf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-
-auto.arima(vendite1_day_pre, D=1)
-
-checkresiduals(M4)
 
 
 # PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
@@ -919,6 +901,27 @@ checkresiduals(M4)
 
 # quindi per rispondere a questa domanda creiamo un modello arima che ci permette poi
 # di fare delle previsioni
+
+
+## identificazione modello (s)arima per la modellazione dei dati fino al 2020
+
+vendite1_day_pre_diff <- diff(vendite1_day_pre, 365)
+par(mfrow=c(1,1))
+plot(vendite1_day_pre_diff)
+require(gridExtra)
+acf<-ggAcf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+
+M4 <- Arima(vendite1_day_pre_diff, order = c(1,0,1),seasonal = list(order=c(1,0,1),period=7))
+summary(M4)
+ggAcf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+ggPacf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+
+checkresiduals(M4)
+
+
+
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
