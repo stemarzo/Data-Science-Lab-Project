@@ -87,9 +87,39 @@ ggplot(ristorante1, aes(data, vendite)) + geom_line() + scale_x_date('month')  +
 vendite1_day_pre
 
 
-# tentativo 2 ----
+# tentativo 4 ----
 # lisciamento esponenziale 
 # https://webs.rete.toscana.it/lso/c/document_library/get_file?uuid=dcfe244a-3038-4e00-a2c6-fff1aa19be72&groupId=38526
+
+# tentativo 4 ----
+
+library(tseries)
+
+vendite1_day_pre
+vendite1_day_pre_diff <- diff(vendite1_day_pre)
+
+# visualize data
+autoplot(vendite1_day_pre)
+autoplot(vendite1_day_pre_diff)
+
+
+# check stationarity
+adf.test(vendite1_day_pre, k=1)
+# con lag = 1 i dati sono stazionari
+
+# altro test
+pp.test(vendite1_day_pre)
+
+# altro test
+kpss.test(vendite1_day_pre)
+
+library(TSstudio)
+arima_diag(vendite1_day_pre)
+
+
+
+
+check_res(M4)
 
 
 # altri link da vedere ----
@@ -150,5 +180,6 @@ abline(a = 0,b = 1,lwd = 2,lty = 3,col = "black")
 rf.auc <- performance(rf.pr, measure = "auc")
 rf.auc <- rf.auc@y.values[[1]]
 rf.auc  # 0.7386719
+
 
 
