@@ -1,18 +1,20 @@
 # SETTING PROGETTO --------------------------------------------------------
 
 # setting librerie
-library(readxl)
-library(readr)
-library(forecast)
-library(dplyr)
-library(magrittr)
-library(ggplot2)
-library(forcats)
-library(lubridate)
-library(RQuantLib)
-library(devtools)
-library(patchwork)
-library(KFAS)
+# Package names
+packages <- c("readxl",  "readr", "forecast", "dplyr", "magrittr", "ggplot2",
+              "forcats", "lubridate", "RQuantLib", "devtools", "patchwork", "KFAS",
+              "caret") 
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
+
 
 # setting working directory
 # working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
@@ -906,6 +908,7 @@ plot(auxres_ls)
 
 ## identificazione modello (s)arima per la modellazione dei dati fino al 2020
 
+# arima_diag(vendite1_day_pre)
 vendite1_day_pre_diff <- diff(vendite1_day_pre, 365)
 par(mfrow=c(1,1))
 plot(vendite1_day_pre_diff)
@@ -920,6 +923,7 @@ ggAcf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
 ggPacf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
 
 checkresiduals(M4)
+# check_res(M4)
 
 
 
