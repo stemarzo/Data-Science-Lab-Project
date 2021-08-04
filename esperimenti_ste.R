@@ -84,3 +84,48 @@ checkresiduals(M5)
 
 autoplot(forecast(M5, h=10))
 
+
+##SETTIMANALE
+
+train <- window(vendite1_sett_avg_pre, end=2019)
+test <- window(vendite1_sett_avg_pre, start=2019)
+
+
+train_dest <- seasadj(stl(train, s.window = 'periodic'))
+plot(train_dest)
+
+par(mfrow=c(1,1))
+plot(train)
+
+ndiffs(train_dest)
+nsdiffs(train_dest)
+
+train_diff <-diff(train_dest)
+
+plot(train_diff)
+
+M10 <-auto.arima(train, D=1)
+
+checkresiduals(M10)
+
+autoplot(forecast(M10, h=52))+autolayer(test)
+
+
+# vendite ristorante 1 pre covid
+ristorante1_pre_covid_chiuso <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(chiuso, data)
+
+chiuso_sett_avg_pre <- aggregate(chiuso ~ week_pre_covid, ristorante1_pre_covid_chiuso, mean)
+chiuso1_sett_avg_pre <- chiuso_sett_avg_pre$chiuso
+chiuso1_sett_avg_pre <- ts(chiuso1_sett_avg_pre,start=2017,frequency=52) 
+
+train_chiuso <- window(chiuso1_sett_avg_pre, end=2019)
+test_chiuso <- window(chiuso1_sett_avg_pre, start=2019)
+
+M11 <- auto.arima(train, D=1, xreg = train_chiuso)
+summary(M11)
+checkresiduals(M11)
+
+autoplot(forecast(M11, h=52, xreg = test_chiuso))+autolayer(test)
+
