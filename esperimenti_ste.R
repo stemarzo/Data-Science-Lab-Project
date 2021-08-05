@@ -247,13 +247,19 @@ chiuso_sett_avg_pre <- aggregate(chiuso ~ week_pre_covid, ristorante1_pre_covid_
 chiuso1_sett_avg_pre <- chiuso_sett_avg_pre$chiuso
 chiuso1_sett_avg_pre <- ts(chiuso1_sett_avg_pre,start=2017,frequency=52) 
 
-train_chiuso <- window(chiuso1_sett_avg_pre, end=2019)
-test_chiuso <- window(chiuso1_sett_avg_pre, start=2019)
+chiuso_split <- ts_split(chiuso1_sett_avg_pre)
+train_chiuso <- chiuso_split$train
+test_chiuso <- chiuso_split$test
 
-M11 <- auto.arima(train, D=1, xreg = train_chiuso)
-summary(M11)
-checkresiduals(M11)
 
-autoplot(forecast(M11, h=52, xreg = test_chiuso))+autolayer(test)
+M3 <- auto.arima(train_auto, seasonal = T, xreg = train_chiuso)
+summary(M3)
+checkresiduals(M3)
+
+M3 %>%
+  forecast(h=50, xreg = test_chiuso) %>%  # h Number of periods for fore
+  autoplot() + autolayer(test_auto)
+
+
 
 

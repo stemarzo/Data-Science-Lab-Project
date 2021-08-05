@@ -17,8 +17,8 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 
 # setting working directory
-# working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
-working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
+working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
+#working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
@@ -906,25 +906,92 @@ plot(auxres_ls)
 # di fare delle previsioni
 
 
-## identificazione modello (s)arima per la modellazione dei dati fino al 2020
 
-# arima_diag(vendite1_day_pre)
-vendite1_day_pre_diff <- diff(vendite1_day_pre, 365)
-par(mfrow=c(1,1))
-plot(vendite1_day_pre_diff)
+library(tseries)
+library(urca)
+library(TSstudio)
 require(gridExtra)
-acf<-ggAcf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(vendite1_day_pre_diff, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+
+# ARIMA MANUALE
+# rendiamo stazionaria la ts, dobbiamo togliere stagionalità e trend
+
+#rimuovo stagionalità
+
+vendite1_sett_avg_pre_dest <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
+autoplot(vendite1_sett_avg_pre_dest)+autolayer(vendite1_sett_avg_pre)
+
+#controllo se devo differenziare
+
+ndiffs(vendite1_sett_avg_pre_dest)
+nsdiffs(vendite1_sett_avg_pre_dest)
+
+#rimuovo trend con differenziazione
+
+vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
+autoplot(vendite1_sett_avg_pre_dest_diff)
+
+#controllo stazionarietà
+adf.test(vendite1_sett_avg_pre_dest_diff, alternative = "stationary")  
+summary(ur.kpss(vendite1_sett_avg_pre_dest_diff ))
+ndiffs(vendite1_sett_avg_pre_dest_diff)
+nsdiffs(vendite1_sett_avg_pre_dest_diff)
+
+
+#CREAZIONE TRAINIG SET E TEST SET
+
+vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
+
+# divisione in train e test
+train <- vendite1_sett_avg_pre_split$train
+test <- vendite1_sett_avg_pre_split$test
+autoplot(train)
+autoplot(test)
+
+autoplot(vendite1_sett_avg_pre_dest_diff) +
+  autolayer(train, series="Training") +
+  autolayer(test, series="Test")
+
+# scelta di parametri p e q con acf e pacf
+acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-M4 <- Arima(vendite1_day_pre_diff, order = c(1,0,1),seasonal = list(order=c(1,0,1),period=7))
-summary(M4)
-ggAcf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
-ggPacf(M4$residuals, lag.max = 30)+ggtitle("Vendite1 day pre diff")
+#applico ARMA
+M1<-Arima(train, order = c(2,0,2))
+summary(M1)#guardare meglio accuracy
+checkresiduals(M1)
 
-checkresiduals(M4)
-# check_res(M4)
+#autoplot(forecast(M1, h=50))+autolayer(test)
 
+#USO AUTO ARIMA----------------------------------------------------------
+vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
+
+# divisione in train e test
+train_auto <- vendite1_sett_avg_pre_split_auto$train
+test_auto <- vendite1_sett_avg_pre_split_auto$test
+
+autoplot(vendite1_sett_avg_pre) +
+  autolayer(train_auto, series="Training") +
+  autolayer(train_auto, series="Test")
+
+# auto.arima per selezione modello migliore
+auto.model = auto.arima(train_auto, seasonal = T)
+summary(auto.model)
+
+
+# previsioni con test set
+auto.model %>%
+  forecast(h=50) %>%  # h Number of periods for fore
+  autoplot() + autolayer(test_auto)
+
+forecast <- auto.model %>%
+  forecast(h=50)
+
+# alternativa per vedere previsioni con test set
+par(mfrow=c(1,1))
+plot(forecast)
+lines(test_auto, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 
 
