@@ -87,11 +87,11 @@ autoplot(forecast(M5, h=10))
 
 ##SETTIMANALE
 
-train <- window(vendite1_sett_avg_pre, end=2019)
-test <- window(vendite1_sett_avg_pre, start=2019)
+train <- window(vendite1_sett_avg_pre, end=c(2019,2))
+test <- window(vendite1_sett_avg_pre, start=c(2019,2))
 
 
-train_dest <- seasadj(stl(train, s.window = 'periodic'))
+train_dest <- seasadj(stl(train, s.window = 52))
 plot(train_dest)
 
 par(mfrow=c(1,1))
@@ -100,11 +100,30 @@ plot(train)
 ndiffs(train_dest)
 nsdiffs(train_dest)
 
-train_diff <-diff(train_dest)
+train_diff <-diff(train_dest,1)
+
+library(urca)
+summary(ur.kpss(train_diff ))
+
+
+nsdiffs(train_diff)
 
 plot(train_diff)
 
-M10 <-auto.arima(train, D=1)
+require(gridExtra)
+acf<-ggAcf(train_diff, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(train_diff, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+
+M9<-auto.arima(train_diff)
+M9s<-Arima(train_diff, order = c(2,0,2))
+
+checkresiduals(M9)
+checkresiduals(M9s)
+
+M9s
+
+ M10 <-auto.arima(train, D=1)
 
 checkresiduals(M10)
 
@@ -128,4 +147,8 @@ summary(M11)
 checkresiduals(M11)
 
 autoplot(forecast(M11, h=52, xreg = test_chiuso))+autolayer(test)
+
+
+
+
 
