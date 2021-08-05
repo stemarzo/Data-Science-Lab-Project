@@ -149,6 +149,111 @@ checkresiduals(M11)
 autoplot(forecast(M11, h=52, xreg = test_chiuso))+autolayer(test)
 
 
+## DEFINITIVO ----------------------------------------------------------------------------------
 
+library(tseries)
+library(urca)
+library(TSstudio)
+require(gridExtra)
+
+# ARIMA MANUALE
+# rendiamo stazionaria la ts, dobbiamo togliere stagionalità e trend
+
+#rimuovo stagionalità
+
+vendite1_sett_avg_pre_dest <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
+autoplot(vendite1_sett_avg_pre_dest)+autolayer(vendite1_sett_avg_pre)
+
+#controllo se devo differenziare
+
+ndiffs(vendite1_sett_avg_pre_dest)
+nsdiffs(vendite1_sett_avg_pre_dest)
+
+#rimuovo trend con differenziazione
+
+vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
+autoplot(vendite1_sett_avg_pre_dest_diff)
+
+#controllo stazionarietà
+adf.test(vendite1_sett_avg_pre_dest_diff, alternative = "stationary")  
+summary(ur.kpss(vendite1_sett_avg_pre_dest_diff ))
+ndiffs(vendite1_sett_avg_pre_dest_diff)
+nsdiffs(vendite1_sett_avg_pre_dest_diff)
+
+
+#CREAZIONE TRAINIG SET E TEST SET
+
+vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
+
+# divisione in train e test
+train <- vendite1_sett_avg_pre_split$train
+test <- vendite1_sett_avg_pre_split$test
+autoplot(train)
+autoplot(test)
+
+autoplot(vendite1_sett_avg_pre_dest_diff) +
+  autolayer(train, series="Training") +
+  autolayer(test, series="Test")
+
+# scelta di parametri p e q con acf e pacf
+acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+
+#applico ARMA
+M1<-Arima(train, order = c(2,0,2))
+summary(M1)#guardare meglio accuracy
+checkresiduals(M1)
+
+#autoplot(forecast(M1, h=50))+autolayer(test)
+
+#USO AUTO ARIMA----------------------------------------------------------
+vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
+
+# divisione in train e test
+train_auto <- vendite1_sett_avg_pre_split_auto$train
+test_auto <- vendite1_sett_avg_pre_split_auto$test
+
+autoplot(vendite1_sett_avg_pre) +
+  autolayer(train_auto, series="Training") +
+  autolayer(train_auto, series="Test")
+
+# auto.arima per selezione modello migliore
+auto.model = auto.arima(train_auto, seasonal = T)
+summary(auto.model)
+
+
+# previsioni con test set
+auto.model %>%
+  forecast(h=50) %>%  # h Number of periods for fore
+  autoplot() + autolayer(test_auto)
+
+forecast <- auto.model %>%
+  forecast(h=50)
+
+# alternativa per vedere previsioni con test set
+par(mfrow=c(1,1))
+plot(forecast)
+lines(test_auto, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
+
+## PROVA REGRESSORE------------------------------------------
+
+ristorante1_pre_covid_chiuso <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(chiuso, data)
+
+chiuso_sett_avg_pre <- aggregate(chiuso ~ week_pre_covid, ristorante1_pre_covid_chiuso, mean)
+chiuso1_sett_avg_pre <- chiuso_sett_avg_pre$chiuso
+chiuso1_sett_avg_pre <- ts(chiuso1_sett_avg_pre,start=2017,frequency=52) 
+
+train_chiuso <- window(chiuso1_sett_avg_pre, end=2019)
+test_chiuso <- window(chiuso1_sett_avg_pre, start=2019)
+
+M11 <- auto.arima(train, D=1, xreg = train_chiuso)
+summary(M11)
+checkresiduals(M11)
+
+autoplot(forecast(M11, h=52, xreg = test_chiuso))+autolayer(test)
 
 
