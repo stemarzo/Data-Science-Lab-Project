@@ -411,6 +411,7 @@ rm(list = c('col_date','col_nomi'))
 # ESPLORAZIONE DATASET ------------------------------------------------------------
 
 # un aspetto da osservare potrebbe essere: i ristoranti aperti da più tempo hanno reagito meglio o peggio rispetto al covid , rispetto a ristoranti magari aperti da poco ? 
+# nei plot sarebbe bello inserire le date degli eventi principali: chiusura ristoranti, inizio vaccinazione ecc (tipo https://statisticsglobe.com/draw-time-series-plot-with-events-using-ggplot2-in-r)
 
 ## analisi vendite giornaliere considerando tutti gli anni e tutti i ristoranti ----
 par(mfrow=c(3,2))
@@ -885,6 +886,28 @@ plot(auxres_ls)
 
 # PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE -------------------------------------------
 
+# work in progress
+vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
+
+# divisione in train e test
+train <- vendite1_sett_avg_pre_split$train
+test <- vendite1_sett_avg_pre_split$test
+autoplot(train)
+autoplot(test)
+
+autoplot(vendite1_sett_avg_pre_dest_diff) +
+  autolayer(train, series="Training") +
+  autolayer(test, series="Test")
+
+M0 <- HoltWinters(train)
+previsioni <- forecast(M0, h=50)
+accuracy(previsioni, test)
+
+par(mfrow=c(1,1))
+plot(previsioni)
+lines(test, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","HoltWintersPred"))
+
 
 
 # PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
@@ -964,7 +987,17 @@ accuracy(M2)
 # MASE = 0.4430427, < 1, buon risultato
 
 summary(M2)
+
+# we want to check that there are no correlations between forecast errors
 check_res(M2)
+M2$residuals
+
+# A Ljung-Box test can also indicate the presence of these correlations. 
+# As long as we score a p-value > 0.05, there is a 95% chance the residuals are independent
+acf(M2$residuals, lag.max=20, na.action=na.pass)
+Box.test(M2$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
+hist(M2$residuals)
+
 
 # previsioni con test set
 M2 %>%
@@ -979,6 +1012,9 @@ par(mfrow=c(1,1))
 plot(forecast)
 lines(test_auto, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
+
+# valutazione qualità previsioni
+accuracy(forecast, test)
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
