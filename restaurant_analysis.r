@@ -930,13 +930,13 @@ autoplot(vendite1_sett_avg_pre_dest_diff) +
   autolayer(test, series="Test")
 
 # scelta di parametri p e q con acf e pacf
-acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # q = 2
+pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # p = 2
 grid.arrange(acf, pacf, ncol=2)
 
 # creazione modello arima
 M1<-Arima(train, order = c(2,0,2))
-summary(M1)#guardare meglio accuracy
+summary(M1) 
 checkresiduals(M1)
 
 # autoplot(forecast(M1, h=50))+autolayer(test)
@@ -955,16 +955,23 @@ autoplot(vendite1_sett_avg_pre) +
 
 # auto.arima per selezione modello migliore
 arima_diag(train_auto)
-auto.model = auto.arima(train_auto, seasonal = T)
-summary(auto.model)
-check_res(auto.model)
+M2 <- auto.arima(train_auto, seasonal = T)
+
+# AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
+
+accuracy(M2)
+# MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
+# MASE = 0.4430427, < 1, buon risultato
+
+summary(M2)
+check_res(M2)
 
 # previsioni con test set
-auto.model %>%
-  forecast(h=50) %>%  # h Number of periods for forecast
+M2 %>%
+  forecast(h=50) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(test_auto)
 
-forecast <- auto.model %>%
+forecast <- M2 %>%
   forecast(h=50)
 
 # alternativa per vedere previsioni con test set
