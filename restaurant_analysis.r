@@ -4,7 +4,7 @@
 # Package names
 packages <- c("readxl",  "readr", "forecast", "dplyr", "magrittr", "ggplot2",
               "forcats", "lubridate", "RQuantLib", "devtools", "patchwork", "KFAS",
-              "caret") 
+              "caret", "tseries", "urca", "TSstudio", "gridExtra") 
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -19,6 +19,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 # setting working directory
 working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
 #working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
+working_dir = "~/Desktop/Progetto ds lab/progetto_dslab/dati"
 setwd(working_dir)
 
 # lettura dataset
@@ -888,56 +889,33 @@ plot(auxres_ls)
 
 # PREVISIONE FATTURATO NO COVID ARIMA -------------------------------------------
 
-# bisogna consierare un periodo pre covid e fare le previsioni sui mesi del covid per vedere come sarebbero andate le vendite del ristorante
+### Arima manuale----
+# per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
-# Lo scopo di ARIMA è di trovare il modello che meglio rappresenti i valori di una serie storica.
-# 
-# Un modello ARIMA può essere espresso come ARIMA (p, d, q), dove, come abbiamo già visto, p è l’ordine del modello autoregressivo, d indica il grado di differenziazione e q indica l’ordine della media mobile..
-# 
-# Operativamente, possiamo definire cinque passaggi per adattare le serie storiche a un modello ARIMA:
-#   
-# Visualizzare le serie temporali con un grafico.
-# Differenziare le serie storiche non stazionarie per ottenere serie temporali stazionarie.
-# Tracciare grafici ACF e PACF per trovare i valori ottimali di p e q, oppure ricavarli usando la funzione auto.arima.
-# Costruire il modello ARIMA.
-# Fare la previsione.
-
-# quindi per rispondere a questa domanda creiamo un modello arima che ci permette poi
-# di fare delle previsioni
-
-
-
-library(tseries)
-library(urca)
-library(TSstudio)
-require(gridExtra)
-
-# ARIMA MANUALE
-# rendiamo stazionaria la ts, dobbiamo togliere stagionalità e trend
-
-#rimuovo stagionalità
+# rimozione stagionalità
 
 vendite1_sett_avg_pre_dest <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
 autoplot(vendite1_sett_avg_pre_dest)+autolayer(vendite1_sett_avg_pre)
 
-#controllo se devo differenziare
+# controllo se bisonga differenziare
 
 ndiffs(vendite1_sett_avg_pre_dest)
 nsdiffs(vendite1_sett_avg_pre_dest)
 
-#rimuovo trend con differenziazione
+# rimozione trend con differenziazione
 
 vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
 autoplot(vendite1_sett_avg_pre_dest_diff)
 
-#controllo stazionarietà
+# verifica stazionarietà
 adf.test(vendite1_sett_avg_pre_dest_diff, alternative = "stationary")  
 summary(ur.kpss(vendite1_sett_avg_pre_dest_diff ))
 ndiffs(vendite1_sett_avg_pre_dest_diff)
 nsdiffs(vendite1_sett_avg_pre_dest_diff)
 
 
-#CREAZIONE TRAINIG SET E TEST SET
+# una volta ottenuta la serie storica stazionaria si procede con la creazione
+# di train e test
 
 vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
 
@@ -956,14 +934,15 @@ acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
 pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-#applico ARMA
+# creazione modello arima
 M1<-Arima(train, order = c(2,0,2))
 summary(M1)#guardare meglio accuracy
 checkresiduals(M1)
 
-#autoplot(forecast(M1, h=50))+autolayer(test)
+# autoplot(forecast(M1, h=50))+autolayer(test)
 
-#USO AUTO ARIMA----------------------------------------------------------
+### Auto Arima----
+
 vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
 
 # divisione in train e test
@@ -975,13 +954,14 @@ autoplot(vendite1_sett_avg_pre) +
   autolayer(train_auto, series="Test")
 
 # auto.arima per selezione modello migliore
+arima_diag(train_auto)
 auto.model = auto.arima(train_auto, seasonal = T)
 summary(auto.model)
-
+check_res(auto.model)
 
 # previsioni con test set
 auto.model %>%
-  forecast(h=50) %>%  # h Number of periods for fore
+  forecast(h=50) %>%  # h Number of periods for forecast
   autoplot() + autolayer(test_auto)
 
 forecast <- auto.model %>%
@@ -992,8 +972,6 @@ par(mfrow=c(1,1))
 plot(forecast)
 lines(test_auto, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
-
-
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
