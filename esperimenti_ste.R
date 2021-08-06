@@ -262,4 +262,11 @@ M3 %>%
 
 
 
+M1<-Arima(train, order = c(2,0,0),seasonal =  list(order=c(1,0,0),period=52))
+summary(M1)#guardare meglio accuracy
+checkresiduals(M1)
+acf<-ggAcf(M1$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(M1$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
 
+autoplot(forecast(M1, h=50))+autolayer(test)
