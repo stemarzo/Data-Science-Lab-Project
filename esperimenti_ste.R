@@ -260,13 +260,46 @@ M3 %>%
   forecast(h=50, xreg = test_chiuso) %>%  # h Number of periods for fore
   autoplot() + autolayer(test_auto)
 
+###NUOVO MANUALE --------------------------------------------------------------
 
+#guardo acf e pacf del train
 
-M1<-Arima(train, order = c(2,0,0),seasonal =  list(order=c(1,0,0),period=52))
-summary(M1)#guardare meglio accuracy
-checkresiduals(M1)
-acf<-ggAcf(M1$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(M1$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-autoplot(forecast(M1, h=50))+autolayer(test)
+#provo ad iniziare con un ar 2, vedendo che nel pacf due lag sono significativamente
+#correlati
+
+M4 <- Arima(train, order = c(2,0,0))
+
+#guardo pacf e acf dei residui, in modo tale da capire dove  è e poi
+#catturare l'informazione che abbiamo lasciato 
+acf<-ggAcf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+
+#vedo che il lag 52 è molto correlato nell'acf
+M4<-Arima(train, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52))# il mio amico in seasonal aveva messo (1,0,0)
+#ma dal grafico mi sebra più sbarellato il 52 lag nell'acf quindi bho, alla fine penso che non esistea uno perfetto, basta
+#che si catturi l'info.
+summary(M4)
+acf<-ggAcf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+checkresiduals(M4)
+autoplot(forecast(M4, h=50))+autolayer(test)
+
+M5<-Arima(train, order = c(2,0,0),seasonal =  list(order=c(1,0,0),period=52))
+summary(M3)#guardare meglio accuracy
+checkresiduals(M5)
+acf<-ggAcf(M3$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+pacf<-ggPacf(M3$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+grid.arrange(acf, pacf, ncol=2)
+summary(M5)
+
+
+
+
+
+
