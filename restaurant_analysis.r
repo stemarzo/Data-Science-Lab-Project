@@ -1037,7 +1037,7 @@ M2 %>%
   autoplot() + autolayer(test_auto)
 
 forecast <- M2 %>%
-  forecast(h=50)
+  forecast(h=30)
 
 # alternativa per vedere previsioni con test set
 par(mfrow=c(1,1))
@@ -1047,6 +1047,11 @@ legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
 accuracy(forecast, test)
+
+M2 %>%
+  forecast(h=106) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(vendite1_sett_avg)
+
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
