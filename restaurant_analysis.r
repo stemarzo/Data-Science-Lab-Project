@@ -736,7 +736,7 @@ ggseasonplot(vendite1_mens, year.labels=TRUE, year.labels.left=TRUE) +
 
 ### seasonal sub series plot
 ggsubseriesplot(vendite1_mens_avg) +
-  ylab("$ million") +
+  ylab("euro") +
   ggtitle("Seasonal subseries plot: vendite medie mensili")
 
 
@@ -751,15 +751,15 @@ ggseasonplot(vendite1_mens_pre, year.labels=TRUE, year.labels.left=TRUE) +
 
 ### seasonal sub series plot
 ggsubseriesplot(vendite1_mens_avg_pre) +
-  ylab("$ million") +
+  ylab("euro") +
   ggtitle("Seasonal subseries plot: vendite medie mensili pre covid")
 
 
 ### analisi correlazione tra vendite e scontrini ----
-scontrini_sett_avg <- aggregate(scontrini ~ week, ristorante1, mean)
-scontrini_sett_avg <- scontrini_sett_avg$scontrini
-scontrini_sett_avg <- ts(scontrini_sett_avg,start=2017,frequency=52) 
-sc_ven1_sett_avg <-ts.intersect(vendite1_sett_avg, scontrini_sett_avg)
+scontrini_sett_avg1 <- aggregate(scontrini ~ week, ristorante1, mean)
+scontrini_sett_avg1 <- scontrini_sett_avg1$scontrini
+scontrini_sett_avg1 <- ts(scontrini_sett_avg1,start=2017,frequency=52) 
+sc_ven1_sett_avg <-ts.intersect(vendite1_sett_avg, scontrini_sett_avg1)
 
 
 print(autoplot(sc_ven1_sett_avg, facets=TRUE) +
@@ -877,6 +877,23 @@ lines(y)
 
 auxres_ls <- rstandard(smo3, "state")
 plot(auxres_ls)
+
+
+## Altri ristoranti ----
+# esplorazione ristorante 2
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
+
+# esplorazione ristorante 3
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
+
+# esplorazione ristorante 4
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
+
+# esplorazione ristorante 5
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
+
+# esplorazione ristorante 6
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
 
