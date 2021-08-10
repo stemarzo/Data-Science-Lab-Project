@@ -804,14 +804,9 @@ ggAcf(vendite1_mens_avg_pre, lag=24)+
 
 ### decomposizione considerando tutti gli anni ----
 # decomposizione giornaliera 
-vendite1_day.fit<-stl(vendite1_day,s.window="periodic")
-trend.vendite1_day<-vendite1_day.fit$time.series[,2]
-stag.vendite1_day<-vendite1_day.fit$time.series[,1]
-res.vendite1_day<-vendite1_day.fit$time.series[,3]
-print(autoplot(vendite1_day.fit))
-
-# vendite1_day %>% stl(s.window="periodic") %>% autoplot() + xlab("Time")
-# vendite1_day %>% mstl() %>% autoplot() + xlab("Time")
+multi_vendite1 <- msts(ristorante1$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
+multi_vendite1_dec <- mstl(multi_vendite1, s.window = "periodic")
+autoplot(multi_vendite1_dec)
 
 # decomposizione settimanale
 vendite1_sett.fit<-stl(vendite1_sett_avg,s.window="periodic")
@@ -834,11 +829,9 @@ plot(components.ts)
 
 ### decomposizione pre covid ----
 # decomposizione giornaliera 
-vendite1_day_pre.fit<-stl(vendite1_day_pre,s.window="periodic")
-trend.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,2]
-stag.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,1]
-res.vendite1_day_pre<-vendite1_day_pre.fit$time.series[,3]
-print(autoplot(vendite1_day_pre.fit))
+multi_vendite <- msts(ristorante1_pre_covid_vendite$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
+multi_vendite_dec <- mstl(multi_vendite, s.window = "periodic")
+autoplot(multi_vendite_dec)
 
 # decomposizione settimanale
 vendite1_sett.fit_pre<-stl(vendite1_sett_avg_pre,s.window="periodic")
