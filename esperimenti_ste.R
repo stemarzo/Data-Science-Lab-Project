@@ -1,4 +1,15 @@
 #### CESTINO ---------------------------------------------------------------------------
+
+##INSERIMENTO ristorazione
+new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
+new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
+                                     as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
+
+for (i in 1:nrow(ristorazione)) {
+  ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
+}
+
+View(ristorazione)
 ristorante1$tipo_giorno <- as.factor(ristorazione$tipo_giorno)
 ristorante1$weekday <- as.factor(ristorazione$weekday)
 ristorante1$holiday <- ristorazione$holiday
@@ -302,6 +313,8 @@ summary(MR1)
 pvalue = 2*pt(-350.8245/280.9505,115)
 
 
+summary(lm(train_auto ~ train_top))
+
 ristorante1$pioggia <- ristorazione$pioggia
 
 ristorante1_pre_covid_pioggia <- ristorante1 %>%
@@ -363,6 +376,25 @@ summary(MR4)
 
 pvalue = 2*pt(-740.1464/60.7140,115)
 
+MR4 %>%
+  forecast(h=50, xreg= test_neve) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(test_auto)
+
+
+forecast <- MR4 %>%
+  forecast(h=10, xreg= test_chiuso) 
+
+# alternativa per vedere previsioni con test set
+par(mfrow=c(1,1))
+plot(forecast)
+lines(test_auto, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
+
+# valutazione qualità previsioni
+accuracy(forecast, test_auto[1:10])
+
+
+
 ristorante1$fuori <- ristorazione$meteo_aperto
 
 ristorante1_pre_covid_fuori <- ristorante1 %>%
@@ -408,20 +440,82 @@ pvalue = 2*pt(-825.0664/115.4211,115)
 pvalue
 
 
-MR6 %>%
-  forecast(h=50, xreg= test_neve) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto)
+M2 %>%
+  forecast(h=106) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(vendite1_sett_avg)
 
 
-forecast <- MR6 %>%
-  forecast(h=10, xreg= test_neve) 
+forecast <- M2 %>%
+  forecast(h=107) 
 
 # alternativa per vedere previsioni con test set
 par(mfrow=c(1,1))
 plot(forecast)
-lines(test_auto, col="red")
+lines(vendite1_sett_avg, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
 accuracy(forecast, test_auto[1:10])
+
+library(DataCombine)
+ristorante1<- slide(ristorante1, Var = 'vendite', NewVar = 'vendite_slide',slideBy = -366)
+
+ristorante1_pre_covid_vendite_slide <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(vendite_slide, data)
+
+
+vendite_slide_sett_avg_pre <- aggregate(vendite_slide ~ week_pre_covid, ristorante1_pre_covid_vendite_slide, mean)
+vendite_slide_sett_avg_pre <- vendite_slide_sett_avg_pre$vendite_slide
+vendite_slide_sett_avg_pre <- ts(vendite_slide_sett_avg_pre,start=2017,frequency=52) 
+
+vendite_split <- ts_split(vendite_slide_sett_avg_pre)
+train_vendite <- vendite_split$train
+test_vendite <- vendite_split$test
+
+
+
+
+MR7 <- auto.arima(train_auto, D=1, xreg = train_vendite)
+summary(MR7)
+
+pvalue = 2*pt(-825.0664/115.4211,115)
+pvalue
+
+
+
+
+
+vacanze_pre <- df %>%
+  filter(df$Date < reference_date) %>%
+  select(holiday, Date)
+
+View(ristorazione)
+vacanze_pre_agg <- aggregate(holiday ~ week_pre_covid, vacanze_pre, sum)
+vacanze_pre_agg <- vacanze_pre_agg$holiday
+vacanze_pre_agg <- ts(vacanze_pre_agg,start=2017,frequency=52) 
+
+vacanze_split <- ts_split(vacanze_pre_agg)
+train_vacanze <- vacanze_split$train
+test_vendite <- vacanze_split$test
+
+
+
+
+MR7 <- auto.arima(train_auto, D=1, xreg = train_vacanze)
+summary(MR7)
+
+pvalue = 2*pt(-181.2487/263.5413, 115)
+pvalue
+
+
+###DECOMPOSIZIONE ESTATE ----------------------------------------------------
+estate_2020 <- ts(ristorante1_estate_2020$vendite, start=c(2020,06,21), frequency = 7)
+multi_vendite1_dec <- stl(estate_2020, s.window = "periodic")
+autoplot(multi_vendite1_dec)
+
+
+estate_2019 <- ts(ristorante1_estate_2019$vendite, start=c(2019,06,21), frequency = 7)
+multi_vendite1_dec <- stl(estate_2019, s.window = "periodic")
+autoplot(multi_vendite1_dec)
 

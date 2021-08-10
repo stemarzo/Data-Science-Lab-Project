@@ -339,6 +339,12 @@ names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi L
 
 ristorazione <- cbind(ristorazione, other_dates)
 
+#AGGIUNTA DATASET NEVE
+meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+meteo <- meteo[, -c(1)]
+meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
+ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
+
 
 
 
@@ -1077,6 +1083,32 @@ M2 %>%
 
 
 
+ristorante1$neve <- as.numeric(ristorazione$neve)
+ristorante1_pre_covid_neve <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(neve, data)
+
+neve_sett_avg_pre <- aggregate(neve ~ week_pre_covid, ristorante1_pre_covid_neve, sum)
+neve1_sett_avg_pre <- neve_sett_avg_pre$neve
+neve1_sett_avg_pre <- ts(neve1_sett_avg_pre,start=2017,frequency=52) 
+
+neve_split <- ts_split(neve1_sett_avg_pre)
+train_neve <- neve_split$train
+test_neve <- neve_split$test
+
+MR1 <- auto.arima(train_auto, D=1, xreg = train_neve)
+summary(MR1)
+
+pvalue = 2*pt(-825.0664/115.4211,115)
+pvalue
+
+MR1 %>%
+  forecast(h=30, xreg = test_neve) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(test_auto)
+
+
+
+
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST -------------------------------------------
 
 # CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
@@ -1113,6 +1145,21 @@ p <- ggplot(data=ristoranti_unione_2019_2020, mapping=aes(x=MonthDay, y=vendite,
 p <- p + facet_grid(facets = Year ~ ., margins = FALSE) + theme_bw()
 p + scale_y_continuous() + scale_x_discrete(labels=labels) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8))
+
+
+## DECOMPOSIZIONE ESTATE 
+estate_2020 <- ts(ristorante1_estate_2020$vendite, start=c(2020,06,21), frequency = 7)
+multi_vendite1_dec <- stl(estate_2020, s.window = "periodic")
+autoplot(multi_vendite1_dec)
+
+
+estate_2019 <- ts(ristorante1_estate_2019$vendite, start=c(2019,06,21), frequency = 7)
+multi_vendite1_dec <- stl(estate_2019, s.window = "periodic")
+autoplot(multi_vendite1_dec)
+
+
+
+
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
 # alla domanda di ricerca: ovvero nel 2020 c'era pochissime restrizioni, quasi 
