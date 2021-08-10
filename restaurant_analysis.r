@@ -86,13 +86,23 @@ ristorazione$mese <- month(ristorazione$data)
 # colonna giorni festivi e feriali
 ristorazione <- ristorazione %>%
   mutate(weekday = wday(data, week_start = getOption("lubridate.week.start", 1))) %>%
-  mutate(holiday = isHoliday("Italy", data)) %>%  # aggiungiere eventuali feste
   mutate(tipo_giorno = case_when(
     (weekday %in% c(6,7)) ~ "weekend"
     , (weekday < 7) ~ "weekday"
     , TRUE ~ "other"
   )
   )
+
+##INSERIMENTO ristorazione
+
+#lista vacanze italiane
+new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
+new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
+                                     as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
+
+for (i in 1:nrow(ristorazione)) {
+  ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
+}
 
 # conversione true/false -> 1/0
 ristorazione$holiday <- as.integer(ristorazione$holiday)
@@ -1128,6 +1138,5 @@ p + scale_y_continuous() + scale_x_discrete(labels=labels) +
 # Perform an F test ala G. Chow to test the hypothesis of a common set of parameters. AUTOBOX , 
 # a program that I am involved with allows this test to be performed. SPSS may not.
 
-# CLUSTERING RISTORANTI ---------------------------------------------------
 
 
