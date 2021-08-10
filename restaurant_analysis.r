@@ -810,6 +810,9 @@ stag.vendite1_day<-vendite1_day.fit$time.series[,1]
 res.vendite1_day<-vendite1_day.fit$time.series[,3]
 print(autoplot(vendite1_day.fit))
 
+# vendite1_day %>% stl(s.window="periodic") %>% autoplot() + xlab("Time")
+# vendite1_day %>% mstl() %>% autoplot() + xlab("Time")
+
 # decomposizione settimanale
 vendite1_sett.fit<-stl(vendite1_sett_avg,s.window="periodic")
 trend.vendite1_sett<-vendite1_sett.fit$time.series[,2]
