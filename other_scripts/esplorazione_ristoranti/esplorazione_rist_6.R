@@ -1,0 +1,1 @@
+# eliminare primi NA
