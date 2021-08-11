@@ -93,17 +93,14 @@ ristorazione <- ristorazione %>%
   )
   )
 
-##INSERIMENTO ristorazione
-
-#lista vacanze italiane
+# colonna holiday
+# lista vacanze italiane
 new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
 new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
                                      as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
-
 for (i in 1:nrow(ristorazione)) {
   ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
 }
-
 # conversione true/false -> 1/0
 ristorazione$holiday <- as.integer(ristorazione$holiday)
 
@@ -216,7 +213,7 @@ names(vaccini_emilia_romagna)[1] <- "data"
 vaccini_emilia_romagna$area <- NULL
 
 
-# integro con il file ristorazione (ci saranno righe duplicate perchè bisogna ancora scegliere tra Lombardia e Emilia Romagna cosa tenere in colori regioni)
+# integro con il file ristorazione
 ristorazione <- merge(x = ristorazione, y = vaccini_lombardia, by = "data", all.x = TRUE)
 ristorazione <- merge(x = ristorazione, y = vaccini_emilia_romagna, by = "data", all.x = TRUE)
 
@@ -339,7 +336,7 @@ names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi L
 
 ristorazione <- cbind(ristorazione, other_dates)
 
-#AGGIUNTA DATASET NEVE
+# aggiunta colonna neve
 meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 meteo <- meteo[, -c(1)]
 meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
@@ -774,7 +771,7 @@ MR1 %>%
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST PRIMO RISTORANTE -------------------------------------------
 
-# CONFRONTO ESTATE COVID & ESTATE NO COVID --------------------------------
+# CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
 
 # seleziono un periodo temporale che corrisponde all'estate
 # ricavo due serie storiche, per 2019 e 2020
@@ -786,43 +783,25 @@ inizio_estate_2020 <- as.Date("2020-06-21", format = "%Y-%m-%d")
 fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
 
 
-ristorante1_estate_2019 <- subset(ristorante1, data >= inizio_estate_2019 & data <= fine_estate_2019)
-ristorante1_estate_2019 <- ristorante1_estate_2019[,-2]
+# confronto estati ristorante 1
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
 
-ristorante1_estate_2020 <- subset(ristorante1, data >= inizio_estate_2020 & data <= fine_estate_2020)
- ristorante1_estate_2020 <- ristorante1_estate_2020[,-2]
+# confronto estati ristorante 2
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
 
-ristoranti_unione_2019_2020 <- rbind(ristorante1_estate_2019, ristorante1_estate_2020)
+# confronto estati ristorante 3
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
 
-ristoranti_unione_2019_2020$Year <- format(ristoranti_unione_2019_2020$data, "%Y")
-ristoranti_unione_2019_2020$Month <- format(ristoranti_unione_2019_2020$data, "%b")
-ristoranti_unione_2019_2020$Day <- format(ristoranti_unione_2019_2020$data, "%d")
+# confronto estati ristorante 4
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
 
-ristoranti_unione_2019_2020$MonthDay <- format(ristoranti_unione_2019_2020$data, "%d-%b")
-ristoranti_unione_2019_2020$MonthDay2 <- ristoranti_unione_2019_2020$MonthDay
+# confronto estati ristorante 5
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
 
-ristoranti_unione_2019_2020$MonthDay2[as.numeric(row.names(ristoranti_unione_2019_2020))%%3!=0] <- ""
-labels <- ristoranti_unione_2019_2020$MonthDay2
+# confronto estati ristorante 6
+source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
 
-p <- ggplot(data=ristoranti_unione_2019_2020, mapping=aes(x=MonthDay, y=vendite, shape=Year, color=Year)) + geom_point() +geom_line(aes(group = 1))
-p <- p + facet_grid(facets = Year ~ ., margins = FALSE) + theme_bw()
-p + scale_y_continuous() + scale_x_discrete(labels=labels) + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8))
-
-
-## DECOMPOSIZIONE ESTATE 
-estate_2020 <- ts(ristorante1_estate_2020$vendite, start=c(2020,06,21), frequency = 7)
-multi_vendite1_dec <- stl(estate_2020, s.window = "periodic")
-autoplot(multi_vendite1_dec)
-
-
-estate_2019 <- ts(ristorante1_estate_2019$vendite, start=c(2019,06,21), frequency = 7)
-multi_vendite1_dec <- stl(estate_2019, s.window = "periodic")
-autoplot(multi_vendite1_dec)
-
-
-
-
+## alcuni spunti ----
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
 # alla domanda di ricerca: ovvero nel 2020 c'era pochissime restrizioni, quasi 
@@ -847,6 +826,3 @@ autoplot(multi_vendite1_dec)
 # of the scond series and doesn't forecast it from the latter values of the first series. 
 # Perform an F test ala G. Chow to test the hypothesis of a common set of parameters. AUTOBOX , 
 # a program that I am involved with allows this test to be performed. SPSS may not.
-
-
-
