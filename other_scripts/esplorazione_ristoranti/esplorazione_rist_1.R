@@ -341,9 +341,9 @@ plot(components.ts)
 
 ### decomposizione pre covid ----
 # decomposizione giornaliera 
-multi_vendite <- msts(ristorante1_pre_covid_vendite$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
-multi_vendite_dec <- mstl(multi_vendite, s.window = "periodic")
-autoplot(multi_vendite_dec + ggtitle("Ristorante 1: Decomposizione giornaliera pre covid"))
+multi_vendite1_pre <- msts(ristorante1_pre_covid_vendite$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
+multi_vendite_dec1_pre <- mstl(multi_vendite1_pre, s.window = "periodic")
+print(autoplot(multi_vendite_dec1_pre) + ggtitle("Ristorante 1: Decomposizione giornaliera pre covid"))
 
 # decomposizione settimanale
 vendite1_sett.fit_pre<-stl(vendite1_sett_avg_pre,s.window="periodic")

@@ -554,22 +554,22 @@ ggplot(ristorante6, aes(data, vendite)) +
 ## esplorazioni dettagliate dei ristoranti ----
 
 # esplorazione ristorante 1
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
 
 # esplorazione ristorante 2
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
 
 # esplorazione ristorante 3
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
 
 # esplorazione ristorante 4
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
 
 # esplorazione ristorante 5
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
 
 # esplorazione ristorante 6
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
 
@@ -784,19 +784,19 @@ fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
 
 
 # confronto estati ristorante 1
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
 
 # confronto estati ristorante 2
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
 
 # confronto estati ristorante 3
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
 
 # confronto estati ristorante 4
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
 
 # confronto estati ristorante 5
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
 
 # confronto estati ristorante 6
-source("~/Desktop/Progetto ds lab/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
