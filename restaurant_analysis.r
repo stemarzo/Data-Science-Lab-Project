@@ -605,17 +605,14 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
 # rimozione stagionalità
-
 vendite1_sett_avg_pre_dest <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
-autoplot(vendite1_sett_avg_pre_dest)+autolayer(vendite1_sett_avg_pre)
+autoplot(vendite1_sett_avg_pre_dest) + autolayer(vendite1_sett_avg_pre)
 
-# controllo se bisonga differenziare
-
+# verifica se necessario differenziare
 ndiffs(vendite1_sett_avg_pre_dest)
 nsdiffs(vendite1_sett_avg_pre_dest)
 
 # rimozione trend con differenziazione
-
 vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
 autoplot(vendite1_sett_avg_pre_dest_diff)
 
@@ -628,7 +625,6 @@ nsdiffs(vendite1_sett_avg_pre_dest_diff)
 
 # una volta ottenuta la serie storica stazionaria si procede con la creazione
 # di train e test
-
 vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
 
 # divisione in train e test
@@ -641,48 +637,40 @@ autoplot(vendite1_sett_avg_pre_dest_diff) +
   autolayer(train, series="Training") +
   autolayer(test, series="Test")
 
-# scelta di parametri p e q con acf e pacf
-acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # q = 2
-pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # p = 2
+# # scelta di parametri p e q con acf e pacf
+# acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # q = 2
+# pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # p = 2
+# grid.arrange(acf, pacf, ncol=2)
+# 
+# # creazione modello arima
+# M1<-Arima(train, order = c(2,0,2))
+# summary(M1) 
+# checkresiduals(M1)
+# 
+# # autoplot(forecast(M1, h=50))+autolayer(test)
+
+# si analizzano acf e pacf del train, per la scelta dei parametri p e q
+acf <- ggAcf(train, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(train, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-# creazione modello arima
-M1<-Arima(train, order = c(2,0,2))
-summary(M1) 
-checkresiduals(M1)
+# si inzia provando con un ar 2, osservando che nel pacf due lag sono 
+# significativamente correlati
+M2 <- Arima(train, order = c(2,0,0))
 
-# autoplot(forecast(M1, h=50))+autolayer(test)
-
-
-### Nuovo Arima manuale----
-
-#guardo acf e pacf del train
-
-acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+# si analizzano pacf e acf dei residui 
+acf <- ggAcf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-#provo ad iniziare con un ar 2, vedendo che nel pacf due lag sono significativamente
-#correlati
-
-M4 <- Arima(train, order = c(2,0,0))
-
-#guardo pacf e acf dei residui, in modo tale da capire dove  è e poi
-#catturare l'informazione che abbiamo lasciato 
-acf<-ggAcf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
+# si osserva che il lag 52 è molto correlato nell'acf
+M2 <- Arima(train, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
+summary(M2)
+acf <- ggAcf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
-
-#vedo che il lag 52 è molto correlato nell'acf
-M4<-Arima(train, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52))# il mio amico in seasonal aveva messo (1,0,0)
-#ma dal grafico mi sebra più sbarellato il 52 lag nell'acf quindi bho, alla fine penso che non esistea uno perfetto, basta
-#che si catturi l'info.
-summary(M4)
-acf<-ggAcf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-pacf<-ggPacf(M4$residuals, lag.max = 52)+ggtitle("Vendite1 day pre diff")
-grid.arrange(acf, pacf, ncol=2)
-checkresiduals(M4)
-autoplot(forecast(M4, h=50))+autolayer(test)
+checkresiduals(M2)
+autoplot(forecast(M2, h=50)) + autolayer(test)
 
 
 ### Auto Arima----
@@ -699,33 +687,33 @@ autoplot(vendite1_sett_avg_pre) +
 
 # auto.arima per selezione modello migliore
 arima_diag(train_auto)
-M2 <- auto.arima(train_auto, seasonal = T)
+M3 <- auto.arima(train_auto, seasonal = T)
 
 # AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
 
-accuracy(M2)
+accuracy(M3)
 # MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
 # MASE = 0.4430427, < 1, buon risultato
 
-summary(M2)
+summary(M3)
 
-# we want to check that there are no correlations between forecast errors
-check_res(M2)
-M2$residuals
+# si vuole verificare che non ci sia correlazione tra gli errori 
+check_res(M3)
+M3$residuals
 
 # A Ljung-Box test can also indicate the presence of these correlations. 
 # As long as we score a p-value > 0.05, there is a 95% chance the residuals are independent
-acf(M2$residuals, lag.max=20, na.action=na.pass)
-Box.test(M2$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
-hist(M2$residuals)
+acf(M3$residuals, lag.max=20, na.action=na.pass)
+Box.test(M3$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
+hist(M3$residuals)
 
 
 # previsioni con test set
-M2 %>%
+M3 %>%
   forecast(h=50) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(test_auto)
 
-forecast <- M2 %>%
+forecast <- M3 %>%
   forecast(h=30)
 
 # alternativa per vedere previsioni con test set
@@ -737,12 +725,12 @@ legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 # valutazione qualità previsioni
 accuracy(forecast, test)
 
-M2 %>%
+M3 %>%
   forecast(h=106) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(vendite1_sett_avg)
 
 
-
+### Auto Arima con regressore----
 ristorante1$neve <- as.numeric(ristorazione$neve)
 ristorante1_pre_covid_neve <- ristorante1 %>%
   filter(ristorante1$data < reference_date) %>%
