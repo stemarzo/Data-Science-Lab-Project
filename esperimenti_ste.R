@@ -440,13 +440,18 @@ pvalue = 2*pt(-825.0664/115.4211,115)
 pvalue
 
 
-M2 %>%
-  forecast(h=106) %>%  # h Number of periods for forecasting
+MR6 %>%
+  forecast(h=10, xreg=test_neve) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(vendite1_sett_avg)
 
 
-forecast <- M2 %>%
-  forecast(h=107) 
+forecast <- MR6 %>%
+  forecast(h=10, xreg=test_neve) 
+
+
+
+
+accuracy(forecast, test_auto[1:10])
 
 # alternativa per vedere previsioni con test set
 par(mfrow=c(1,1))
@@ -456,23 +461,6 @@ legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
 accuracy(forecast, test_auto[1:10])
-
-library(DataCombine)
-ristorante1<- slide(ristorante1, Var = 'vendite', NewVar = 'vendite_slide',slideBy = -366)
-
-ristorante1_pre_covid_vendite_slide <- ristorante1 %>%
-  filter(ristorante1$data < reference_date) %>%
-  select(vendite_slide, data)
-
-
-vendite_slide_sett_avg_pre <- aggregate(vendite_slide ~ week_pre_covid, ristorante1_pre_covid_vendite_slide, mean)
-vendite_slide_sett_avg_pre <- vendite_slide_sett_avg_pre$vendite_slide
-vendite_slide_sett_avg_pre <- ts(vendite_slide_sett_avg_pre,start=2017,frequency=52) 
-
-vendite_split <- ts_split(vendite_slide_sett_avg_pre)
-train_vendite <- vendite_split$train
-test_vendite <- vendite_split$test
-
 
 
 
@@ -486,9 +474,9 @@ pvalue
 
 
 
-vacanze_pre <- df %>%
-  filter(df$Date < reference_date) %>%
-  select(holiday, Date)
+vacanze_pre <- ristorazione %>%
+  filter(ristorazione$data < reference_date) %>%
+  select(holiday, data)
 
 View(ristorazione)
 vacanze_pre_agg <- aggregate(holiday ~ week_pre_covid, vacanze_pre, sum)
@@ -497,25 +485,182 @@ vacanze_pre_agg <- ts(vacanze_pre_agg,start=2017,frequency=52)
 
 vacanze_split <- ts_split(vacanze_pre_agg)
 train_vacanze <- vacanze_split$train
-test_vendite <- vacanze_split$test
+test_vacanze <- vacanze_split$test
 
 
+df= data.frame(train_vacanze, train_neve)
 
-
-MR7 <- auto.arima(train_auto, D=1, xreg = train_vacanze)
+MR7 <- auto.arima(train_auto, seasonal = TRUE, xreg =data.matrix(df[, c("train_vacanze","train_neve" )]))
 summary(MR7)
 
-pvalue = 2*pt(-181.2487/263.5413, 115)
+pvalue = 2*pt(-185.3499/199.1393, 114)
+pvalue
+
+pvalue = 2*pt( -824.4265/114.2885, 114)
+pvalue
+
+df= data.frame(test_vacanze, test_neve)
+
+forecast <- MR7 %>%
+  forecast(h=10,  xreg =data.matrix(df[, c("test_vacanze","test_neve" )])) 
+
+
+
+
+accuracy(forecast, test_auto[1:10])
+
+
+
+ristorazione[, "Black Friday e saldi  Emilia-Romagna"] <- 0
+ristorazione[5:64, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[182:242, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[328, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[370:428, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[549:609, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[692, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[735:794, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[917:972, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1063, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1100:1160, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1309:1369, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1427, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1491:1550, "Black Friday e saldi  Emilia-Romagna"] <- 1
+
+
+
+
+
+
+
+
+ristorante1$saldi <- ristorazione$`Black Friday e saldi  Emilia-Romagna`
+
+r1_saldi_pre <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(saldi, data)
+
+r1_saldi_pre_avg <- aggregate(saldi ~ week_pre_covid, r1_saldi_pre, mean)
+r1_saldi_pre_avg <- r1_saldi_pre_avg$saldi
+r1_saldi_pre_avg <- ts(r1_saldi_pre_avg,start=2017,frequency=52) 
+
+saldi_split <- ts_split(r1_saldi_pre_avg)
+train_saldi <- saldi_split$train
+test_saldi <- saldi_split$test
+
+
+#regr <- data.frame(train_top, train_pioggia)
+
+MR2 <- auto.arima(train_auto, seasonal = T, xreg = train_saldi)
+summary(MR2)
+
+valori <- MR2$coef["xreg"]/sqrt(diag(MR2$var.coef))
+
+
+pvalue = 2*pt(valori["xreg"] ,115)
 pvalue
 
 
-###DECOMPOSIZIONE ESTATE ----------------------------------------------------
-estate_2020 <- ts(ristorante1_estate_2020$vendite, start=c(2020,06,21), frequency = 7)
-multi_vendite1_dec <- stl(estate_2020, s.window = "periodic")
-autoplot(multi_vendite1_dec)
+forecast <- MR2 %>%
+  forecast(h=20, xreg=test_saldi) 
+
+accuracy(forecast, test_auto[1:20])
+
+forecast <- M3 %>%
+  forecast(h=20) 
+
+accuracy(forecast, test_auto[1:20])
+checkresiduals(MR2)
 
 
-estate_2019 <- ts(ristorante1_estate_2019$vendite, start=c(2019,06,21), frequency = 7)
-multi_vendite1_dec <- stl(estate_2019, s.window = "periodic")
-autoplot(multi_vendite1_dec)
+summary(M3)
 
+
+
+
+
+summary(lm(train_auto ~ train_top))
+
+
+
+
+ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
+ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
+ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancionene"
+ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
+
+
+### LAVORO FATTO GIOVEDI----------------------------------------------------------
+
+ristorazione$rossa <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
+ristorazione$bianca <- ifelse(ristorazione$colore_emilia_romagna == "bianco", 1, 0)
+ristorazione$gialla <- ifelse(ristorazione$colore_emilia_romagna == "giallo", 1, 0)
+ristorazione$arancione <- ifelse(ristorazione$colore_emilia_romagna == "arancionene", 1, 0)
+
+ristorante1$rossa <- ristorazione$rossa
+ristorante1$bianca <- ristorazione$bianca
+ristorante1$gialla <- ristorazione$gialla
+ristorante1$arancione <- ristorazione$arancione
+
+
+
+giorni_rossa <- aggregate(rossa ~ week, ristorante1, sum)
+giorni_rossa <- giorni_rossa$rossa
+giorni_rossa <- ts(giorni_rossa,start=2017,frequency=52) 
+
+
+giorni_arancione <- aggregate(arancione ~ week, ristorante1, sum)
+giorni_arancione <- giorni_arancione$arancione
+giorni_arancione <- ts(giorni_arancione,start=2017,frequency=52) 
+
+giorni_gialla <- aggregate(gialla ~ week, ristorante1, sum)
+giorni_gialla <- giorni_gialla$gialla
+giorni_gialla <- ts(giorni_gialla,start=2017,frequency=52) 
+
+giorni_bianca <- aggregate(bianca ~ week, ristorante1, sum)
+giorni_bianca <- giorni_bianca$bianca
+giorni_bianca <- ts(giorni_bianca,start=2017,frequency=52) 
+
+df <- data.frame(giorni_arancione, giorni_bianca, giorni_gialla, giorni_rossa)
+
+
+MT1 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = data.matrix(df[, c("giorni_rossa", "giorni_arancione" )]))
+summary(MT1)
+checkresiduals(MT1)
+tsdisplay(residuals(MT1), lag.max=52, main='Seasonal Model Residuals')
+
+valori <- MT1$coef["giorni_arancione"]/sqrt(diag(MT1$var.coef))
+
+
+pvalue = 2*pt(valori["giorni_arancione"] ,221)
+pvalue
+
+summary(lm(vendite1_sett_avg~ giorni_arancione+ giorni_rossa))
+
+
+
+autoplot(MT1$fitted) + autolayer(vendite1_sett_avg)
+
+ 
+for (i in 1:nrow(df)) {
+  df[i,"colore"] <- which.max(c(df[i,"giorni_arancione"],df[i,"giorni_bianca"],df[i,"giorni_gialla"],df[i,"giorni_rossa"]))
+}
+
+MT2 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = data.matrix(df[, "colore"]))
+summary(MT2)
+checkresiduals(MT2)
+tsdisplay(residuals(MT2), lag.max=52, main='Seasonal Model Residuals')
+
+df$rosso <- ifelse(df$colore == 4, 1, 0)
+df$arancione <- ifelse(df$colore == 1, 1, 0)
+df$bianco <- ifelse(df$colore == 2, 1, 0)
+df$giallo <- ifelse(df$colore == 3, 1, 0)
+
+MT2 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = data.matrix(df[, c("rosso", "giallo", "bianco")]))
+summary(MT2)
+checkresiduals(MT2)
+tsdisplay(residuals(MT2), lag.max=52, main='Seasonal Model Residuals')
+
+autoplot(MT2$fitted) + autolayer(vendite1_sett_avg)
+
+
+autoplot(M3$fitted) + autolayer(train_auto)

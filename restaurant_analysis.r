@@ -336,13 +336,36 @@ names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi L
 
 ristorazione <- cbind(ristorazione, other_dates)
 
+# correzione colonna saldi e black friday
+
+ristorazione[, "Black Friday e saldi  Emilia-Romagna"] <- 0
+ristorazione[5:64, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[182:242, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[328, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[370:428, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[549:609, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[692, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[735:794, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[917:972, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1063, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1100:1160, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1309:1369, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1427, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione[1491:1550, "Black Friday e saldi  Emilia-Romagna"] <- 1
+
+
+
 # aggiunta colonna neve
 meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 meteo <- meteo[, -c(1)]
 meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
 ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
-
+# aggiunta valori zone in presenza di NA, in base alle fasi 1, 2, 3
+ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
+ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
+ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancionene"
+ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
 
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
@@ -555,7 +578,7 @@ ggplot(ristorante6, aes(data, vendite)) +
 
 # esplorazione ristorante 1
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
-
+source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
 # esplorazione ristorante 2
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
 
@@ -702,6 +725,7 @@ autoplot(vendite1_sett_avg_pre) +
 # auto.arima per selezione modello migliore
 arima_diag(train_auto)
 M3 <- auto.arima(train_auto, seasonal = T)
+
 
 # per valutare la qualità del modello si possono inizialmente plottare i grafici
 # ACF e PACF dei residui del modello
