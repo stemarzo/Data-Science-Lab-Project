@@ -617,11 +617,22 @@ vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
 autoplot(vendite1_sett_avg_pre_dest_diff)
 
 # verifica stazionarietà
+
 adf.test(vendite1_sett_avg_pre_dest_diff, alternative = "stationary")  
+# The null-hypothesis for an ADF test is that the data are non-stationary. 
+# So p-value greater than 0.05 indicates non-stationarity, and  p-values less than 
+# 0.05 suggest stationarity.
+# risulta essere stazionaria
+
+kpss.test(vendite1_sett_avg_pre_dest_diff)
+# In this case, the null-hypothesis is that the data are stationary. In this case, 
+# p-value less than 0.05 indicates non-stationary series and p-value greater than 
+# 0.05 indicates stationary series.
+# risulta essere stazionaria
+
 summary(ur.kpss(vendite1_sett_avg_pre_dest_diff ))
 ndiffs(vendite1_sett_avg_pre_dest_diff)
 nsdiffs(vendite1_sett_avg_pre_dest_diff)
-
 
 # una volta ottenuta la serie storica stazionaria si procede con la creazione
 # di train e test
@@ -669,8 +680,11 @@ summary(M2)
 acf <- ggAcf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 pacf <- ggPacf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
-checkresiduals(M2)
+checkresiduals(M2)  # tutte le autocorrelazioni si trovano all'interno della banda, questo significa che i residui si comportano come un white noise
 autoplot(forecast(M2, h=50)) + autolayer(test)
+
+# si potrebbe procedere selezionando altri modelli variando i parametri p e q,
+# optando per il modello il cui valore di AIC è minore
 
 
 ### Auto Arima----
@@ -689,6 +703,10 @@ autoplot(vendite1_sett_avg_pre) +
 arima_diag(train_auto)
 M3 <- auto.arima(train_auto, seasonal = T)
 
+# per valutare la qualità del modello si possono inizialmente plottare i grafici
+# ACF e PACF dei residui del modello
+tsdisplay(residuals(M3), lag.max=15, main='Seasonal Model Residuals')
+
 # AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
 
 accuracy(M3)
@@ -697,7 +715,8 @@ accuracy(M3)
 
 summary(M3)
 
-# si vuole verificare che non ci sia correlazione tra gli errori 
+# si vuole verificare che non ci sia correlazione tra gli errori
+checkresiduals(M3)
 check_res(M3)
 M3$residuals
 
