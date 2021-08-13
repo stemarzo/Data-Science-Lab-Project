@@ -106,7 +106,7 @@ ristorazione$holiday <- as.integer(ristorazione$holiday)
 
 
 # colore zona in base alla data
-colori_zone <- read_csv("colori_zone.csv")
+colori_zone <- read_csv("colori_zone.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
 # colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
 
 # selezione regioni
