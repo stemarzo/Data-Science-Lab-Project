@@ -205,9 +205,8 @@ df_previsioni <- rbind(df7, df7_new)
 # eventualmente modificare a mano settimane che sono a cavallo e che quindi vengono tagliate di qualche giorno
 df= data.frame(test_vacanze, test_neve)
 
-# previsione vendite settimanali su dati nuovi
+# previsione vendite settimanali su dati nuovi - DA RIVEDERE
 forecast <- MT7 %>%
   forecast(h=3,  xreg =data.matrix(df_previsioni[, c("chiuso_sum","rossa_sum", "covid_bin")])) 
 
 autoplot(forecast)
-

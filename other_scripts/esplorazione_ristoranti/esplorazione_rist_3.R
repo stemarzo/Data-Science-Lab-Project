@@ -233,32 +233,32 @@ print(
 )
 
 ### seasonal sub series plot
-print(
-  ggsubseriesplot(vendite3_mens_avg) +
-    ylab("$ million") +
-    ggtitle("Seasonal subseries plot Ristorante 3: vendite medie mensili")
-)
+# print(
+#   ggsubseriesplot(vendite3_mens_avg) +
+#     ylab("$ million") +
+#     ggtitle("Seasonal subseries plot Ristorante 3: vendite medie mensili")
+# )
 
 
 ### analisi stagionalità considerando il periodo pre covid ----
-print(
-  ggseasonplot(vendite3_sett_pre, year.labels=TRUE, year.labels.left=TRUE) +
-    ylab("euro") +
-    ggtitle("Seasonal plot Ristorante 3: vendite settimanale pre covid")
-)
+# print(
+#   ggseasonplot(vendite3_sett_pre, year.labels=TRUE, year.labels.left=TRUE) +
+#     ylab("euro") +
+#     ggtitle("Seasonal plot Ristorante 3: vendite settimanale pre covid")
+# )
 
-print(
-  ggseasonplot(vendite3_mens_pre, year.labels=TRUE, year.labels.left=TRUE) +
-    ylab("euro") +
-    ggtitle("Seasonal plot Ristorante 3: vendite mensili pre covid")
-)
+# print(
+#   ggseasonplot(vendite3_mens_pre, year.labels=TRUE, year.labels.left=TRUE) +
+#     ylab("euro") +
+#     ggtitle("Seasonal plot Ristorante 3: vendite mensili pre covid")
+# )
 
 ### seasonal sub series plot
-print(
-  ggsubseriesplot(vendite3_mens_avg_pre) +
-    ylab("$ million") +
-    ggtitle("Seasonal subseries plot Ristorante 3: vendite medie mensili pre covid")
-)
+# print(
+#   ggsubseriesplot(vendite3_mens_avg_pre) +
+#     ylab("$ million") +
+#     ggtitle("Seasonal subseries plot Ristorante 3: vendite medie mensili pre covid")
+# )
 
 
 ### analisi correlazione tra vendite e scontrini ----
@@ -329,25 +329,22 @@ multi_vendite3 <- msts(ristorante1$vendite, ts.frequency = 365, start=2017, seas
 multi_vendite3_dec <- mstl(multi_vendite3, s.window = "periodic")
 print(autoplot(multi_vendite3_dec) + ggtitle("Ristorante 3: Decomposizione giornaliera"))
 
-# vendite3_day %>% stl(s.window="periodic") %>% autoplot() + xlab("Time")
-# vendite3_day %>% mstl() %>% autoplot() + xlab("Time")
-
 # decomposizione settimanale
-vendite3_sett.fit<-stl(vendite3_sett_avg,s.window="periodic")
-trend.vendite3_sett<-vendite3_sett.fit$time.series[,2]
-stag.vendite3_sett<-vendite3_sett.fit$time.series[,1]
-res.vendite3_sett<-vendite3_sett.fit$time.series[,3]
-print(autoplot(vendite3_sett.fit) + ggtitle("Ristorante 3: Decomposizione settimanale"))
+# vendite3_sett.fit<-stl(vendite3_sett_avg,s.window="periodic")
+# trend.vendite3_sett<-vendite3_sett.fit$time.series[,2]
+# stag.vendite3_sett<-vendite3_sett.fit$time.series[,1]
+# res.vendite3_sett<-vendite3_sett.fit$time.series[,3]
+# print(autoplot(vendite3_sett.fit) + ggtitle("Ristorante 3: Decomposizione settimanale"))
 
 # decomposizione mensile 
-vendite3_mens.fit<-stl(vendite3_mens_avg,s.window="periodic")
-trend.vendite3_mens<-vendite3_mens.fit$time.series[,2]
-stag.vendite3_mens<-vendite3_mens.fit$time.series[,1]
-res.vendite3_mens<-vendite3_mens.fit$time.series[,3]
-print(autoplot(vendite3_mens.fit) + ggtitle("Ristorante 3: Decomposizione mensile"))
+# vendite3_mens.fit<-stl(vendite3_mens_avg,s.window="periodic")
+# trend.vendite3_mens<-vendite3_mens.fit$time.series[,2]
+# stag.vendite3_mens<-vendite3_mens.fit$time.series[,1]
+# res.vendite3_mens<-vendite3_mens.fit$time.series[,3]
+# print(autoplot(vendite3_mens.fit) + ggtitle("Ristorante 3: Decomposizione mensile"))
 
-components.ts = decompose(vendite3_mens_avg)
-plot(components.ts)
+# components.ts_3 = decompose(vendite3_mens_avg)
+# plot(components.ts_3)
 
 
 
@@ -358,21 +355,21 @@ multi_vendite_dec3_pre <- mstl(multi_vendite3_pre, s.window = "periodic")
 print(autoplot(multi_vendite_dec3_pre) + ggtitle("Ristorante 3: Decomposizione giornaliera pre covid"))
 
 # decomposizione settimanale
-vendite3_sett.fit_pre<-stl(vendite3_sett_avg_pre,s.window="periodic")
-trend.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,2]
-stag.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,1]
-res.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,3]
-print(autoplot(vendite3_sett.fit_pre) + ggtitle("Ristorante 3: Decomposizione settimanale pre covid"))
+# vendite3_sett.fit_pre<-stl(vendite3_sett_avg_pre,s.window="periodic")
+# trend.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,2]
+# stag.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,1]
+# res.vendite3_sett_pre<-vendite3_sett.fit_pre$time.series[,3]
+# print(autoplot(vendite3_sett.fit_pre) + ggtitle("Ristorante 3: Decomposizione settimanale pre covid"))
 
 # decomposizione mensile 
-vendite3_mens.fit_pre<-stl(vendite3_mens_avg_pre,s.window="periodic")
-trend.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,2]
-stag.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,1]
-res.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,3]
-print(autoplot(vendite3_mens.fit_pre) + ggtitle("Ristorante 3: Decomposizione mensile pre covid"))
+# vendite3_mens.fit_pre<-stl(vendite3_mens_avg_pre,s.window="periodic")
+# trend.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,2]
+# stag.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,1]
+# res.vendite3_mens_pre<-vendite3_mens.fit_pre$time.series[,3]
+# print(autoplot(vendite3_mens.fit_pre) + ggtitle("Ristorante 3: Decomposizione mensile pre covid"))
 
-components.ts_pre = decompose(vendite3_mens_avg_pre)
-plot(components.ts_pre)
+components.ts_pre_3 = decompose(vendite3_mens_avg_pre)
+plot(components.ts_pre_3)
 
 
 ### decomposizione approfondita considerando tutti gli anni----

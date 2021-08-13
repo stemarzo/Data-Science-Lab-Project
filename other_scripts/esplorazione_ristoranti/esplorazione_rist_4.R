@@ -335,8 +335,8 @@ stag.vendite4_mens<-vendite4_mens.fit$time.series[,1]
 res.vendite4_mens<-vendite4_mens.fit$time.series[,3]
 print(autoplot(vendite4_mens.fit) + ggtitle("Ristorante 4: Decomposizione mensile"))
 
-components.ts = decompose(vendite4_mens_avg)
-plot(components.ts)
+components.ts_ = decompose(vendite4_mens_avg)
+plot(components.ts_)
 
 
 
@@ -360,8 +360,8 @@ stag.vendite4_mens_pre<-vendite4_mens.fit_pre$time.series[,1]
 res.vendite4_mens_pre<-vendite4_mens.fit_pre$time.series[,3]
 print(autoplot(vendite4_mens.fit_pre) + ggtitle("Ristorante 4: Decomposizione mensile pre covid"))
 
-components.ts_pre = decompose(vendite4_mens_avg_pre)
-plot(components.ts_pre)
+components.ts_pre_4 = decompose(vendite4_mens_avg_pre)
+plot(components.ts_pre_4)
 
 
 ### decomposizione approfondita considerando tutti gli anni----
