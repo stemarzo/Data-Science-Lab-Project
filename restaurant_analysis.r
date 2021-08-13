@@ -599,28 +599,27 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 
 # PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE PRIMO RISTORANTE  -------------------------------------------
 
-# # work in progress
-# vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
-# 
-# # divisione in train e test
-# train <- vendite1_sett_avg_pre_split$train
-# test <- vendite1_sett_avg_pre_split$test
-# autoplot(train)
-# autoplot(test)
-# 
-# autoplot(vendite1_sett_avg_pre_dest_diff) +
-#   autolayer(train, series="Training") +
-#   autolayer(test, series="Test")
-# 
-# M0 <- HoltWinters(train)
-# previsioni <- forecast(M0, h=50)
-# accuracy(previsioni, test)
-# 
-# par(mfrow=c(1,1))
-# plot(previsioni)
-# lines(test, col="red")
-# legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","HoltWintersPred"))
+M0 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
+plot(M0)
 
+# parametri
+M0$alpha
+M0$beta
+M0$gamma
+
+# analisi residui
+acf(residuals(M0), lag = 52)
+
+# previsione
+prev <- forecast(M0, h=10)
+autoplot(prev)
+
+# in alternativa
+prev <- predict(M0, 10, prediction.interval=TRUE)
+plot(M0, prev)
+
+
+M0$SSE
 
 
 # PREVISIONE FATTURATO NO COVID ARIMA PRIMO RISTORANTE -------------------------------------------
