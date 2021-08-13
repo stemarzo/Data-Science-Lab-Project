@@ -619,9 +619,6 @@ prev <- predict(M0, 10, prediction.interval=TRUE)
 plot(M0, prev)
 
 
-M0$SSE
-
-
 # PREVISIONE FATTURATO NO COVID ARIMA PRIMO RISTORANTE -------------------------------------------
 
 ### Arima manuale----
