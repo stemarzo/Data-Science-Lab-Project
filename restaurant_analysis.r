@@ -622,6 +622,10 @@ plot(M0, prev)
 # PREVISIONE FATTURATO NO COVID ARIMA PRIMO RISTORANTE -------------------------------------------
 
 ### Arima manuale----
+# viene utilizzato come train il periodo pre covid e come test il periodo post covid,
+# in modo tale da osservare come sarebbero andate le vendite nel periodo covid (
+# durante il quale ci sono state 0 vendite)
+
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
 # rimozione stagionalità
@@ -708,6 +712,8 @@ autoplot(forecast(M2, h=50)) + autolayer(test)
 
 
 ### Auto Arima----
+# anche in questo caso viene utilizzato come train il periodo pre covid e 
+# come test il periodo post covid
 
 vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
 
@@ -770,29 +776,8 @@ M3 %>%
   autoplot() + autolayer(vendite1_sett_avg)
 
 
-### Auto Arima con regressore----
-ristorante1$neve <- as.numeric(ristorazione$neve)
-ristorante1_pre_covid_neve <- ristorante1 %>%
-  filter(ristorante1$data < reference_date) %>%
-  select(neve, data)
+### Auto Arima con regressori----
 
-neve_sett_avg_pre <- aggregate(neve ~ week_pre_covid, ristorante1_pre_covid_neve, sum)
-neve1_sett_avg_pre <- neve_sett_avg_pre$neve
-neve1_sett_avg_pre <- ts(neve1_sett_avg_pre,start=2017,frequency=52) 
-
-neve_split <- ts_split(neve1_sett_avg_pre)
-train_neve <- neve_split$train
-test_neve <- neve_split$test
-
-MR1 <- auto.arima(train_auto, D=1, xreg = train_neve)
-summary(MR1)
-
-pvalue = 2*pt(-825.0664/115.4211,115)
-pvalue
-
-MR1 %>%
-  forecast(h=30, xreg = test_neve) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto)
 
 
 
