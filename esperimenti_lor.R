@@ -44,18 +44,20 @@ ristorante1_copy <- ristorante1
 # colonna covid 
 ristorante1_copy$covid <- 0
 ristorante1_copy[ristorante1_copy$data > "2020-03-09",]$covid <- 1
+
 # colonna covid settimanale
-week_covid <- aggregate(covid ~ week, ristorante1_copy, sum)  # per settimana
+# week_rist1 <- as.Date(cut(ristorante1_copy$data, "week"))
+week_covid <- aggregate(covid ~ week_rist1, ristorante1_copy, sum)  # per settimana
 # la colonna covid "somma" non ha molto senso
 
 # colonna chiuso: numero giorni chiusura per settimana
-week_chiuso <- aggregate(chiuso ~ week, ristorante1_copy, sum)  # per settimana
+week_chiuso <- aggregate(chiuso ~ week_rist1, ristorante1_copy, sum)  # per settimana
 
 
 # colonna zona rossa
 ristorazione$rossa <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
 ristorante1_copy$rossa <- ristorazione$rossa
-week_rossa <- aggregate(rossa ~ week, ristorante1_copy, sum)  # per settimana
+week_rossa <- aggregate(rossa ~ week_rist1, ristorante1_copy, sum)  # per settimana
 week_rossa <- week_rossa$rossa
 
 
@@ -111,7 +113,7 @@ pvalue
 
 # verifica adattamento modello
 autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
-autoplot(M3$fitted) + autolayer(train_auto)
+# autoplot(M3$fitted) + autolayer(train_auto)
 
 
 
@@ -172,11 +174,11 @@ df_dati_aggiornati$chiuso <- 0  # non ci sono date in cui i ristoranti avrebbero
 
 
 # divisione in settimane
-week_new <- as.Date(cut(df_dati_aggiornati$data, "week"))
+week_new_rist1 <- as.Date(cut(df_dati_aggiornati$data, "week"))
 
-week_rossa_new <- aggregate(rossa ~ week_new, df_dati_aggiornati, sum)  # per settimana
-week_chiuso_new <- aggregate(chiuso ~ week_new, df_dati_aggiornati, sum)  # per settimana
-covid_chiuso_new <- aggregate(covid ~ week_new, df_dati_aggiornati, sum)  # per settimana
+week_rossa_new <- aggregate(rossa ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
+week_chiuso_new <- aggregate(chiuso ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
+covid_chiuso_new <- aggregate(covid ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
 
 df7_new <- data.frame(covid_chiuso_new$covid, week_chiuso_new$chiuso, week_rossa_new$rossa)
 View(df7_new)
@@ -195,9 +197,6 @@ df7_new <- df7_new %>%
 
 # creazione df regressori per previsioni
 df_previsioni <- rbind(df7, df7_new)
-
-# eventualmente modificare a mano settimane che sono a cavallo e che quindi vengono tagliate di qualche giorno
-df= data.frame(test_vacanze, test_neve)
 
 # previsione vendite settimanali su dati nuovi - DA RIVEDERE
 forecast <- MT7 %>%
