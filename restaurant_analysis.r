@@ -123,25 +123,52 @@ names(colori_emilia_romagna)[3] <- "colore_emilia_romagna"
 colori_lombardia_emilia_romagna <- merge(x = colori_lombardia, y = colori_emilia_romagna, by = "data", all.x = TRUE)
 colori_lombardia_emilia_romagna <- colori_lombardia_emilia_romagna[,-c(2,4)]
 
-
 # faccio il join con ristorazione su data
 ristorazione<-merge(x=ristorazione,y=colori_lombardia_emilia_romagna,by="data",all.x=TRUE)
+ristorazione$colore_lombardia[is.na(ristorazione$colore_lombardia)] <- "bianco"
+ristorazione$colore_emilia_romagna[is.na(ristorazione$colore_emilia_romagna)] <- "bianco"
+# versione precedente
+# # aggiunta valori zone in presenza di NA, in base alle fasi 1, 2, 3
+# ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
+# ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
+# ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancionene"
+# ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
+
+# aggiungo colonna zona rossa lombardia
+ristorazione$rossa_lombardia <- ifelse(ristorazione$colore_lombardia == "rosso", 1, 0)
+
+# aggiungo colonna zona rossa emilia romagna
+ristorazione$rossa_emilia_romagna <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
 
 # colonna asporto (per Lombardia, bisogna decidere quale regione)
 # zona rossa: solo asporto e consegne a domicilio senza limiti
 # zona arancione: solo asporto e consegne a domicilio senza limiti
 # zona gialla: si può mangiare in presenza e consegne a domicilio senza limiti
 ristorazione <- ristorazione %>%
-  mutate(solo_asporto = case_when(
+  mutate(solo_asporto_lombardia = case_when(
     (colore_lombardia == "rosso") ~ TRUE
     ,(colore_lombardia == "arancione") ~ TRUE
     , (colore_lombardia == "giallo") ~ FALSE
     , TRUE ~ FALSE
   ) 
-  )      
+  )    
+
 
 # conversione true/false -> 1/0
-ristorazione$solo_asporto <- as.integer(ristorazione$solo_asporto)
+ristorazione$solo_asporto_lombardia <- as.integer(ristorazione$solo_asporto_lombardia)
+
+
+
+ristorazione <- ristorazione %>%
+  mutate(solo_asporto_emilia_romagna = case_when(
+    (colore_lombardia == "rosso") ~ TRUE
+    ,(colore_lombardia == "arancione") ~ TRUE
+    , (colore_lombardia == "giallo") ~ FALSE
+    , TRUE ~ FALSE
+  ) 
+  ) 
+# conversione true/false -> 1/0
+ristorazione$solo_asporto_emilia_romagna <- as.integer(ristorazione$solo_asporto_emilia_romagna)
 
 
 # inserimento delle colonne che riguardano gli eventi sportivi
@@ -354,18 +381,16 @@ ristorazione[1427, "Black Friday e saldi  Emilia-Romagna"] <- 1
 ristorazione[1491:1550, "Black Friday e saldi  Emilia-Romagna"] <- 1
 
 
-
 # aggiunta colonna neve
 meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 meteo <- meteo[, -c(1)]
 meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
 ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
-# aggiunta valori zone in presenza di NA, in base alle fasi 1, 2, 3
-ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
-ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
-ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancionene"
-ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
+# aggiunta colonna covid
+ristorazione$covid <- 0
+ristorazione[ristorazione$data > "2020-03-09",]$covid <- 1
+
 
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
@@ -386,6 +411,8 @@ ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 ristorante1$rapprto_v_s[is.na(ristorante1$rapprto_v_s)] <- 0
 ristorante1$chiuso <- 0
 ristorante1$chiuso <- ifelse(ristorante1$rapprto_v_s == 0, 1, 0)
+ristorante1$covid <- ristorazione$covid
+ristorante1$rossa <- ristorazione$rossa_emilia_romagna
 
 
 #ristorante2
@@ -397,6 +424,9 @@ ristorante2$rapprto_v_s <- ristorante2$vendite/ristorante2$scontrini
 ristorante2$rapprto_v_s[is.na(ristorante2$rapprto_v_s)] <- 0
 ristorante2$chiuso <- 0
 ristorante2$chiuso <- ifelse(ristorante2$rapprto_v_s == 0, 1, 0)
+ristorante2$covid <- ristorazione$covid
+ristorante2$rossa <- ristorazione$rossa_emilia_romagna
+
 
 #ristorante3
 ristorante3 <- data.frame(col_date, ristorazione$vendite3, ristorazione$scontrini3)
@@ -407,6 +437,9 @@ ristorante3$rapprto_v_s <- ristorante3$vendite/ristorante3$scontrini
 ristorante3$rapprto_v_s[is.na(ristorante3$rapprto_v_s)] <- 0
 ristorante3$chiuso <- 0
 ristorante3$chiuso <- ifelse(ristorante3$rapprto_v_s == 0, 1, 0)
+ristorante3$covid <- ristorazione$covid
+ristorante3$rossa <- ristorazione$rossa_emilia_romagna
+
 
 #ristorante4
 ristorante4 <- data.frame(col_date,ristorazione$vendite4, ristorazione$scontrini4)
@@ -417,6 +450,8 @@ ristorante4$rapprto_v_s <- ristorante4$vendite/ristorante4$scontrini
 ristorante4$rapprto_v_s[is.na(ristorante4$rapprto_v_s)] <- 0
 ristorante4$chiuso <- 0
 ristorante4$chiuso <- ifelse(ristorante4$rapprto_v_s == 0, 1, 0)
+ristorante4$covid <- ristorazione$covid
+ristorante4$rossa <- ristorazione$rossa_emilia_romagna
 
 #ristorante5
 ristorante5 <- data.frame(col_date, ristorazione$vendite5, ristorazione$scontrini5)
@@ -427,6 +462,9 @@ ristorante5$rapprto_v_s <- ristorante5$vendite/ristorante5$scontrini
 ristorante5$rapprto_v_s[is.na(ristorante5$rapprto_v_s)] <- 0
 ristorante5$chiuso <- 0
 ristorante5$chiuso <- ifelse(ristorante5$rapprto_v_s == 0, 1, 0)
+ristorante5$covid <- ristorazione$covid
+ristorante5$rossa <- ristorazione$rossa_emilia_romagna
+
 
 #ristorante6
 ristorante6 <- data.frame(col_date, ristorazione$vendite6, ristorazione$scontrini6)
@@ -437,6 +475,8 @@ ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 ristorante6$rapprto_v_s[is.na(ristorante6$rapprto_v_s)] <- 0
 ristorante6$chiuso <- 0
 ristorante6$chiuso <- ifelse(ristorante6$rapprto_v_s == 0, 1, 0)
+ristorante6$covid <- ristorazione$covid
+ristorante6$rossa <- ristorazione$rossa_emilia_romagna
 
 # rimuovo le variabili che mi sono servite nella fase sopra
 rm(list = c('col_date','col_nomi'))
@@ -777,7 +817,7 @@ M3 %>%
 
 
 ### Auto Arima con regressori----
-
+# si procede considerando i dati su base settimanale
 
 
 
