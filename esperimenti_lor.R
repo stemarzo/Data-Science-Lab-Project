@@ -1,6 +1,5 @@
 # WORKING IN PROGRESS #
 
-#ciaoprova
 # confronto estati ----
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
@@ -42,7 +41,7 @@ vendite1_sett_avg
 # aggiungo nuove colonne
 ristorante1_copy <- ristorante1
 
-# colonna covid 
+# ------> colonna covid 
 ristorante1_copy$covid <- 0
 ristorante1_copy[ristorante1_copy$data > "2020-03-09",]$covid <- 1
 
@@ -51,11 +50,11 @@ ristorante1_copy[ristorante1_copy$data > "2020-03-09",]$covid <- 1
 week_covid <- aggregate(covid ~ week_rist1, ristorante1_copy, sum)  # per settimana
 # la colonna covid "somma" non ha molto senso
 
-# colonna chiuso: numero giorni chiusura per settimana
+# ------> colonna chiuso: numero giorni chiusura per settimana
 week_chiuso <- aggregate(chiuso ~ week_rist1, ristorante1_copy, sum)  # per settimana
 
 
-# colonna zona rossa
+# ------> colonna zona rossa
 ristorazione$rossa <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
 ristorante1_copy$rossa <- ristorazione$rossa
 week_rossa <- aggregate(rossa ~ week_rist1, ristorante1_copy, sum)  # per settimana
