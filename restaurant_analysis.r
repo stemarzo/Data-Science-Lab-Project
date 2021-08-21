@@ -817,8 +817,65 @@ M3 %>%
 
 
 ### Auto Arima con regressori----
-# si procede considerando i dati su base settimanale
 
+# si procede considerando i dati su base settimanale
+# dunque: vendite1_sett_avg
+
+# colonna covid su base settimanale (somma)
+week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1, sum)  
+week_covid_sum <- week_covid_sum$covid
+
+# colonna chiuso su base settimanale (somma)
+week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1, sum) 
+week_chiuso_sum <- week_chiuso_sum$chiuso
+
+# colonna rossa su base settimanale (somma)
+week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1, sum)
+week_rossa_sum <- week_rossa_sum$rossa
+
+df_temp <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
+
+# trasformazione colonne precedenti in valori binari
+df_temp <- df_temp %>%
+  mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))
+
+df_temp <- df_temp %>%
+  mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
+
+df_temp <- df_temp %>%
+  mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))
+
+# verifica collinearità variabili
+library(corrplot)
+
+numeric.var <- sapply(df_temp, is.numeric)
+corr.matrix <- cor(df_temp[,numeric.var])
+corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
+
+# regressori: "covid_bin", "rossa_sum", "chiuso_sum" 
+
+MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
+                  xreg = data.matrix(df_temp[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
+summary(MT7)  # AIC: 3486.2   
+checkresiduals(MT7)
+tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
+
+# verifica p-value
+valori <- MT7$coef["week_chiuso_sum"]/sqrt(diag(MT7$var.coef))
+pvalue = 2*pt(valori["week_chiuso_sum"] ,221)
+pvalue
+
+valori <- MT7$coef["week_covid_bin"]/sqrt(diag(MT7$var.coef))
+pvalue = 2*pt(valori["week_covid_bin"] ,221)
+pvalue
+
+valori <- MT7$coef["week_rossa_sum"]/sqrt(diag(MT7$var.coef))
+pvalue = 2*pt(valori["week_rossa_sum"] ,221)
+pvalue
+
+# verifica adattamento modello
+autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
+# autoplot(M3$fitted) + autolayer(train_auto)
 
 
 
