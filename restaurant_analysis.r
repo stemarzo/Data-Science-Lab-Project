@@ -662,9 +662,9 @@ plot(M0, prev)
 # PREVISIONE FATTURATO NO COVID ARIMA PRIMO RISTORANTE -------------------------------------------
 
 ### Arima manuale----
-# viene utilizzato come train il periodo pre covid e come test il periodo post covid,
-# in modo tale da osservare come sarebbero andate le vendite nel periodo covid (
-# durante il quale ci sono state 0 vendite)
+# le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
+# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# Il seguente modello non viene utilizzato per fare previsioni
 
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
@@ -752,23 +752,25 @@ autoplot(forecast(M2, h=50)) + autolayer(test)
 
 
 ### Auto Arima----
-# anche in questo caso viene utilizzato come train il periodo pre covid e 
-# come test il periodo post covid
-
-vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
+# le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
+# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
+# particolar modo per prevedere come le vendite sarebbero andate durante il periodo
+# covid, durante il quale le vendite effettive invece sono state pari a zero
 
 # divisione in train e test
-train_auto <- vendite1_sett_avg_pre_split_auto$train
-test_auto <- vendite1_sett_avg_pre_split_auto$test
+vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
+train_auto_pre <- vendite1_sett_avg_pre_split_auto$train
+test_auto_pre <- vendite1_sett_avg_pre_split_auto$test
 
 autoplot(vendite1_sett_avg_pre) +
-  autolayer(train_auto, series="Training") +
-  autolayer(train_auto, series="Test")
+  autolayer(train_auto_pre, series="Training") +
+  autolayer(train_auto_pre, series="Test")
 
 # auto.arima per selezione modello migliore
-arima_diag(train_auto)
-M3 <- auto.arima(train_auto, seasonal = T)
-
+arima_diag(train_auto_pre)
+M3 <- auto.arima(train_auto_pre, seasonal = T)
+# i dati vengono addestrati sul train e poi viene valutato il modello sul test
 
 # per valutare la qualità del modello si possono inizialmente plottare i grafici
 # ACF e PACF dei residui del modello
@@ -793,23 +795,25 @@ acf(M3$residuals, lag.max=20, na.action=na.pass)
 Box.test(M3$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
 hist(M3$residuals)
 
-
-# previsioni con test set
+#  considerando test set
 M3 %>%
   forecast(h=50) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto)
+  autoplot() + autolayer(test_auto_pre)
 
+# alternativa per verifica addatamento dati con test set
 forecast <- M3 %>%
   forecast(h=30)
 
-# alternativa per vedere previsioni con test set
 par(mfrow=c(1,1))
 plot(forecast)
-lines(test_auto, col="red")
+lines(test_auto_pre, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
-accuracy(forecast, test)
+accuracy(forecast, test_auto_pre)
+
+# si procede ora utilizzando il modello ottenuto per fare previsione su dati nuovi,
+# per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
 M3 %>%
   forecast(h=106) %>%  # h Number of periods for forecasting
@@ -817,9 +821,34 @@ M3 %>%
 
 
 ### Auto Arima con regressori----
+#  il modello viene addestrato su tutti i dati a disposizione (vendite1_sett_avg) 
+# per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
+# disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
+# I dati a disposizione vengono divisi comunque in train e test per valutare 
+# la qualità del modello ottenuto
 
 # si procede considerando i dati su base settimanale
-# dunque: vendite1_sett_avg
+
+# divisione in train e test, in questo caso rispetto a prima si avrà un train e
+# test di dimensioni maggiori
+vendite1_sett_avg_split_auto <- ts_split(vendite1_sett_avg)
+train_auto <- vendite1_sett_avg_split_auto$train
+test_auto <- vendite1_sett_avg_split_auto$test
+
+autoplot(vendite1_sett_avg) +
+  autolayer(train_auto, series="Training") +
+  autolayer(test_auto, series="Test")
+
+
+
+
+
+
+
+
+
+
+# setting regressori
 
 # colonna covid su base settimanale (somma)
 week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1, sum)  
@@ -853,6 +882,13 @@ corr.matrix <- cor(df_temp[,numeric.var])
 corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
 
 # regressori: "covid_bin", "rossa_sum", "chiuso_sum" 
+
+
+
+
+
+
+
 
 MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
                   xreg = data.matrix(df_temp[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
