@@ -35,6 +35,7 @@ print(
   xlab("anno") +
   ylab("vendite")
 )
+
 print(
   autoplot(vendite1_sett_avg) +
   ggtitle("Ristorante 1: vendite medie settimanali") +

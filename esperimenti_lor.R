@@ -120,24 +120,24 @@ autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
 
 
 ## PROVA2- regressori: "covid_sum", "chiuso_sum" ----
-MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = 
-                    data.matrix(df7[, c("covid_sum", "chiuso_sum")]))
-summary(MT7)  # AIC: 3506.24   
-checkresiduals(MT7)
-tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
-
-# verifica p-value
-valori <- MT7$coef["chiuso_sum"]/sqrt(diag(MT7$var.coef))
-pvalue = 2*pt(valori["chiuso_sum"] ,222)
-pvalue
-
-valori <- MT7$coef["covid_sum"]/sqrt(diag(MT7$var.coef))
-pvalue = 2*pt(valori["covid_sum"] ,222)
-pvalue
-
-# verifica adattamento modello
-autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
-autoplot(M3$fitted) + autolayer(train_auto)
+# MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = 
+#                     data.matrix(df7[, c("covid_sum", "chiuso_sum")]))
+# summary(MT7)  # AIC: 3506.24   
+# checkresiduals(MT7)
+# tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
+# 
+# # verifica p-value
+# valori <- MT7$coef["chiuso_sum"]/sqrt(diag(MT7$var.coef))
+# pvalue = 2*pt(valori["chiuso_sum"] ,222)
+# pvalue
+# 
+# valori <- MT7$coef["covid_sum"]/sqrt(diag(MT7$var.coef))
+# pvalue = 2*pt(valori["covid_sum"] ,222)
+# pvalue
+# 
+# # verifica adattamento modello
+# autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
+# autoplot(M3$fitted) + autolayer(train_auto)
 
 
 
@@ -200,6 +200,8 @@ df_previsioni <- rbind(df7, df7_new)
 
 # previsione vendite settimanali su dati nuovi - DA RIVEDERE
 forecast <- MT7 %>%
-  forecast(h=3,  xreg =data.matrix(df_previsioni[, c("chiuso_sum","rossa_sum", "covid_bin")])) 
+  forecast(h=17,  xreg =data.matrix(df7_new[, c("covid_bin", "rossa_sum", "chiuso_sum")])) 
 
 autoplot(forecast)
+
+

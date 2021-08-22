@@ -859,29 +859,29 @@ week_chiuso_sum <- week_chiuso_sum$chiuso
 week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1, sum)
 week_rossa_sum <- week_rossa_sum$rossa
 
-df_temp <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
+regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
 
 # trasformazione colonne precedenti in valori binari
-df_temp <- df_temp %>%
+regressori_week <- regressori_week %>%
   mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))  # se almeno un giorno durante la settimana ha registrato il covid allora tale settimana viene etichettata come settimana covid
 
-df_temp <- df_temp %>%
+regressori_week <- regressori_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))  # se un ristorante durante la settimana rimane chiuso per più di 4 giorni allora tale settimana viene etichettata come settimana chiusa
 
-df_temp <- df_temp %>%
+regressori_week <- regressori_week %>%
   mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))  # se un ristorante durante la settimana è in zona rossa per più di 4 giorni allora tale settimana viene etichettata come settimana rossa
 
 # verifica collinearità variabili
 library(corrplot)
 
-numeric.var <- sapply(df_temp, is.numeric)
-corr.matrix <- cor(df_temp[,numeric.var])
+numeric.var <- sapply(regressori_week, is.numeric)
+corr.matrix <- cor(regressori_week[,numeric.var])
 corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
 
 # regressori: "covid_bin", "rossa_sum", "chiuso_sum" 
 
 M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
-                  xreg = data.matrix(df_temp[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
+                  xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
 summary(M4)  # AIC: 3486.2   
 checkresiduals(M4)
 tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
