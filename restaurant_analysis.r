@@ -801,18 +801,18 @@ M3 %>%
   autoplot() + autolayer(test_auto_pre)
 
 # alternativa per verifica addatamento dati con test set
-forecast <- M3 %>%
+forecast_covid <- M3 %>%
   forecast(h=30)
 
 par(mfrow=c(1,1))
-plot(forecast)
+plot(forecast_covid)
 lines(test_auto_pre, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
-accuracy(forecast, test_auto_pre)
+accuracy(forecast_covid, test_auto_pre)
 
-# si procede ora utilizzando il modello ottenuto per fare previsione su dati nuovi,
+# si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
 M3 %>%
@@ -824,41 +824,38 @@ M3 %>%
 #  il modello viene addestrato su tutti i dati a disposizione (vendite1_sett_avg) 
 # per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
 # disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
-# I dati a disposizione vengono divisi comunque in train e test per valutare 
-# la qualità del modello ottenuto
+# In questo caso non vi è una suddivisione in train e test (approccio statistico)
+
+# si considera la regione emilia-romagna
+
+# NOTA BENE
+# Splitting in Train and Test sets or not depends from the purpose of your analysis. 
+# You can follow a statistical approach or a machine learning approach.
+# 
+# In the classical, statistical approach, you fit a model on the whole batch of data. 
+# Your goal here is to check the sign of the variables' parameters, and whether 
+# they are significant or not. Scientifically speaking, each of those parameters 
+# represents the test of an hypothesis.
+# 
+# In the machine learning approach, you want a model that is good at predicting 
+# data it has never seen before. You don't care whether a given variable has a 
+# positive or negative association with you dependend variable, you don't 
+# care whether your parameters are 95% significant or not, you just care 
+# that the model predicts the output as precisely as possible.
 
 # si procede considerando i dati su base settimanale
 
-# divisione in train e test, in questo caso rispetto a prima si avrà un train e
-# test di dimensioni maggiori
-vendite1_sett_avg_split_auto <- ts_split(vendite1_sett_avg)
-train_auto <- vendite1_sett_avg_split_auto$train
-test_auto <- vendite1_sett_avg_split_auto$test
-
-autoplot(vendite1_sett_avg) +
-  autolayer(train_auto, series="Training") +
-  autolayer(test_auto, series="Test")
-
-
-
-
-
-
-
-
-
-
 # setting regressori
 
-# colonna covid su base settimanale (somma)
+# dati covid su base settimanale (somma, si contano i giorni della settimana in cui c'è il covid)
 week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1, sum)  
 week_covid_sum <- week_covid_sum$covid
 
-# colonna chiuso su base settimanale (somma)
+# dati chiuso su base settimanale (somma, si contano i giorni della settimana in cui il ristorante è chiuso, ovvero non ci sono state vendite)
 week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1, sum) 
 week_chiuso_sum <- week_chiuso_sum$chiuso
 
-# colonna rossa su base settimanale (somma)
+# dati rossa su base settimanale (somma, si contano i giorni della settimana in cui c'è zona rossa)
 week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1, sum)
 week_rossa_sum <- week_rossa_sum$rossa
 
@@ -866,13 +863,13 @@ df_temp <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
 
 # trasformazione colonne precedenti in valori binari
 df_temp <- df_temp %>%
-  mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))
+  mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))  # se almeno un giorno durante la settimana ha registrato il covid allora tale settimana viene etichettata come settimana covid
 
 df_temp <- df_temp %>%
-  mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
+  mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))  # se un ristorante durante la settimana rimane chiuso per più di 4 giorni allora tale settimana viene etichettata come settimana chiusa
 
 df_temp <- df_temp %>%
-  mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))
+  mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))  # se un ristorante durante la settimana è in zona rossa per più di 4 giorni allora tale settimana viene etichettata come settimana rossa
 
 # verifica collinearità variabili
 library(corrplot)
@@ -883,36 +880,96 @@ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", metho
 
 # regressori: "covid_bin", "rossa_sum", "chiuso_sum" 
 
-
-
-
-
-
-
-
-MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
+M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
                   xreg = data.matrix(df_temp[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
-summary(MT7)  # AIC: 3486.2   
-checkresiduals(MT7)
-tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
+summary(M4)  # AIC: 3486.2   
+checkresiduals(M4)
+tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
 
 # verifica p-value
-valori <- MT7$coef["week_chiuso_sum"]/sqrt(diag(MT7$var.coef))
+valori <- M4$coef["week_chiuso_sum"]/sqrt(diag(M4$var.coef))
 pvalue = 2*pt(valori["week_chiuso_sum"] ,221)
 pvalue
 
-valori <- MT7$coef["week_covid_bin"]/sqrt(diag(MT7$var.coef))
+valori <- M4$coef["week_covid_bin"]/sqrt(diag(M4$var.coef))
 pvalue = 2*pt(valori["week_covid_bin"] ,221)
 pvalue
 
-valori <- MT7$coef["week_rossa_sum"]/sqrt(diag(MT7$var.coef))
+valori <- M4$coef["week_rossa_sum"]/sqrt(diag(M4$var.coef))
 pvalue = 2*pt(valori["week_rossa_sum"] ,221)
 pvalue
 
 # verifica adattamento modello
-autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
-# autoplot(M3$fitted) + autolayer(train_auto)
+autoplot(M4$fitted) + autolayer(vendite1_sett_avg)
+# autoplot(M34fitted) + autolayer(train_auto)
 
+# si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
+# in particolare si cerca di prevedere le vendite dopo aprile 2021, date per cui 
+# non si hanno a disposizone informazioni relative a vendite. In particolare si cerca 
+# di prvedere per il periodo 13 aprile 2021 - 12 agosto 2021, date per cui si 
+# possono ricavare i valori dei regressori ma non si possono avere i valori di 
+# vendite, valori che dunque vengono previsti utilzizando il modello precedente
+# e i regressori ottenuti per le nuove date
+
+# per procedere bisogna prima avere i valori dei regressori per le date per cui
+# verranno eseguite le previsioni
+
+# colori aggiornati fino al 12 agosto 2021
+colori_zone_aggiornato <- read_csv("colori_zone_aggiornato.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
+
+colori_emilia_romagna_new <- colori_zone_aggiornato %>% 
+  filter(denominazione_regione == "Emilia-Romagna")
+names(colori_emilia_romagna_new)[3] <- "colore_emilia_romagna"
+
+reference_date_colori <- as.Date("2021-04-19", format = "%Y-%m-%d")  # 19 aprile e non 12 perchè se no dopo con le settiman è un casino. L'ultima settimana che abbiamo è quella del 12 (anche se i dati non sono completi per tutta la settimana), per i dati aggionrati devo prendere la nuova settimana del 19 aprile
+
+colori_emilia_romagna_new <- colori_emilia_romagna_new  %>% 
+  filter(data > reference_date_colori)
+
+
+# creazione df (dal 19 aprile 2021 al 12 agosto 2021) 
+regressori_forecast_day <- data.frame(colori_emilia_romagna_new)  # deve essere l'analogo di regressori_forecast_day
+regressori_forecast_day <- regressori_forecast_day[,-2]
+
+# colonna zona rossa
+regressori_forecast_day$rossa <- ifelse(regressori_forecast_day$colore_emilia_romagna == "rosso", 1, 0)  # no zone rosse
+
+
+# covid aggiornato fino al 12 agosto
+regressori_forecast_day$covid <- 1  # il covid è presents
+
+
+# chiuso aggiornato fino al 12 agosto
+regressori_forecast_day$chiuso <- 0  # non ci sono date in cui i ristoranti avrebbero potuto chiudere
+
+
+# divisione in settimane
+week_new_rist1 <- as.Date(cut(regressori_forecast_day$data, "week"))
+
+week_rossa_new <- aggregate(rossa ~ week_new_rist1, regressori_forecast_day, sum)  # per settimana
+week_chiuso_new <- aggregate(chiuso ~ week_new_rist1, regressori_forecast_day, sum)  # per settimana
+covid_chiuso_new <- aggregate(covid ~ week_new_rist1, regressori_forecast_day, sum)  # per settimana
+
+regressori_forecast_week <- data.frame(covid_chiuso_new$covid, week_chiuso_new$chiuso, week_rossa_new$rossa)
+View(regressori_forecast_week)
+colnames(regressori_forecast_week) <- c("week_covid_sum", "week_chiuso_sum", "week_rossa_sum")
+
+
+# trasformazione colonne precedenti in valori binari
+regressori_forecast_week <- regressori_forecast_week %>%
+  mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))
+
+regressori_forecast_week <- regressori_forecast_week %>%
+  mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))
+
+regressori_forecast_week <- regressori_forecast_week %>%
+  mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
+
+# previsione vendite settimanali su dati nuovi - DA RIVEDERE
+forecast_2021 <- M4 %>%
+  forecast(h=17,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
+
+autoplot(forecast_2021)
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST PRIMO RISTORANTE -------------------------------------------
