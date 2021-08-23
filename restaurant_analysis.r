@@ -848,15 +848,15 @@ M3 %>%
 # setting regressori
 
 # dati covid su base settimanale (somma, si contano i giorni della settimana in cui c'è il covid)
-week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1[-1563,], sum)  
+week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1[-c(1,1563),], sum)  
 week_covid_sum <- week_covid_sum$covid
 
 # dati chiuso su base settimanale (somma, si contano i giorni della settimana in cui il ristorante è chiuso, ovvero non ci sono state vendite)
-week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1[-1563,], sum) 
+week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1[-c(1,1563),], sum) 
 week_chiuso_sum <- week_chiuso_sum$chiuso
 
 # dati rossa su base settimanale (somma, si contano i giorni della settimana in cui c'è zona rossa)
-week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1[-1563,], sum)
+week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1[-c(1,1563),], sum)
 week_rossa_sum <- week_rossa_sum$rossa
 
 regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
@@ -906,7 +906,7 @@ autoplot(M4$fitted) + autolayer(vendite1_sett_avg)
 # si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # in particolare si cerca di prevedere le vendite dopo aprile 2021, date per cui 
 # non si hanno a disposizone informazioni relative a vendite. In particolare si cerca 
-# di prvedere per il periodo 12 aprile 2021 - 12 agosto 2021, date per cui si 
+# di prevedere per il periodo 12 aprile 2021 - 12 agosto 2021, date per cui si 
 # possono ricavare i valori dei regressori ma non si possono avere i valori di 
 # vendite, valori che dunque vengono previsti utilzizando il modello precedente
 # e i regressori ottenuti per le nuove date
@@ -931,7 +931,7 @@ colori_emilia_romagna_new <- colori_emilia_romagna_new  %>%
   filter(data > reference_date_colori)
 
 
-# creazione df (dal 19 aprile 2021 al 12 agosto 2021) 
+# creazione df (dal 12 aprile 2021 al 12 agosto 2021) 
 regressori_forecast_day <- data.frame(colori_emilia_romagna_new)  # deve essere l'analogo di regressori_forecast_day
 regressori_forecast_day <- regressori_forecast_day[,-2]
 
@@ -940,7 +940,7 @@ regressori_forecast_day$rossa <- ifelse(regressori_forecast_day$colore_emilia_ro
 
 
 # covid aggiornato fino al 12 agosto
-regressori_forecast_day$covid <- 1  # il covid è presents
+regressori_forecast_day$covid <- 1  # il covid è presente
 
 
 # chiuso aggiornato fino al 12 agosto
@@ -972,6 +972,9 @@ forecast_2021 <- M4 %>%
   forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
 
 autoplot(forecast_2021)
+
+# in commit precedenti non vi erano salti in questi grafico, però potrebbe essere
+# ritenuto giusto anche questo
 
 
 # PREVISIONE FATTURATO NO COVID RANDOM FOREST PRIMO RISTORANTE -------------------------------------------
