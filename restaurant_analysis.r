@@ -956,7 +956,6 @@ covid_chiuso_new <- aggregate(covid ~ week_new_rist1, regressori_forecast_day, s
 
 regressori_forecast_week <- data.frame(covid_chiuso_new$covid, week_chiuso_new$chiuso, week_rossa_new$rossa)
 colnames(regressori_forecast_week) <- c("week_covid_sum", "week_chiuso_sum", "week_rossa_sum")
-View(regressori_forecast_week)
 
 # trasformazione colonne precedenti in valori binari
 regressori_forecast_week <- regressori_forecast_week %>%
@@ -970,7 +969,7 @@ regressori_forecast_week <- regressori_forecast_week %>%
 
 # previsione vendite settimanali su dati nuovi
 forecast_2021 <- M4 %>%
-  forecast(h=17,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
+  forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
 
 autoplot(forecast_2021)
 

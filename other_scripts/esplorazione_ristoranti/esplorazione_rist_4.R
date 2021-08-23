@@ -9,11 +9,15 @@ vendite4_day <- ts(ristorante4$vendite, start = 2017, frequency=365)
 # vendite settimanali medie secondo ristorante 
 week_rist4 <- as.Date(cut(ristorante4$data, "week"))
 
-vendite4_sett <- aggregate(vendite ~ week_rist4, ristorante4, sum)
+remove_dates <- as.Date(c('2016-12-26','2021-04-12'))
+all_dates <- week_rist4
+week_rist4 <- all_dates[!all_dates %in% remove_dates]
+
+vendite4_sett <- aggregate(vendite ~ week_rist4, ristorante4[-c(1,1563),], sum)
 vendite4_sett <- vendite4_sett$vendite
 vendite4_sett <- ts(vendite4_sett,start=2017,frequency=52) 
 
-vendite4_sett_avg <- aggregate(vendite ~ week_rist4, ristorante4, mean)
+vendite4_sett_avg <- aggregate(vendite ~ week_rist4, ristorante4[-c(1,1563),], mean)
 vendite4_sett_avg <- vendite4_sett_avg$vendite
 vendite4_sett_avg <- ts(vendite4_sett_avg,start=2017,frequency=52) 
 
@@ -68,11 +72,15 @@ vendite4_day_pre <- ts(ristorante4_pre_covid_vendite$vendite,start=2017,frequenc
 # vendite settimanali medie secondo ristorante pre covid
 week_pre_covid_rist4 <- as.Date(cut(ristorante4_pre_covid_vendite$data, "week"))
 
-vendite4_sett_pre <- aggregate(vendite ~ week_pre_covid_rist4, ristorante4_pre_covid_vendite, sum)
+remove_dates <- as.Date(c('2016-12-26'))
+all_dates <- week_pre_covid_rist4
+week_pre_covid_rist4 <- all_dates[!all_dates %in% remove_dates]
+
+vendite4_sett_pre <- aggregate(vendite ~ week_pre_covid_rist4, ristorante4_pre_covid_vendite[-1,], sum)
 vendite4_sett_pre <- vendite4_sett_pre$vendite
 vendite4_sett_pre <- ts(vendite4_sett_pre,start=2017,frequency=52) 
 
-vendite4_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist4, ristorante4_pre_covid_vendite, mean)
+vendite4_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist4, ristorante4_pre_covid_vendite[-1,], mean)
 vendite4_sett_avg_pre <- vendite4_sett_avg_pre$vendite
 vendite4_sett_avg_pre <- ts(vendite4_sett_avg_pre,start=2017,frequency=52) 
 
@@ -118,13 +126,13 @@ print(
 scontrini4_day <- ts(ristorante4$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medie secondo ristorante 
-week_rist4 <- as.Date(cut(ristorante4$data, "week"))
+# week_rist4
 
-scontrini4_sett <- aggregate(scontrini ~ week_rist4, ristorante4, sum)
+scontrini4_sett <- aggregate(scontrini ~ week_rist4, ristorante4[-c(1,1563),], sum)
 scontrini4_sett <- scontrini4_sett$scontrini
 scontrini4_sett <- ts(scontrini4_sett,start=2017,frequency=52) 
 
-scontrini4_sett_avg <- aggregate(scontrini ~ week_rist4, ristorante4, mean)
+scontrini4_sett_avg <- aggregate(scontrini ~ week_rist4, ristorante4[-c(1,1563),], mean)
 scontrini4_sett_avg <- scontrini4_sett_avg$scontrini
 scontrini4_sett_avg <- ts(scontrini4_sett_avg,start=2017,frequency=52) 
 
@@ -175,9 +183,9 @@ ristorante4_pre_covid_scontrini <- ristorante4 %>%
 scontrini4_day_pre <- ts(ristorante4_pre_covid_scontrini$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medi secondo ristorante pre covid
-week_pre_covid_rist4 <- as.Date(cut(ristorante4_pre_covid_scontrini$data, "week"))
+# week_pre_covid_rist4 
 
-scontrini4_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist4, ristorante4_pre_covid_scontrini, mean)
+scontrini4_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist4, ristorante4_pre_covid_scontrini[-1,], mean)
 scontrini4_sett_avg_pre <- scontrini4_sett_avg_pre$scontrini
 scontrini4_sett_avg_pre <- ts(scontrini4_sett_avg_pre,start=2017,frequency=52) 
 
@@ -254,7 +262,7 @@ print(
 
 
 ### analisi correlazione tra vendite e scontrini ----
-scontrini_sett_avg4 <- aggregate(scontrini ~ week_rist4, ristorante4, mean)
+scontrini_sett_avg4 <- aggregate(scontrini ~ week_rist4, ristorante4[-c(1,1563),], mean)
 scontrini_sett_avg4 <- scontrini_sett_avg4$scontrini
 scontrini_sett_avg4 <- ts(scontrini_sett_avg4,start=2017,frequency=52) 
 sc_ven4_sett_avg <-ts.intersect(vendite4_sett_avg, scontrini_sett_avg4)

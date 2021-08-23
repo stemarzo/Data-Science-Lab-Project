@@ -5,36 +5,44 @@
 
 
 # si considera la serie storica a partire dai primi dati registrati
-reference_date_rist3 <- as.Date("2019-10-16", format = "%Y-%m-%d")
+# considero il "2019-11-04 in modo tale che il 4 novembre sia lunedì
+reference_date_rist3 <- as.Date("2019-11-04", format = "%Y-%m-%d")
 
 ristorante3 <- ristorante3 %>%
   filter(ristorante3$data >= reference_date_rist3)
 
 
 # vendite giornaliere secondo ristorante 
-vendite3_day <- ts(ristorante3$vendite, start = decimal_date(as.Date("2019-10-16")), frequency=365) 
+vendite3_day <- ts(ristorante3$vendite, start = decimal_date(as.Date("2019-11-04")), frequency=365) 
 
 # vendite settimanali medie secondo ristorante 
 week_rist3 <- as.Date(cut(ristorante3$data, "week"))
 
-vendite3_sett <- aggregate(vendite ~ week_rist3, ristorante3, sum)
-vendite3_sett <- vendite3_sett$vendite
-vendite3_sett <- ts(vendite3_sett,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+# si procede ad eliminare la data 12 aprile essendo un lunedì, altrimenti si perderebbe
+# una settimana nelle successive analisi
+remove_dates <- as.Date('2021-04-12')
+all_dates <- week_rist3
+week_rist3 <- all_dates[!all_dates %in% remove_dates]
+# ristorante3[-1563,], si toglie solo per le analisi settimanali lunedì 12 aprile 2021
 
-vendite3_sett_avg <- aggregate(vendite ~ week_rist3, ristorante3, mean)
+vendite3_sett <- aggregate(vendite ~ week_rist3, ristorante3[-526,], sum)
+vendite3_sett <- vendite3_sett$vendite
+vendite3_sett <- ts(vendite3_sett,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
+
+vendite3_sett_avg <- aggregate(vendite ~ week_rist3, ristorante3[-526,], mean)
 vendite3_sett_avg <- vendite3_sett_avg$vendite
-vendite3_sett_avg <- ts(vendite3_sett_avg,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+vendite3_sett_avg <- ts(vendite3_sett_avg,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
 # vendite mensili medie  secondo ristorante 
 month_rist3 <- as.Date(cut(ristorante3$data, "month"))
 
 vendite3_mens <- aggregate(vendite ~ month_rist3, ristorante3, sum)
 vendite3_mens <- vendite3_mens$vendite
-vendite3_mens <- ts(vendite3_mens,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+vendite3_mens <- ts(vendite3_mens,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 vendite3_mens_avg <- aggregate(vendite ~ month_rist3, ristorante3, mean)
 vendite3_mens_avg <- vendite3_mens_avg$vendite
-vendite3_mens_avg <- ts(vendite3_mens_avg,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+vendite3_mens_avg <- ts(vendite3_mens_avg,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 # plot delle diverse serie trovate sopra
 print(
@@ -71,29 +79,29 @@ ristorante3_pre_covid_vendite <- ristorante3 %>%
   select(vendite, data)
 
 # vendite giornaliere secondo ristorante pre covid
-vendite3_day_pre <- ts(ristorante3_pre_covid_vendite$vendite,start = decimal_date(as.Date("2019-10-16")),frequency=365) 
+vendite3_day_pre <- ts(ristorante3_pre_covid_vendite$vendite,start = decimal_date(as.Date("2019-11-04")),frequency=365) 
 
 # vendite settimanali medie secondo ristorante pre covid
 week_pre_covid <- as.Date(cut(ristorante3_pre_covid_vendite$data, "week"))
 
 vendite3_sett_pre <- aggregate(vendite ~ week_pre_covid, ristorante3_pre_covid_vendite, sum)
 vendite3_sett_pre <- vendite3_sett_pre$vendite
-vendite3_sett_pre <- ts(vendite3_sett_pre,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+vendite3_sett_pre <- ts(vendite3_sett_pre,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
 vendite3_sett_avg_pre <- aggregate(vendite ~ week_pre_covid, ristorante3_pre_covid_vendite, mean)
 vendite3_sett_avg_pre <- vendite3_sett_avg_pre$vendite
-vendite3_sett_avg_pre <- ts(vendite3_sett_avg_pre,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+vendite3_sett_avg_pre <- ts(vendite3_sett_avg_pre,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
 # vendite mensili medie  secondo ristorante pre covid
 month_pre_covid_rist3 <- as.Date(cut(ristorante3_pre_covid_vendite$data, "month"))
 
 vendite3_mens_pre <- aggregate(vendite ~ month_pre_covid_rist3, ristorante3_pre_covid_vendite, sum)
 vendite3_mens_pre <- vendite3_mens_pre$vendite
-vendite3_mens_pre <- ts(vendite3_mens_pre,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+vendite3_mens_pre <- ts(vendite3_mens_pre,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 vendite3_mens_avg_pre <- aggregate(vendite ~ month_pre_covid_rist3, ristorante3_pre_covid_vendite, mean)
 vendite3_mens_avg_pre <- vendite3_mens_avg_pre$vendite
-vendite3_mens_avg_pre <- ts(vendite3_mens_avg_pre,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+vendite3_mens_avg_pre <- ts(vendite3_mens_avg_pre,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 # plot delle diverse serie pre covid trovate sopra 
 print(
@@ -123,29 +131,29 @@ print(
 # eventualmente da mettere a confronto con l'andamento delle vendite (grafico sopra vendite e sotto scontrini)
 
 # scontrini giornalieri secondo ristorante 
-scontrini3_day <- ts(ristorante3$scontrini,start = decimal_date(as.Date("2019-10-16")),frequency=365) 
+scontrini3_day <- ts(ristorante3$scontrini,start = decimal_date(as.Date("2019-11-04")),frequency=365) 
 
 # scontrini settimanali medie secondo ristorante 
-week_rist3 <- as.Date(cut(ristorante3$data, "week"))
+# week_rist3
 
-scontrini3_sett <- aggregate(scontrini ~ week_rist3, ristorante3, sum)
+scontrini3_sett <- aggregate(scontrini ~ week_rist3, ristorante3[-526,], sum)
 scontrini3_sett <- scontrini3_sett$scontrini
-scontrini3_sett <- ts(scontrini3_sett,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+scontrini3_sett <- ts(scontrini3_sett,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
-scontrini3_sett_avg <- aggregate(scontrini ~ week_rist3, ristorante3, mean)
+scontrini3_sett_avg <- aggregate(scontrini ~ week_rist3, ristorante3[-526,], mean)
 scontrini3_sett_avg <- scontrini3_sett_avg$scontrini
-scontrini3_sett_avg <- ts(scontrini3_sett_avg,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+scontrini3_sett_avg <- ts(scontrini3_sett_avg,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
 # scontrini mensili medie  secondo ristorante 
 month_rist3 <- as.Date(cut(ristorante3$data, "month"))
 
 scontrini3_mens <- aggregate(scontrini ~ month_rist3, ristorante3, sum)
 scontrini3_mens <- scontrini3_mens$scontrini
-scontrini3_mens <- ts(scontrini3_mens,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+scontrini3_mens <- ts(scontrini3_mens,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 scontrini3_mens_avg <- aggregate(scontrini ~ month_rist3, ristorante3, mean)
 scontrini3_mens_avg <- scontrini3_mens_avg$scontrini
-scontrini3_mens_avg <- ts(scontrini3_mens_avg,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+scontrini3_mens_avg <- ts(scontrini3_mens_avg,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 # plot delle diverse serie trovate sopra
 print(
@@ -180,20 +188,20 @@ ristorante3_pre_covid_scontrini <- ristorante3 %>%
   select(scontrini, data)
 
 # scontrini giornalieri secondo ristorante pre covid
-scontrini3_day_pre <- ts(ristorante3_pre_covid_scontrini$scontrini,start = decimal_date(as.Date("2019-10-16")),frequency=365) 
+scontrini3_day_pre <- ts(ristorante3_pre_covid_scontrini$scontrini,start = decimal_date(as.Date("2019-11-04")),frequency=365) 
 
 # scontrini settimanali medi secondo ristorante pre covid
 week_pre_covid <- as.Date(cut(ristorante3_pre_covid_scontrini$data, "week"))
 
 scontrini3_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid, ristorante3_pre_covid_scontrini, mean)
 scontrini3_sett_avg_pre <- scontrini3_sett_avg_pre$scontrini
-scontrini3_sett_avg_pre <- ts(scontrini3_sett_avg_pre,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+scontrini3_sett_avg_pre <- ts(scontrini3_sett_avg_pre,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 
 # scontrini mensili medi  secondo ristorante pre covid
 month_pre_covid_rist3 <- as.Date(cut(ristorante3_pre_covid_scontrini$data, "month"))
 scontrini3_mens_avg_pre <- aggregate(scontrini ~ month_pre_covid_rist3, ristorante3_pre_covid_scontrini, mean)
 scontrini3_mens_avg_pre <- scontrini3_mens_avg_pre$scontrini
-scontrini3_mens_avg_pre <- ts(scontrini3_mens_avg_pre,start = decimal_date(as.Date("2019-10-16")),frequency=12) 
+scontrini3_mens_avg_pre <- ts(scontrini3_mens_avg_pre,start = decimal_date(as.Date("2019-11-04")),frequency=12) 
 
 # plot delle diverse serie pre covid trovate sopra 
 print(
@@ -262,9 +270,9 @@ print(
 
 
 ### analisi correlazione tra vendite e scontrini ----
-scontrini_sett_avg3 <- aggregate(scontrini ~ week_rist3, ristorante3, mean)
+scontrini_sett_avg3 <- aggregate(scontrini ~ week_rist3, ristorante3[-526,], mean)
 scontrini_sett_avg3 <- scontrini_sett_avg3$scontrini
-scontrini_sett_avg3 <- ts(scontrini_sett_avg3,start = decimal_date(as.Date("2019-10-16")),frequency=52) 
+scontrini_sett_avg3 <- ts(scontrini_sett_avg3,start = decimal_date(as.Date("2019-11-04")),frequency=52) 
 sc_ven3_sett_avg <-ts.intersect(vendite3_sett_avg, scontrini_sett_avg3)
 
 

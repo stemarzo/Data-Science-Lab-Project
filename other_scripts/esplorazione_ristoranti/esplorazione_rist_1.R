@@ -187,7 +187,7 @@ ristorante1_pre_covid_scontrini <- ristorante1 %>%
 scontrini1_day_pre <- ts(ristorante1_pre_covid_scontrini$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medi primo ristorante pre covid
-week_pre_covid_rist1 
+# week_pre_covid_rist1 
 
 scontrini1_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist1, ristorante1_pre_covid_scontrini[-1,], mean)
 scontrini1_sett_avg_pre <- scontrini1_sett_avg_pre$scontrini
