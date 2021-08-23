@@ -835,7 +835,7 @@ M3 %>%
 # In the classical, statistical approach, you fit a model on the whole batch of data. 
 # Your goal here is to check the sign of the variables' parameters, and whether 
 # they are significant or not. Scientifically speaking, each of those parameters 
-# represents the test of an hypothesis.
+# represents the test of an hypothesis. <- è questo caso
 # 
 # In the machine learning approach, you want a model that is good at predicting 
 # data it has never seen before. You don't care whether a given variable has a 
@@ -848,15 +848,15 @@ M3 %>%
 # setting regressori
 
 # dati covid su base settimanale (somma, si contano i giorni della settimana in cui c'è il covid)
-week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1, sum)  
+week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1[-1563,], sum)  
 week_covid_sum <- week_covid_sum$covid
 
 # dati chiuso su base settimanale (somma, si contano i giorni della settimana in cui il ristorante è chiuso, ovvero non ci sono state vendite)
-week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1, sum) 
+week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1[-1563,], sum) 
 week_chiuso_sum <- week_chiuso_sum$chiuso
 
 # dati rossa su base settimanale (somma, si contano i giorni della settimana in cui c'è zona rossa)
-week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1, sum)
+week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1[-1563,], sum)
 week_rossa_sum <- week_rossa_sum$rossa
 
 regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
@@ -906,10 +906,14 @@ autoplot(M4$fitted) + autolayer(vendite1_sett_avg)
 # si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # in particolare si cerca di prevedere le vendite dopo aprile 2021, date per cui 
 # non si hanno a disposizone informazioni relative a vendite. In particolare si cerca 
-# di prvedere per il periodo 13 aprile 2021 - 12 agosto 2021, date per cui si 
+# di prvedere per il periodo 12 aprile 2021 - 12 agosto 2021, date per cui si 
 # possono ricavare i valori dei regressori ma non si possono avere i valori di 
 # vendite, valori che dunque vengono previsti utilzizando il modello precedente
 # e i regressori ottenuti per le nuove date
+
+# N.b.: il 12 agosto è un giovedì, quindi non viene presa in considerazione la 
+# settimana intera ma ciò è non influenza il valore dei regressori (la settimana 
+# è comunque etichettata covid, non ci sono possibili chiusure e non c'è zona rossa)
 
 # per procedere bisogna prima avere i valori dei regressori per le date per cui
 # verranno eseguite le previsioni
@@ -921,7 +925,7 @@ colori_emilia_romagna_new <- colori_zone_aggiornato %>%
   filter(denominazione_regione == "Emilia-Romagna")
 names(colori_emilia_romagna_new)[3] <- "colore_emilia_romagna"
 
-reference_date_colori <- as.Date("2021-04-19", format = "%Y-%m-%d")  # 19 aprile e non 12 perchè se no dopo con le settiman è un casino. L'ultima settimana che abbiamo è quella del 12 (anche se i dati non sono completi per tutta la settimana), per i dati aggionrati devo prendere la nuova settimana del 19 aprile
+reference_date_colori <- as.Date("2021-04-11", format = "%Y-%m-%d")  
 
 colori_emilia_romagna_new <- colori_emilia_romagna_new  %>% 
   filter(data > reference_date_colori)
@@ -951,9 +955,8 @@ week_chiuso_new <- aggregate(chiuso ~ week_new_rist1, regressori_forecast_day, s
 covid_chiuso_new <- aggregate(covid ~ week_new_rist1, regressori_forecast_day, sum)  # per settimana
 
 regressori_forecast_week <- data.frame(covid_chiuso_new$covid, week_chiuso_new$chiuso, week_rossa_new$rossa)
-View(regressori_forecast_week)
 colnames(regressori_forecast_week) <- c("week_covid_sum", "week_chiuso_sum", "week_rossa_sum")
-
+View(regressori_forecast_week)
 
 # trasformazione colonne precedenti in valori binari
 regressori_forecast_week <- regressori_forecast_week %>%
@@ -965,7 +968,7 @@ regressori_forecast_week <- regressori_forecast_week %>%
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
 
-# previsione vendite settimanali su dati nuovi - DA RIVEDERE
+# previsione vendite settimanali su dati nuovi
 forecast_2021 <- M4 %>%
   forecast(h=17,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
 

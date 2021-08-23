@@ -9,11 +9,19 @@ vendite1_day <- ts(ristorante1$vendite, start=2017, frequency=365)
 # vendite settimanali medie primo ristorante 
 week_rist1 <- as.Date(cut(ristorante1$data, "week"))
 
-vendite1_sett <- aggregate(vendite ~ week_rist1, ristorante1, sum)
+# si procede ad eliminare la data 12 aprile essendo un lunedì, altrimenti si perderebbe
+# una settimana nelle successive analisi
+remove_dates <- as.Date('2021-04-12')
+all_dates <- week_rist1
+week_rist1 <- all_dates[!all_dates %in% remove_dates]
+# ristorante1[-1563,], si toglier solo per le analisi settimanali lunedì 12 aprile 2021
+
+
+vendite1_sett <- aggregate(vendite ~ week_rist1, ristorante1[-1563,], sum)
 vendite1_sett <- vendite1_sett$vendite
 vendite1_sett <- ts(vendite1_sett,start=2017,frequency=52) 
 
-vendite1_sett_avg <- aggregate(vendite ~ week_rist1, ristorante1, mean)
+vendite1_sett_avg <- aggregate(vendite ~ week_rist1, ristorante1[-1563,], mean)
 vendite1_sett_avg <- vendite1_sett_avg$vendite
 vendite1_sett_avg <- ts(vendite1_sett_avg,start=2017,frequency=52) 
 
