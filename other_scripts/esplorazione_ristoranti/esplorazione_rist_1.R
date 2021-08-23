@@ -11,17 +11,16 @@ week_rist1 <- as.Date(cut(ristorante1$data, "week"))
 
 # si procede ad eliminare la data 12 aprile essendo un lunedì, altrimenti si perderebbe
 # una settimana nelle successive analisi
-remove_dates <- as.Date('2021-04-12')
+remove_dates <- as.Date(c('2016-12-26','2021-04-12'))
 all_dates <- week_rist1
 week_rist1 <- all_dates[!all_dates %in% remove_dates]
-# ristorante1[-1563,], si toglier solo per le analisi settimanali lunedì 12 aprile 2021
+# ristorante1[-c(1,1563),], si toglie solo per le analisi settimanali domenica 1 gennaio 2017, lunedì 12 aprile 2021
 
-
-vendite1_sett <- aggregate(vendite ~ week_rist1, ristorante1[-1563,], sum)
+vendite1_sett <- aggregate(vendite ~ week_rist1, ristorante1[-c(1,1563),], sum)
 vendite1_sett <- vendite1_sett$vendite
 vendite1_sett <- ts(vendite1_sett,start=2017,frequency=52) 
 
-vendite1_sett_avg <- aggregate(vendite ~ week_rist1, ristorante1[-1563,], mean)
+vendite1_sett_avg <- aggregate(vendite ~ week_rist1, ristorante1[-c(1,1563),], mean)
 vendite1_sett_avg <- vendite1_sett_avg$vendite
 vendite1_sett_avg <- ts(vendite1_sett_avg,start=2017,frequency=52) 
 
@@ -76,11 +75,16 @@ vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequenc
 # vendite settimanali medie primo ristorante pre covid
 week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid_vendite$data, "week"))
 
-vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite, sum)
+# si procede ad eliminare il giorno 1 gennaio 2017 che risulta essere domenica
+remove_dates <- as.Date(c('2016-12-26'))
+all_dates <- week_pre_covid_rist1
+week_pre_covid_rist1 <- all_dates[!all_dates %in% remove_dates]
+
+vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], sum)
 vendite1_sett_pre <- vendite1_sett_pre$vendite
 vendite1_sett_pre <- ts(vendite1_sett_pre,start=2017,frequency=52) 
 
-vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite, mean)
+vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], mean)
 vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
 vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
 
@@ -126,13 +130,13 @@ print(
 scontrini1_day <- ts(ristorante1$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medie primo ristorante 
-week_rist1 <- as.Date(cut(ristorante1$data, "week"))
+# week_rist1 
 
-scontrini1_sett <- aggregate(scontrini ~ week_rist1, ristorante1, sum)
+scontrini1_sett <- aggregate(scontrini ~ week_rist1, ristorante1[-c(1,1563),], sum)
 scontrini1_sett <- scontrini1_sett$scontrini
 scontrini1_sett <- ts(scontrini1_sett,start=2017,frequency=52) 
 
-scontrini1_sett_avg <- aggregate(scontrini ~ week_rist1, ristorante1, mean)
+scontrini1_sett_avg <- aggregate(scontrini ~ week_rist1, ristorante1[-c(1,1563),], mean)
 scontrini1_sett_avg <- scontrini1_sett_avg$scontrini
 scontrini1_sett_avg <- ts(scontrini1_sett_avg,start=2017,frequency=52) 
 
@@ -183,9 +187,9 @@ ristorante1_pre_covid_scontrini <- ristorante1 %>%
 scontrini1_day_pre <- ts(ristorante1_pre_covid_scontrini$scontrini,start=2017,frequency=365) 
 
 # scontrini settimanali medi primo ristorante pre covid
-week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid_scontrini$data, "week"))
+week_pre_covid_rist1 
 
-scontrini1_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist1, ristorante1_pre_covid_scontrini, mean)
+scontrini1_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist1, ristorante1_pre_covid_scontrini[-1,], mean)
 scontrini1_sett_avg_pre <- scontrini1_sett_avg_pre$scontrini
 scontrini1_sett_avg_pre <- ts(scontrini1_sett_avg_pre,start=2017,frequency=52) 
 
@@ -262,7 +266,7 @@ print(
 
 
 ### analisi correlazione tra vendite e scontrini ----
-scontrini_sett_avg1 <- aggregate(scontrini ~ week_rist1, ristorante1, mean)
+scontrini_sett_avg1 <- aggregate(scontrini ~ week_rist1, ristorante1[-c(1,1563),], mean)
 scontrini_sett_avg1 <- scontrini_sett_avg1$scontrini
 scontrini_sett_avg1 <- ts(scontrini_sett_avg1,start=2017,frequency=52) 
 sc_ven1_sett_avg <-ts.intersect(vendite1_sett_avg, scontrini_sett_avg1)
