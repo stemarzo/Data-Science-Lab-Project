@@ -77,10 +77,12 @@ ristorazione$stagione[ristorazione$stagione == "Primavera"] <- 1
 ristorazione$stagione[ristorazione$stagione == "Estate"] <- 2
 ristorazione$stagione[ristorazione$stagione == "Autunno"] <- 3
 ristorazione$stagione[ristorazione$stagione == "Inverno"] <- 4
+ristorazione$stagione <- as.factor(ristorazione$stagione)
 
 # aggiunta colonna mese
 # ristorazione$mese <- format(ristorazione$data,"%B")
 ristorazione$mese <- month(ristorazione$data)
+ristorazione$mese <- as.factor(ristorazione$mese)
 
 
 # colonna giorni festivi e feriali
@@ -92,6 +94,12 @@ ristorazione <- ristorazione %>%
     , TRUE ~ "other"
   )
   )
+ristorazione$weekday <- as.factor(ristorazione$weekday)
+ristorazione["tipo_giorno"][ristorazione["tipo_giorno"] == "weekend"] <- "1"
+ristorazione["tipo_giorno"][ristorazione["tipo_giorno"] == "weekday"] <- "0"
+colnames(ristorazione)[which(names(ristorazione) == "tipo_giorno")] <- "is_weekend"
+ristorazione$is_weekend <- as.factor(ristorazione$is_weekend)
+
 
 # colonna holiday
 # lista vacanze italiane
@@ -132,8 +140,9 @@ holidays_2021 <- as.Date(c("2021-01-01", "2021-01-06", "2021-02-14", "2021-04-04
 
 holidays_2017_to_2021 <- c(holidays_2017, holidays_2018, holidays_2019, holidays_2020, holidays_2021)
 
-ristorazione$holiday <- 0
-ristorazione$holiday[which(ristorazione$data %in% holidays_2017_to_2021)] <- 1
+ristorazione$is_holiday <- 0
+ristorazione$is_holiday[which(ristorazione$data %in% holidays_2017_to_2021)] <- 1
+ristorazione$is_holiday <- as.factor(ristorazione$is_holiday)
 
 
 
@@ -159,18 +168,17 @@ colori_lombardia_emilia_romagna <- colori_lombardia_emilia_romagna[,-c(2,4)]
 ristorazione<-merge(x=ristorazione,y=colori_lombardia_emilia_romagna,by="data",all.x=TRUE)
 ristorazione$colore_lombardia[is.na(ristorazione$colore_lombardia)] <- "bianco"
 ristorazione$colore_emilia_romagna[is.na(ristorazione$colore_emilia_romagna)] <- "bianco"
-# versione precedente
-# # aggiunta valori zone in presenza di NA, in base alle fasi 1, 2, 3
-# ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
-# ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
-# ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancionene"
-# ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
+
+ristorazione$colore_lombardia <- as.factor(ristorazione$colore_lombardia)
+ristorazione$colore_emilia_romagna <- as.factor(ristorazione$colore_emilia_romagna)
 
 # aggiungo colonna zona rossa lombardia
 ristorazione$rossa_lombardia <- ifelse(ristorazione$colore_lombardia == "rosso", 1, 0)
+ristorazione$rossa_lombardia <- as.factor(ristorazione$rossa_lombardia)
 
 # aggiungo colonna zona rossa emilia romagna
 ristorazione$rossa_emilia_romagna <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
+ristorazione$rossa_emilia_romagna <- as.factor(ristorazione$rossa_emilia_romagna)
 
 # colonna asporto (per Lombardia, bisogna decidere quale regione)
 # zona rossa: solo asporto e consegne a domicilio senza limiti
@@ -188,7 +196,7 @@ ristorazione <- ristorazione %>%
 
 # conversione true/false -> 1/0
 ristorazione$solo_asporto_lombardia <- as.integer(ristorazione$solo_asporto_lombardia)
-
+ristorazione$solo_asporto_lombardia <- as.factor(ristorazione$solo_asporto_lombardia )
 
 
 ristorazione <- ristorazione %>%
@@ -201,18 +209,21 @@ ristorazione <- ristorazione %>%
   ) 
 # conversione true/false -> 1/0
 ristorazione$solo_asporto_emilia_romagna <- as.integer(ristorazione$solo_asporto_emilia_romagna)
-
+ristorazione$solo_asporto_emilia_romagna <- as.factor(ristorazione$solo_asporto_emilia_romagna)
 
 # inserimento delle colonne che riguardano gli eventi sportivi
-eventi_sportivi <- read_delim("eventi_sportivi.csv", ";", escape_double = FALSE, trim_ws = TRUE)
-eventi_sportivi <- eventi_sportivi[, -c(1)]
-ristorazione<-merge(x=ristorazione,y=eventi_sportivi,by="data",all.x=TRUE)
+# eventi_sportivi <- read_delim("eventi_sportivi.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+# eventi_sportivi <- eventi_sportivi[, -c(1)]
+# cols <- colnames(eventi_sportivi)
+# eventi_sportivi[cols] <- lapply(eventi_sportivi[cols], factor) 
+# ristorazione<-merge(x=ristorazione,y=eventi_sportivi,by="data",all.x=TRUE)
 
 # inserimento colonne riguardanti il meteo
 meteo <- read_delim("meteo.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 meteo <- meteo[, -c(1)]
 meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
-ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
+ristorazione<-merge(x=ristorazione,y=meteo[,-3],by="data",all.x=TRUE)
+ristorazione$pioggia <- as.factor(ristorazione$pioggia)
 
 # aggiunta colonna somministrazioni vaccini
 vaccini <- read_csv("somministrazioni_vaccini.csv")
@@ -267,6 +278,7 @@ names(vaccini_lombardia)[3] <- "tot_vaccini_lombardia"
 names(vaccini_lombardia)[1] <- "data"
 vaccini_lombardia$area <- NULL
 
+
 names(vaccini_emilia_romagna)[3] <- "tot_vaccini_emilia_romagna"
 names(vaccini_emilia_romagna)[1] <- "data"
 vaccini_emilia_romagna$area <- NULL
@@ -275,6 +287,8 @@ vaccini_emilia_romagna$area <- NULL
 # integro con il file ristorazione
 ristorazione <- merge(x = ristorazione, y = vaccini_lombardia, by = "data", all.x = TRUE)
 ristorazione <- merge(x = ristorazione, y = vaccini_emilia_romagna, by = "data", all.x = TRUE)
+ristorazione$tot_vaccini_lombardia[is.na(ristorazione$tot_vaccini_lombardia)] <- 0
+ristorazione$tot_vaccini_emilia_romagna[is.na(ristorazione$tot_vaccini_emilia_romagna)] <- 0
 
 
 # check NA values
@@ -390,39 +404,44 @@ ristorazione[c(1555:1556),"data_anno_prec"] <- dates
 # aggiunta manuale vacanze scolastiche/ festività straniere/ blackfriday ecc.
 other_dates <- read_excel("vacanze_scolastiche_saldi.xls")
 other_dates <- other_dates[-1,21:24]
-names(other_dates) <- c("Vacanze scolastiche Lombardia", "Black Friday e saldi Lombardia",
-                        "Vacanze scolastiche Emilia-Romagna", "Black Friday e saldi  Emilia-Romagna")
-
+names(other_dates) <- c("vacanze_scolastiche_lombardia", "black_friday_saldi_lombardia",
+                        "vacanze_scolastiche_emilia_romagna", "black_friday_saldi_emilia_romagna")
 ristorazione <- cbind(ristorazione, other_dates)
 
-# correzione colonna saldi e black friday
+ristorazione$vacanze_scolastiche_lombardia <- as.factor(ristorazione$vacanze_scolastiche_lombardia)
+ristorazione$vacanze_scolastiche_emilia_romagna <- as.factor(ristorazione$vacanze_scolastiche_emilia_romagna)
 
-ristorazione[, "Black Friday e saldi  Emilia-Romagna"] <- 0
-ristorazione[5:64, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[182:242, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[328, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[370:428, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[549:609, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[692, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[735:794, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[917:972, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[1063, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[1100:1160, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[1309:1369, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[1427, "Black Friday e saldi  Emilia-Romagna"] <- 1
-ristorazione[1491:1550, "Black Friday e saldi  Emilia-Romagna"] <- 1
+ristorazione$black_friday_saldi_lombardia <- as.factor(ristorazione$black_friday_saldi_lombardia)
+ristorazione$black_friday_saldi_emilia_romagna <- as.factor(ristorazione$black_friday_saldi_emilia_romagna)
+
+# correzione manuale colonna saldi e black friday per Emilia Romagna
+ristorazione[, "black_friday_saldi_emilia_romagna"] <- 0
+ristorazione[5:64, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[182:242, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[328, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[370:428, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[549:609, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[692, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[735:794, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[917:972, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[1063, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[1100:1160, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[1309:1369, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[1427, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione[1491:1550, "black_friday_saldi_emilia_romagna"] <- 1
+ristorazione$black_friday_saldi_emilia_romagna <- as.factor(ristorazione$black_friday_saldi_emilia_romagna)
 
 
 # aggiunta colonna neve
-meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
-meteo <- meteo[, -c(1)]
-meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
-ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
+# meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+# meteo <- meteo[, -c(1)]
+# meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
+# ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
 # aggiunta colonna covid
 ristorazione$covid <- 0
 ristorazione[ristorazione$data > "2020-03-09",]$covid <- 1
-
+ristorazione$covid  <- as.factor(ristorazione$covid )
 
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
