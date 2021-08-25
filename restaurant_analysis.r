@@ -929,11 +929,11 @@ numeric.var <- sapply(regressori_week, is.numeric)
 corr.matrix <- cor(regressori_week[,numeric.var])
 corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
 
-# regressori: "covid_bin", "rossa_sum", "chiuso_sum" 
+# regressori: "covid_bin", "rossa_sum", "chiuso_sum" (check se serve as.factor())
 
 M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
                   xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
-summary(M4)  # AIC: 3486.2   
+summary(M4)  # AIC: 3453.91   
 checkresiduals(M4)
 tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
 
