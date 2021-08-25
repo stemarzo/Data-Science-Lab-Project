@@ -95,14 +95,46 @@ ristorazione <- ristorazione %>%
 
 # colonna holiday
 # lista vacanze italiane
-new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
-new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
-                                     as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
-for (i in 1:nrow(ristorazione)) {
-  ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
-}
-# conversione true/false -> 1/0
-ristorazione$holiday <- as.integer(ristorazione$holiday)
+# new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
+# new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
+#                                      as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
+# for (i in 1:nrow(ristorazione)) {
+#   ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
+# }
+# # conversione true/false -> 1/0
+# ristorazione$holiday <- as.integer(ristorazione$holiday)
+
+# risulta più comodo settare manulmente le i giorni di festività
+holidays_2017 <- as.Date(c("2017-01-01", "2017-01-06", "2017-02-14", "2017-04-16", 
+                           "2017-04-17", "2017-04-25", "2017-05-01", "2017-06-02", 
+                           "2017-08-15", "2017-11-01", "2017-12-08", "2017-12-24", 
+                           "2017-12-25", "2017-12-26", "2017-12-31"))
+
+holidays_2018 <- as.Date(c("2018-01-01", "2018-01-06", "2018-02-14", "2018-04-01", 
+                           "2018-04-02", "2018-04-25", "2018-05-01", "2018-06-02", 
+                           "2018-08-15", "2018-11-01", "2018-12-08", "2018-12-24", 
+                           "2018-12-25", "2018-12-26", "2018-12-31"))
+
+holidays_2019 <- as.Date(c("2019-01-01", "2019-01-06", "2019-02-14", "2019-04-21", 
+                           "2019-04-22", "2019-04-25", "2019-05-01", "2019-06-02", 
+                           "2019-08-15", "2019-11-01", "2019-12-08", "2019-12-24", 
+                           "2019-12-25", "2019-12-26", "2019-12-31"))
+
+holidays_2020 <- as.Date(c("2020-01-01", "2020-01-06", "2020-02-14", "2020-04-12", 
+                           "2020-04-13", "2020-04-25", "2020-05-01", "2020-06-02", 
+                           "2020-08-15", "2020-11-01", "2020-12-08", "2020-12-24", 
+                           "2020-12-25", "2020-12-26", "2020-12-31"))
+
+holidays_2021 <- as.Date(c("2021-01-01", "2021-01-06", "2021-02-14", "2021-04-04", 
+                           "2021-04-05", "2021-04-25", "2021-05-01", "2021-06-02", 
+                           "2021-08-15", "2021-11-01", "2021-12-08", "2021-12-24", 
+                           "2021-12-25", "2021-12-26", "2021-12-31"))
+
+holidays_2017_to_2021 <- c(holidays_2017, holidays_2018, holidays_2019, holidays_2020, holidays_2021)
+
+ristorazione$holiday <- 0
+ristorazione$holiday[which(ristorazione$data %in% holidays_2017_to_2021)] <- 1
+
 
 
 # colore zona in base alla data
