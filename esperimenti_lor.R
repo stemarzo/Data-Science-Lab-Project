@@ -48,6 +48,9 @@
 # rigida questa scelta? I colori della zone sono abbastanza limitati, partendo da 
 # novembre essi agiscono su una piccola porzione di dati
 
+# ricordarsi come nel random forest modificare periodi pre e post covid, il periodo
+# pre dovrebbe fermarmi un pochino prima del picco
+
 
 
 # random forest con regressori----
@@ -60,39 +63,104 @@ mape <- function(actual,pred){
 set.seed(100)
 library(randomForest)
 
+# selezione periodo pre covid per poi fare previsione sul periodo covid
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
-
 vendite_giornaliere <- ristorazione %>%
   filter(ristorazione$data < reference_date)
 
-numberOfRows <- nrow(vendite_giornaliere)
-bound <- as.integer(numberOfRows *0.8)
-train <- vendite_giornaliere[1:bound ,]
-test <-  vendite_giornaliere[(bound+1):numberOfRows ,]
+# sistemazione NA
+sum(is.na(vendite_giornaliere))
 
+sum(is.na(vendite_giornaliere$vendite1))
+vendite_giornaliere$vendite1[is.na(vendite_giornaliere$vendite1)] <- 0 
+
+# divisione in train e tes
+index <- sample(1:nrow(vendite_giornaliere),size = 0.7*nrow(vendite_giornaliere))
+train <- vendite_giornaliere[index,]
+test <- vendite_giornaliere[-index,] 
 dim(train)
 dim(test)
 
-sum(is.na(train$scontrini1))  
-train$scontrini1[is.na(train$scontrini1)] <- 0  
-sum(is.na(train$pioggia))  
-sum(is.na(train$is_weekend))  
-sum(is.na(train$is_holiday)) 
-sum(is.na(train$stagione))  
+# implementazione modelli
+rf1 = randomForest(vendite1 ~ is_holiday + is_weekend + pioggia + covid + stagione 
+                  + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
+                  + tot_vaccini_emilia_romagna + mese, data = train)
+varImpPlot(rf1)
+print(rf1)
 
-rf = randomForest(scontrini1 ~ is_holiday + is_weekend + pioggia + covid + stagione + weekday + solo_asporto_emilia_romagna, data = train)
-rf = randomForest(scontrini1 ~ is_weekend + weekday, data = train)
+# si selezionano le variabili più rilevanti
+rf2 = randomForest(vendite1 ~ weekday + is_weekend + mese + is_holiday + stagione,
+                   data = train)
+varImpPlot(rf2)
+print(rf2)
 
-varImpPlot(rf)
-print(rf)
+predictions = predict(rf2, newdata = train)
+mape(train$vendite1, predictions)
 
-predictions = predict(rf, newdata = train)
-mape(train$scontrini1, predictions)
-
-predictions = predict(rf, newdata = test)
+predictions = predict(rf2, newdata = test)
 mape(test$vendite1, predictions)
 
-rf.result <- confusionMatrix(predictions, test$scontrini1)
+RMSE.forest <- sqrt(mean((predictions-test$vendite1)^2))
+RMSE.forest
+
+MAE.forest <- mean(abs(predictions-test$vendite1))
+MAE.forest
+
+# predizioni su valori nuovi
+
+# selezione periodo post covid
+reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+vendite_giornaliere_forecast <- ristorazione %>%
+  filter(ristorazione$data >= reference_date)
+vendite_giornaliere_forecast <- vendite_giornaliere_forecast[4:59,]
+
+vendite_forecast <- predict(rf2, vendite_giornaliere_forecast)
+vendite_forecast <- as.data.frame(vendite_forecast)
+
+library("xts")
+interval <- seq(as.Date("2020-03-12"), as.Date("2020-05-06"), by = "day")
+gfg_date <- data.frame(date = interval, 
+                       val=vendite_forecast)
+gfg_date$date<-as.Date(gfg_date$date)  
+gfg_ts <- xts(gfg_date$val, gfg_date$date)
+    
+plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+
+
+reference_date_pre <- as.Date("2020-03-11", format = "%Y-%m-%d")
+vendite_pre <- ristorazione %>%
+  filter(ristorazione$data <= reference_date_pre) %>%
+  select(data, vendite1)
+
+interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-03-11"), by = "day")
+gfg_date_pre <- data.frame(date = interval_pre, 
+                       val=vendite_pre$vendite1)
+
+gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
+gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+
+# unire due df
+names(gfg_date)[1] <- "data"
+names(gfg_date)[2] <- "vendite"
+
+names(gfg_date_pre)[1] <- "data"
+names(gfg_date_pre)[2] <- "vendite"
+
+merge_df <- rbind(gfg_date, gfg_date_pre)
+merge_df <- merge_df[order(merge_df$data), ]
+row.names(merge_df) <- NULL
+
+plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+ristorazione_temp <- ristorazione[1:1222,]
+ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
+plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
+
+
+# sia per random forest sia per arima accorciare periodo pre covid altrimenti si 
+# prendono già giorni in cui le vendite stavano già andando a picco
+
+
+
 
 
 
