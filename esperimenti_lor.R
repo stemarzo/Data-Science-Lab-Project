@@ -1,5 +1,12 @@
 # WORKING IN PROGRESS #
 
+
+# esplorazione ristoranti ----
+
+# evidenziare che maggio 2020 (post covid) registra più vendite rispetto a maggio 2019
+
+
+
 # confronto estati ----
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
@@ -34,39 +41,58 @@
 
 # arima con regressori----
 
+# si può valutare anche modello SARIMA e VAR (per gestire + serie storiche)
 
+# bisogna provare con altre variabili: tipo is weekend, is holiday, 
+# noi utilizziamo ad ora solo variabili che sono legate al covid, non è troppo 
+# rigida questa scelta? I colori della zone sono abbastanza limitati, partendo da 
+# novembre essi agiscono su una piccola porzione di dati
 
 
 
 # random forest con regressori----
-
-# si utilizza vendite1_day_pre
-
-vendite1_day_pre_split_auto <- ts_split(vendite1_day_pre)
-train_auto_pre <- vendite1_day_pre_split_auto$train
-test_auto_pre <- vendite1_day_pre_split_auto$test
-
-autoplot(vendite1_day_pre) +
-  autolayer(train_auto_pre, series="Training") +
-  autolayer(train_auto_pre, series="Test")
-
+# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
+# provo a utilizzare come varibaile scontrini1
 mape <- function(actual,pred){
   mape <- mean(abs((actual - pred)/actual))*100
   return (mape)
 }
-
-
 set.seed(100)
-
 library(randomForest)
 
-rf = randomForest(vendite1_day_pre ~ Inventory + year + yday + quarter + month + day + weekdays + weekend + week, data = train)
+reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
 
+vendite_giornaliere <- ristorazione %>%
+  filter(ristorazione$data < reference_date)
+
+numberOfRows <- nrow(vendite_giornaliere)
+bound <- as.integer(numberOfRows *0.8)
+train <- vendite_giornaliere[1:bound ,]
+test <-  vendite_giornaliere[(bound+1):numberOfRows ,]
+
+dim(train)
+dim(test)
+
+sum(is.na(train$scontrini1))  
+train$scontrini1[is.na(train$scontrini1)] <- 0  
+sum(is.na(train$pioggia))  
+sum(is.na(train$is_weekend))  
+sum(is.na(train$is_holiday)) 
+sum(is.na(train$stagione))  
+
+rf = randomForest(scontrini1 ~ is_holiday + is_weekend + pioggia + covid + stagione + weekday + solo_asporto_emilia_romagna, data = train)
+rf = randomForest(scontrini1 ~ is_weekend + weekday, data = train)
+
+varImpPlot(rf)
 print(rf)
 
-# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
+predictions = predict(rf, newdata = train)
+mape(train$scontrini1, predictions)
 
+predictions = predict(rf, newdata = test)
+mape(test$vendite1, predictions)
 
+rf.result <- confusionMatrix(predictions, test$scontrini1)
 
 
 
