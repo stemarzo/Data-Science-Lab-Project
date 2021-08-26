@@ -34,174 +34,39 @@
 
 # arima con regressori----
 
-# vendite settimanali
-vendite1_sett_avg
-
-
-# aggiungo nuove colonne
-ristorante1_copy <- ristorante1
-
-# ------> colonna covid 
-ristorante1_copy$covid <- 0
-ristorante1_copy[ristorante1_copy$data > "2020-03-09",]$covid <- 1
-
-# colonna covid settimanale
-# week_rist1 <- as.Date(cut(ristorante1_copy$data, "week"))
-week_covid <- aggregate(covid ~ week_rist1, ristorante1_copy, sum)  # per settimana
-# la colonna covid "somma" non ha molto senso
-
-# ------> colonna chiuso: numero giorni chiusura per settimana
-week_chiuso <- aggregate(chiuso ~ week_rist1, ristorante1_copy, sum)  # per settimana
-
-
-# ------> colonna zona rossa
-ristorazione$rossa <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
-ristorante1_copy$rossa <- ristorazione$rossa
-week_rossa <- aggregate(rossa ~ week_rist1, ristorante1_copy, sum)  # per settimana
-week_rossa <- week_rossa$rossa
-
-
-# dataframe dati giornalieri
-View(ristorante1_copy)
-
-# dataframe dati settimanali
-df7 <- data.frame(week_covid$covid, week_chiuso$chiuso, week_rossa)
-View(df7)
-colnames(df7) <- c("covid_sum", "chiuso_sum", "rossa_sum")
-
-
-# trasformazione colonne precedenti in valori binari
-df7 <- df7 %>%
-  mutate(covid_bin = ifelse(covid_sum>0, 1, 0))
-
-df7 <- df7 %>%
-  mutate(rossa_bin = ifelse(rossa_sum>4, 1, 0))
-
-df7 <- df7 %>%
-  mutate(chiuso_bin = ifelse(chiuso_sum>4, 1, 0))
-
-# verifica collinearità variabili
-library(corrplot)
-
-numeric.var <- sapply(df7, is.numeric)
-corr.matrix <- cor(df7[,numeric.var])
-corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
-
-
-# modello auto.arima con regressori
-
-## PROVA1- regressori: "covid_bin", "rossa_sum", "chiuso_sum" ----
-# per ora modello migliore
-MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
-                  xreg = data.matrix(df7[, c("covid_bin", "rossa_sum", "chiuso_sum")]))
-summary(MT7)  # AIC: 3486.2   
-checkresiduals(MT7)
-tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
-
-# verifica p-value
-valori <- MT7$coef["chiuso_sum"]/sqrt(diag(MT7$var.coef))
-pvalue = 2*pt(valori["chiuso_sum"] ,221)
-pvalue
-
-valori <- MT7$coef["covid_bin"]/sqrt(diag(MT7$var.coef))
-pvalue = 2*pt(valori["covid_bin"] ,221)
-pvalue
-
-valori <- MT7$coef["rossa_sum"]/sqrt(diag(MT7$var.coef))
-pvalue = 2*pt(valori["rossa_sum"] ,221)
-pvalue
-
-# verifica adattamento modello
-autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
-# autoplot(M3$fitted) + autolayer(train_auto)
 
 
 
 
+# random forest con regressori----
 
-## PROVA2- regressori: "covid_sum", "chiuso_sum" ----
-# MT7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, xreg = 
-#                     data.matrix(df7[, c("covid_sum", "chiuso_sum")]))
-# summary(MT7)  # AIC: 3506.24   
-# checkresiduals(MT7)
-# tsdisplay(residuals(MT7), lag.max=52, main='Seasonal Model Residuals')
-# 
-# # verifica p-value
-# valori <- MT7$coef["chiuso_sum"]/sqrt(diag(MT7$var.coef))
-# pvalue = 2*pt(valori["chiuso_sum"] ,222)
-# pvalue
-# 
-# valori <- MT7$coef["covid_sum"]/sqrt(diag(MT7$var.coef))
-# pvalue = 2*pt(valori["covid_sum"] ,222)
-# pvalue
-# 
-# # verifica adattamento modello
-# autoplot(MT7$fitted) + autolayer(vendite1_sett_avg)
-# autoplot(M3$fitted) + autolayer(train_auto)
+# si utilizza vendite1_day_pre
+
+vendite1_day_pre_split_auto <- ts_split(vendite1_day_pre)
+train_auto_pre <- vendite1_day_pre_split_auto$train
+test_auto_pre <- vendite1_day_pre_split_auto$test
+
+autoplot(vendite1_day_pre) +
+  autolayer(train_auto_pre, series="Training") +
+  autolayer(train_auto_pre, series="Test")
+
+mape <- function(actual,pred){
+  mape <- mean(abs((actual - pred)/actual))*100
+  return (mape)
+}
 
 
+set.seed(100)
 
-# creazione df per previsioni ----
+library(randomForest)
 
-# colori aggiornati fino al 12 agosto 2021
-# il file è nella cartella "dati"
-colori_zone_aggiornato <- read_csv("colori_zone_aggiornato.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
+rf = randomForest(vendite1_day_pre ~ Inventory + year + yday + quarter + month + day + weekdays + weekend + week, data = train)
 
-colori_emilia_romagna_new <- colori_zone_aggiornato %>% 
-  filter(denominazione_regione == "Emilia-Romagna")
-names(colori_emilia_romagna_new)[3] <- "colore_emilia_romagna"
+print(rf)
 
-reference_date_colori <- as.Date("2021-04-19", format = "%Y-%m-%d")  # 19 aprile e non 12 perchè se no dopo con le settiman è un casino. L'ultima settimana che abbiamo è quella del 12 (anche se i dati non sono completi per tutta la settimana), per i dati aggionrati devo prendere la nuova settimana del 19 aprile
-
-colori_emilia_romagna_new <- colori_emilia_romagna_new  %>% 
-  filter(data > reference_date_colori)
+# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
 
 
-# creazione df (dal 12 aprile 2021 al 12 agosto 2021) 
-df_dati_aggiornati <- data.frame(colori_emilia_romagna_new)  # deve essere l'analogo di df_dati_aggiornati
-df_dati_aggiornati <- df_dati_aggiornati[,-2]
 
-# colonna zona rossa
-df_dati_aggiornati$rossa <- ifelse(df_dati_aggiornati$colore_emilia_romagna == "rosso", 1, 0)  # no zone rosse
-
-
-# covid aggiornato fino al 12 agosto
-df_dati_aggiornati$covid <- 1  # il covid è presents
-
-
-# chiuso aggiornato fino al 12 agosto
-df_dati_aggiornati$chiuso <- 0  # non ci sono date in cui i ristoranti avrebbero potuto chiudere
-
-
-# divisione in settimane
-week_new_rist1 <- as.Date(cut(df_dati_aggiornati$data, "week"))
-
-week_rossa_new <- aggregate(rossa ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
-week_chiuso_new <- aggregate(chiuso ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
-covid_chiuso_new <- aggregate(covid ~ week_new_rist1, df_dati_aggiornati, sum)  # per settimana
-
-df7_new <- data.frame(covid_chiuso_new$covid, week_chiuso_new$chiuso, week_rossa_new$rossa)
-View(df7_new)
-colnames(df7_new) <- c("covid_sum", "chiuso_sum", "rossa_sum")
-
-
-# trasformazione colonne precedenti in valori binari
-df7_new <- df7_new %>%
-  mutate(covid_bin = ifelse(covid_sum>0, 1, 0))
-
-df7_new <- df7_new %>%
-  mutate(rossa_bin = ifelse(rossa_sum>4, 1, 0))
-
-df7_new <- df7_new %>%
-  mutate(chiuso_bin = ifelse(chiuso_sum>4, 1, 0))
-
-# creazione df regressori per previsioni
-df_previsioni <- rbind(df7, df7_new)
-
-# previsione vendite settimanali su dati nuovi - DA RIVEDERE
-forecast <- MT7 %>%
-  forecast(h=17,  xreg =data.matrix(df7_new[, c("covid_bin", "rossa_sum", "chiuso_sum")])) 
-
-autoplot(forecast)
 
 
