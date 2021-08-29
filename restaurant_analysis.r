@@ -462,6 +462,7 @@ ristorante1$rapprto_v_s <- ristorante1$vendite/ristorante1$scontrini
 ristorante1$rapprto_v_s[is.na(ristorante1$rapprto_v_s)] <- 0
 ristorante1$chiuso <- 0
 ristorante1$chiuso <- ifelse(ristorante1$rapprto_v_s == 0, 1, 0)
+ristorante1$chiuso <- as.factor(ristorante1$chiuso)
 ristorante1$covid <- ristorazione$covid
 ristorante1$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -475,6 +476,7 @@ ristorante2$rapprto_v_s <- ristorante2$vendite/ristorante2$scontrini
 ristorante2$rapprto_v_s[is.na(ristorante2$rapprto_v_s)] <- 0
 ristorante2$chiuso <- 0
 ristorante2$chiuso <- ifelse(ristorante2$rapprto_v_s == 0, 1, 0)
+ristorante2$chiuso <- as.factor(ristorante2$chiuso)
 ristorante2$covid <- ristorazione$covid
 ristorante2$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -488,6 +490,7 @@ ristorante3$rapprto_v_s <- ristorante3$vendite/ristorante3$scontrini
 ristorante3$rapprto_v_s[is.na(ristorante3$rapprto_v_s)] <- 0
 ristorante3$chiuso <- 0
 ristorante3$chiuso <- ifelse(ristorante3$rapprto_v_s == 0, 1, 0)
+ristorante3$chiuso <- as.factor(ristorante3$chiuso)
 ristorante3$covid <- ristorazione$covid
 ristorante3$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -501,6 +504,7 @@ ristorante4$rapprto_v_s <- ristorante4$vendite/ristorante4$scontrini
 ristorante4$rapprto_v_s[is.na(ristorante4$rapprto_v_s)] <- 0
 ristorante4$chiuso <- 0
 ristorante4$chiuso <- ifelse(ristorante4$rapprto_v_s == 0, 1, 0)
+ristorante4$chiuso <- as.factor(ristorante4$chiuso)
 ristorante4$covid <- ristorazione$covid
 ristorante4$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -513,6 +517,7 @@ ristorante5$rapprto_v_s <- ristorante5$vendite/ristorante5$scontrini
 ristorante5$rapprto_v_s[is.na(ristorante5$rapprto_v_s)] <- 0
 ristorante5$chiuso <- 0
 ristorante5$chiuso <- ifelse(ristorante5$rapprto_v_s == 0, 1, 0)
+ristorante5$chiuso <- as.factor(ristorante5$chiuso)
 ristorante5$covid <- ristorazione$covid
 ristorante5$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -526,6 +531,7 @@ ristorante6$rapprto_v_s <- ristorante6$vendite/ristorante6$scontrini
 ristorante6$rapprto_v_s[is.na(ristorante6$rapprto_v_s)] <- 0
 ristorante6$chiuso <- 0
 ristorante6$chiuso <- ifelse(ristorante6$rapprto_v_s == 0, 1, 0)
+ristorante6$chiuso <- as.factor(ristorante6$chiuso)
 ristorante6$covid <- ristorazione$covid
 ristorante6$rossa <- ristorazione$rossa_emilia_romagna
 
@@ -899,28 +905,39 @@ M3 %>%
 # setting regressori
 
 # dati covid su base settimanale (somma, si contano i giorni della settimana in cui c'è il covid)
+ristorante1$covid <- as.numeric(as.character(ristorante1$covid))
 week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1[-c(1,1563),], sum)  
 week_covid_sum <- week_covid_sum$covid
+ristorante1$covid <- as.factor(ristorante1$covid)
 
 # dati chiuso su base settimanale (somma, si contano i giorni della settimana in cui il ristorante è chiuso, ovvero non ci sono state vendite)
+ristorante1$chiuso <- as.numeric(as.character(ristorante1$chiuso))
 week_chiuso_sum <- aggregate(chiuso ~ week_rist1, ristorante1[-c(1,1563),], sum) 
 week_chiuso_sum <- week_chiuso_sum$chiuso
+ristorante1$chiuso <- as.factor(ristorante1$chiuso)
+
 
 # dati rossa su base settimanale (somma, si contano i giorni della settimana in cui c'è zona rossa)
+ristorante1$rossa <- as.numeric(as.character(ristorante1$rossa))
 week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1[-c(1,1563),], sum)
 week_rossa_sum <- week_rossa_sum$rossa
+ristorante1$rossa <- as.factor(ristorante1$rossa)
+
 
 regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
 
 # trasformazione colonne precedenti in valori binari
 regressori_week <- regressori_week %>%
   mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))  # se almeno un giorno durante la settimana ha registrato il covid allora tale settimana viene etichettata come settimana covid
+regressori_week$week_covid_bin <- as.factor(regressori_week$week_covid_bin)
 
 regressori_week <- regressori_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))  # se un ristorante durante la settimana rimane chiuso per più di 4 giorni allora tale settimana viene etichettata come settimana chiusa
+regressori_week$week_chiuso_bin <- as.factor(regressori_week$week_chiuso_bin)
 
 regressori_week <- regressori_week %>%
   mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))  # se un ristorante durante la settimana è in zona rossa per più di 4 giorni allora tale settimana viene etichettata come settimana rossa
+regressori_week$week_rossa_bin <- as.factor(regressori_week$week_rossa_bin)
 
 # verifica collinearità variabili
 library(corrplot)
@@ -1011,12 +1028,16 @@ colnames(regressori_forecast_week) <- c("week_covid_sum", "week_chiuso_sum", "we
 # trasformazione colonne precedenti in valori binari
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))
+regressori_forecast_week$week_covid_bin <- as.factor(regressori_forecast_week$week_covid_bin)
 
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))
+regressori_forecast_week$week_rossa_bin <- as.factor(regressori_forecast_week$week_rossa_bin)
 
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
+regressori_forecast_week$week_chiuso_bin <- as.factor(regressori_forecast_week$week_chiuso_bin)
+
 
 # previsione vendite settimanali su dati nuovi
 forecast_2021 <- M4 %>%
