@@ -289,3 +289,113 @@ ristorazione_temp <- ristorazione[1:1228,]
 ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
 plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
+
+# arima con periodo accorciato ----
+
+# da modifcare da qui in poi
+
+# si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
+reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+
+# vendite ristorante 1 pre covid
+ristorante1_pre_covid_vendite <- ristorante1 %>%
+  filter(ristorante1$data < reference_date) %>%
+  select(vendite, data)
+
+# vendite giornaliere primo ristorante pre covid
+vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequency=365) 
+
+# vendite settimanali medie primo ristorante pre covid
+week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid_vendite$data, "week"))
+
+# si procede ad eliminare il giorno 1 gennaio 2017 che risulta essere domenica
+remove_dates <- as.Date(c('2017-01-01'))
+all_dates <- week_pre_covid_rist1
+week_pre_covid_rist1 <- all_dates[!all_dates %in% remove_dates]
+
+vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], sum)
+vendite1_sett_pre <- vendite1_sett_pre$vendite
+vendite1_sett_pre <- ts(vendite1_sett_pre,start=2017,frequency=52) 
+
+vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], mean)
+vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
+vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# divisione in train e test
+vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
+train_auto_pre <- vendite1_sett_avg_pre_split_auto$train
+test_auto_pre <- vendite1_sett_avg_pre_split_auto$test
+
+autoplot(vendite1_sett_avg_pre) +
+  autolayer(train_auto_pre, series="Training") +
+  autolayer(train_auto_pre, series="Test")
+
+# auto.arima per selezione modello migliore
+arima_diag(train_auto_pre)
+M3 <- auto.arima(train_auto_pre, seasonal = T)
+# i dati vengono addestrati sul train e poi viene valutato il modello sul test
+
+# per valutare la qualità del modello si possono inizialmente plottare i grafici
+# ACF e PACF dei residui del modello
+tsdisplay(residuals(M3), lag.max=15, main='Seasonal Model Residuals')
+
+# AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
+
+accuracy(M3)
+# MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
+# MASE = 0.4430427, < 1, buon risultato
+
+summary(M3)
+
+# si vuole verificare che non ci sia correlazione tra gli errori
+checkresiduals(M3)
+check_res(M3)
+M3$residuals
+
+# A Ljung-Box test can also indicate the presence of these correlations. 
+# As long as we score a p-value > 0.05, there is a 95% chance the residuals are independent
+acf(M3$residuals, lag.max=20, na.action=na.pass)
+Box.test(M3$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
+hist(M3$residuals)
+
+#  considerando test set
+M3 %>%
+  forecast(h=50) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(test_auto_pre)
+
+# alternativa per verifica addatamento dati con test set
+forecast_covid <- M3 %>%
+  forecast(h=30)
+
+
+par(mfrow=c(1,1))
+plot(forecast_covid)
+lines(test_auto_pre, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
+
+# valutazione qualità previsioni
+accuracy(forecast_covid, test_auto_pre)
+
+# si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
+# per capire come sarebbero andate le vendite se non ci fosse stato il covid
+
+M3 %>%
+  forecast(h=106) %>%  # h Number of periods for forecasting
+  autoplot() + autolayer(vendite1_sett_avg)
+
