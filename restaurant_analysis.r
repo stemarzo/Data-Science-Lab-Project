@@ -861,6 +861,7 @@ M3 %>%
 forecast_covid <- M3 %>%
   forecast(h=30)
 
+
 par(mfrow=c(1,1))
 plot(forecast_covid)
 lines(test_auto_pre, col="red")

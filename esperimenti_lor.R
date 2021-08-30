@@ -55,7 +55,6 @@
 
 # random forest con regressori----
 # https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
-# provo a utilizzare come varibaile scontrini1
 mape <- function(actual,pred){
   mape <- mean(abs((actual - pred)/actual))*100
   return (mape)
@@ -64,7 +63,10 @@ set.seed(100)
 library(randomForest)
 
 # selezione periodo pre covid per poi fare previsione sul periodo covid
+# bisogna considerar un periodo più corto altrimenti si è troppo vicini al covid,
+# e i dati potrebbero risentirne
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+# vendite gionaliere pre covid
 vendite_giornaliere <- ristorazione %>%
   filter(ristorazione$data < reference_date)
 
@@ -106,18 +108,26 @@ RMSE.forest
 MAE.forest <- mean(abs(predictions-test$vendite1))
 MAE.forest
 
-# predizioni su valori nuovi
+# predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
 
 # selezione periodo post covid
 reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+# vendite giornaliere periodo covid
 vendite_giornaliere_forecast <- ristorazione %>%
   filter(ristorazione$data >= reference_date)
+
+# si selezioanno le date in cui si registrano 0 vendite/scontrini
 vendite_giornaliere_forecast <- vendite_giornaliere_forecast[4:59,]
 
+# si utilizza il modello appena creato per fare previsioni sulle date in cui
+# si registrano 0 vendite/scontrini
 vendite_forecast <- predict(rf2, vendite_giornaliere_forecast)
 vendite_forecast <- as.data.frame(vendite_forecast)
 
+# si uniscono le tue serie storiche
 library("xts")
+
+# serie storica previsioni durante periodo covid
 interval <- seq(as.Date("2020-03-12"), as.Date("2020-05-06"), by = "day")
 gfg_date <- data.frame(date = interval, 
                        val=vendite_forecast)
@@ -126,7 +136,7 @@ gfg_ts <- xts(gfg_date$val, gfg_date$date)
     
 plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 
-
+# serie storica dati reali fino a prima covid 
 reference_date_pre <- as.Date("2020-03-11", format = "%Y-%m-%d")
 vendite_pre <- ristorazione %>%
   filter(ristorazione$data <= reference_date_pre) %>%
@@ -139,7 +149,7 @@ gfg_date_pre <- data.frame(date = interval_pre,
 gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
 gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
 
-# unire due df
+# si uniscono le due serie storiche
 names(gfg_date)[1] <- "data"
 names(gfg_date)[2] <- "vendite"
 
@@ -150,8 +160,11 @@ merge_df <- rbind(gfg_date, gfg_date_pre)
 merge_df <- merge_df[order(merge_df$data), ]
 row.names(merge_df) <- NULL
 
+# serie storica con previsioni
 plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
 ristorazione_temp <- ristorazione[1:1222,]
+
+# serie storica originale
 ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
 plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
@@ -160,7 +173,119 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 # prendono già giorni in cui le vendite stavano già andando a picco
 
 
+# random forest con periodo accorciato ----
 
+# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
+mape <- function(actual,pred){
+  mape <- mean(abs((actual - pred)/actual))*100
+  return (mape)
+}
+set.seed(100)
+library(randomForest)
 
+# selezione periodo pre covid per poi fare previsione sul periodo covid
+# bisogna considerar un periodo più corto altrimenti si è troppo vicini al covid,
+# e i dati potrebbero risentirne
+reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+# vendite gionaliere pre covid
+vendite_giornaliere <- ristorazione %>%
+  filter(ristorazione$data < reference_date)
 
+# sistemazione NA
+sum(is.na(vendite_giornaliere))
+
+sum(is.na(vendite_giornaliere$vendite1))
+vendite_giornaliere$vendite1[is.na(vendite_giornaliere$vendite1)] <- 0 
+
+# divisione in train e tes
+index <- sample(1:nrow(vendite_giornaliere),size = 0.7*nrow(vendite_giornaliere))
+train <- vendite_giornaliere[index,]
+test <- vendite_giornaliere[-index,] 
+dim(train)
+dim(test)
+
+# implementazione modelli
+rf1 = randomForest(vendite1 ~ is_holiday + is_weekend + pioggia + covid + stagione 
+                   + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
+                   + tot_vaccini_emilia_romagna + mese, data = train)
+varImpPlot(rf1)
+print(rf1)
+
+# si selezionano le variabili più rilevanti
+rf2 = randomForest(vendite1 ~ weekday + is_weekend + mese + is_holiday + stagione,
+                   data = train)
+varImpPlot(rf2)
+print(rf2)
+
+predictions = predict(rf2, newdata = train)
+mape(train$vendite1, predictions)
+
+predictions = predict(rf2, newdata = test)
+mape(test$vendite1, predictions)
+
+RMSE.forest <- sqrt(mean((predictions-test$vendite1)^2))
+RMSE.forest
+
+MAE.forest <- mean(abs(predictions-test$vendite1))
+MAE.forest
+
+# predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
+
+# selezione periodo post covid
+reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+# vendite giornaliere periodo covid
+vendite_giornaliere_forecast <- ristorazione %>%
+  filter(ristorazione$data >= reference_date)
+
+# si selezioanno le date in cui si registrano 0 vendite/scontrini
+vendite_giornaliere_forecast <- vendite_giornaliere_forecast[1:133,]
+
+# si utilizza il modello appena creato per fare previsioni sulle date in cui
+# si registrano 0 vendite/scontrini
+vendite_forecast <- predict(rf2, vendite_giornaliere_forecast)
+vendite_forecast <- as.data.frame(vendite_forecast)
+
+# si uniscono le tue serie storiche
+library("xts")
+
+# serie storica previsioni durante periodo covid
+interval <- seq(as.Date("2020-01-01"), as.Date("2020-05-12"), by = "day")
+gfg_date <- data.frame(date = interval, 
+                       val=vendite_forecast)
+gfg_date$date<-as.Date(gfg_date$date)  
+gfg_ts <- xts(gfg_date$val, gfg_date$date)
+
+plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+
+# serie storica dati reali fino a prima covid 
+reference_date_pre <- as.Date("2019-12-31", format = "%Y-%m-%d")
+vendite_pre <- ristorazione %>%
+  filter(ristorazione$data <= reference_date_pre) %>%
+  select(data, vendite1)
+
+interval_pre <- seq(as.Date("2017-01-01"), as.Date("2019-12-31"), by = "day")
+gfg_date_pre <- data.frame(date = interval_pre, 
+                           val=vendite_pre$vendite1)
+
+gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
+gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+
+# si uniscono le due serie storiche
+names(gfg_date)[1] <- "data"
+names(gfg_date)[2] <- "vendite"
+
+names(gfg_date_pre)[1] <- "data"
+names(gfg_date_pre)[2] <- "vendite"
+
+merge_df <- rbind(gfg_date, gfg_date_pre)
+merge_df <- merge_df[order(merge_df$data), ]
+row.names(merge_df) <- NULL
+
+# serie storica con previsioni
+plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+ristorazione_temp <- ristorazione[1:1228,]
+
+# serie storica originale
+ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
+plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
