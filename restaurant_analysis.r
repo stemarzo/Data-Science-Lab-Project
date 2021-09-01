@@ -169,6 +169,12 @@ ristorazione<-merge(x=ristorazione,y=colori_lombardia_emilia_romagna,by="data",a
 ristorazione$colore_lombardia[is.na(ristorazione$colore_lombardia)] <- "bianco"
 ristorazione$colore_emilia_romagna[is.na(ristorazione$colore_emilia_romagna)] <- "bianco"
 
+# sistemazione manuale colori zone (per emilia romagna, colonna che verrà effettivamente utilizzata)
+ristorazione[1:1164,"colore_emilia_romagna"]<-"bianco"
+ristorazione[1165:1234,"colore_emilia_romagna"]<-"rosso"
+ristorazione[1235:1258,"colore_emilia_romagna"]<-"arancione"
+ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
+
 ristorazione$colore_lombardia <- as.factor(ristorazione$colore_lombardia)
 ristorazione$colore_emilia_romagna <- as.factor(ristorazione$colore_emilia_romagna)
 
