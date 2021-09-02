@@ -1,12 +1,12 @@
 # WORKING IN PROGRESS #
 
-# esplorazione ristoranti ----
+# !!!esplorazione ristoranti ----
 
 # evidenziare che maggio 2020 (post covid) registra più vendite rispetto a maggio 2019
 
 
 
-# confronto estati ----
+# !!!confronto estati ----
 
 # si procede con un'analisi più approfondita e più tencica del grafico per rispondere 
 # alla domanda di ricerca: ovvero nel 2020 c'era pochissime restrizioni, quasi 
@@ -35,7 +35,7 @@
 
 
 
-# prophet con periodo accorciato ----
+# OKprophet con periodo accorciato ----
 
 library(prophet)
 
@@ -68,7 +68,7 @@ dyplot.prophet(m, forecast)
 
 
 
-# random forest ----
+# OKrandom forest ----
 # periodo accorciato
 # il train si ferma al 5 gennaio
 # https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
@@ -183,7 +183,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 
 
 
-# arima con regressori diversi ----
+# !!!arima con regressori diversi ----
 
 # si può valutare anche modello SARIMA e VAR (per gestire + serie storiche)
 
@@ -223,7 +223,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 
 
 
-# arima con periodo accorciato ----
+# OKarima con periodo accorciato ----
 # nel main l'arima veniva usato su tutti i dati, qui si usa per fare previsioni per il periodo "post" covid,
 # quindi le vendite "pre" covid verranno divise in train e test
 
