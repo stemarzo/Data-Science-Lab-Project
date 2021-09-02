@@ -70,32 +70,32 @@ print(
 reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # vendite Ristorante 6 pre covid
-ristorante6_pre_covid_vendite <- ristorante6 %>%
-  filter(ristorante6$data < reference_date) %>%
-  select(vendite, data)
+ristorante6_pre_covid <- ristorante6 %>%
+  filter(ristorante6$data < reference_date) #%>%
+  #select(vendite, data)
 
 # vendite giornaliere secondo ristorante pre covid
-vendite6_day_pre <- ts(ristorante6_pre_covid_vendite$vendite,start = decimal_date(as.Date("2017-09-21")),frequency=365) 
+vendite6_day_pre <- ts(ristorante6_pre_covid$vendite,start = decimal_date(as.Date("2017-09-21")),frequency=365) 
 
 # vendite settimanali medie secondo ristorante pre covid
-week_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid_vendite$data, "week"))
+week_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid$data, "week"))
 
-vendite6_sett_pre <- aggregate(vendite ~ week_pre_covid_rist6, ristorante6_pre_covid_vendite, sum)
+vendite6_sett_pre <- aggregate(vendite ~ week_pre_covid_rist6, ristorante6_pre_covid, sum)
 vendite6_sett_pre <- vendite6_sett_pre$vendite
 vendite6_sett_pre <- ts(vendite6_sett_pre,start = decimal_date(as.Date("2017-09-21")),frequency=52) 
 
-vendite6_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist6, ristorante6_pre_covid_vendite, mean)
+vendite6_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist6, ristorante6_pre_covid, mean)
 vendite6_sett_avg_pre <- vendite6_sett_avg_pre$vendite
 vendite6_sett_avg_pre <- ts(vendite6_sett_avg_pre,start = decimal_date(as.Date("2017-09-21")),frequency=52) 
 
 # vendite mensili medie  secondo ristorante pre covid
-month_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid_vendite$data, "month"))
+month_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid$data, "month"))
 
-vendite6_mens_pre <- aggregate(vendite ~ month_pre_covid_rist6, ristorante6_pre_covid_vendite, sum)
+vendite6_mens_pre <- aggregate(vendite ~ month_pre_covid_rist6, ristorante6_pre_covid, sum)
 vendite6_mens_pre <- vendite6_mens_pre$vendite
 vendite6_mens_pre <- ts(vendite6_mens_pre,start = decimal_date(as.Date("2017-09-21")),frequency=12) 
 
-vendite6_mens_avg_pre <- aggregate(vendite ~ month_pre_covid_rist6, ristorante6_pre_covid_vendite, mean)
+vendite6_mens_avg_pre <- aggregate(vendite ~ month_pre_covid_rist6, ristorante6_pre_covid, mean)
 vendite6_mens_avg_pre <- vendite6_mens_avg_pre$vendite
 vendite6_mens_avg_pre <- ts(vendite6_mens_avg_pre,start = decimal_date(as.Date("2017-09-21")),frequency=12) 
 
@@ -176,26 +176,26 @@ print(
 ### analisi scontrini considerando il periodo pre covid ----
 
 # si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
-reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
+# reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # scontrini Ristorante 6 pre covid
-ristorante6_pre_covid_scontrini <- ristorante6 %>%
-  filter(ristorante6$data < reference_date) %>%
-  select(scontrini, data)
+# ristorante6_pre_covid <- ristorante6 %>%
+#   filter(ristorante6$data < reference_date) %>%
+#   select(scontrini, data)
 
 # scontrini giornalieri secondo ristorante pre covid
-scontrini6_day_pre <- ts(ristorante6_pre_covid_scontrini$scontrini,start = decimal_date(as.Date("2017-09-21")),frequency=365) 
+scontrini6_day_pre <- ts(ristorante6_pre_covid$scontrini,start = decimal_date(as.Date("2017-09-21")),frequency=365) 
 
 # scontrini settimanali medi secondo ristorante pre covid
 # week_pre_covid_rist6 
 
-scontrini6_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist6, ristorante6_pre_covid_scontrini, mean)
+scontrini6_sett_avg_pre <- aggregate(scontrini ~ week_pre_covid_rist6, ristorante6_pre_covid, mean)
 scontrini6_sett_avg_pre <- scontrini6_sett_avg_pre$scontrini
 scontrini6_sett_avg_pre <- ts(scontrini6_sett_avg_pre,start = decimal_date(as.Date("2017-09-21")),frequency=52) 
 
 # scontrini mensili medi  secondo ristorante pre covid
-month_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid_scontrini$data, "month"))
-scontrini6_mens_avg_pre <- aggregate(scontrini ~ month_pre_covid_rist6, ristorante6_pre_covid_scontrini, mean)
+month_pre_covid_rist6 <- as.Date(cut(ristorante6_pre_covid$data, "month"))
+scontrini6_mens_avg_pre <- aggregate(scontrini ~ month_pre_covid_rist6, ristorante6_pre_covid, mean)
 scontrini6_mens_avg_pre <- scontrini6_mens_avg_pre$scontrini
 scontrini6_mens_avg_pre <- ts(scontrini6_mens_avg_pre,start = decimal_date(as.Date("2017-09-21")),frequency=12) 
 
@@ -329,7 +329,7 @@ plot(
 
 ### decomposizione considerando tutti gli anni ----
 # decomposizione giornaliera 
-multi_vendite6 <- msts(ristorante1$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
+multi_vendite6 <- msts(ristorante6$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
 multi_vendite6_dec <- mstl(multi_vendite6, s.window = "periodic")
 print(autoplot(multi_vendite6_dec) + ggtitle("Ristorante 6: Decomposizione giornaliera"))
 
@@ -354,7 +354,7 @@ plot(components.ts_6)
 
 ### decomposizione pre covid ----
 # decomposizione giornaliera 
-multi_vendite6_pre <- msts(ristorante1_pre_covid_vendite$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
+multi_vendite6_pre <- msts(ristorante6_pre_covid$vendite, ts.frequency = 365, start=2017, seasonal.periods = c(7,365))
 multi_vendite_dec6_pre <- mstl(multi_vendite6_pre, s.window = "periodic")
 print(autoplot(multi_vendite_dec6_pre) + ggtitle("Ristorante 6: Decomposizione giornaliera pre covid"))
 

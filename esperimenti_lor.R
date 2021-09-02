@@ -232,26 +232,26 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
-ristorante1_pre_covid_vendite <- ristorante1 %>%
+ristorante1_pre_covid <- ristorante1 %>%
   filter(ristorante1$data < reference_date) %>%
   select(vendite, data)
 
 # vendite giornaliere primo ristorante pre covid
-vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequency=365) 
+vendite1_day_pre <- ts(ristorante1_pre_covid$vendite,start=2017,frequency=365) 
 
 # vendite settimanali medie primo ristorante pre covid
-week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid_vendite$data, "week"))
+week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid$data, "week"))
 
 # si procede ad eliminare il giorno 1 gennaio 2017 che risulta essere domenica
 remove_dates <- as.Date(c('2016-12-26'))
 all_dates <- week_pre_covid_rist1
 week_pre_covid_rist1 <- all_dates[!all_dates %in% remove_dates]
 
-vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], sum)
+vendite1_sett_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid[-1,], sum)
 vendite1_sett_pre <- vendite1_sett_pre$vendite
 vendite1_sett_pre <- ts(vendite1_sett_pre,start=2017,frequency=52) 
 
-vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid_vendite[-1,], mean)
+vendite1_sett_avg_pre <- aggregate(vendite ~ week_pre_covid_rist1, ristorante1_pre_covid[-1,], mean)
 vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
 vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
 

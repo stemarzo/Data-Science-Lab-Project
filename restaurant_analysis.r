@@ -919,16 +919,16 @@ M3 %>%
 
 ### Random forest----
 # si opera su dati giornalieri
-ristorante1_pre_covid_vendite
+ristorante1_pre_covid
 
 # vendite giornaliere pre covid ristorante 1
-ristorante1_pre_covid_vendite$vendite
+ristorante1_pre_covid$vendite
 
 # divisione in train e test
-index <- sample(1:nrow(ristorante1_pre_covid_vendite),
-                size = 0.7*nrow(ristorante1_pre_covid_vendite))
-train <- ristorante1_pre_covid_vendite[index,]
-test <- ristorante1_pre_covid_vendite[-index,] 
+index <- sample(1:nrow(ristorante1_pre_covid),
+                size = 0.7*nrow(ristorante1_pre_covid))
+train <- ristorante1_pre_covid[index,]
+test <- ristorante1_pre_covid[-index,] 
 dim(train)
 dim(test)
 
@@ -986,12 +986,12 @@ gfg_ts <- xts(gfg_date$val, gfg_date$date)
 plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 
 # serie storica dati reali fino a prima covid 
-ristorante1_pre_covid_vendite$vendite
+ristorante1_pre_covid$vendite
 
 
 interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
 gfg_date_pre <- data.frame(date = interval_pre, 
-                           val=ristorante1_pre_covid_vendite$vendite)
+                           val=ristorante1_pre_covid$vendite)
 
 gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
 gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
@@ -1019,7 +1019,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 ### Prophet----
 # si opera su dati giornalieri
 
-prophet_vendite <- ristorante1_pre_covid_vendite %>% 
+prophet_vendite <- ristorante1_pre_covid %>% 
   select(data, vendite)
 
 colnames(prophet_vendite) <- c("ds", "y")
