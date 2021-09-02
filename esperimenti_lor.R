@@ -1,5 +1,10 @@
 # WORKING IN PROGRESS #
 
+# - DECIDERE PER CIASCUN MODELLO QUALI DATI UTILIZZARE (es. arima manuale modellare solo dati pre covid ecc ...) 
+# - ANALISI RAPPORTO VENDITE SCONTRINI (ste)
+# - potremmo per tutti i modelli fare train sul periodo pre covid e poi fare previsioni sul periodo post covid
+# e poi vedendo qual è modello migliore, utilizzare ques'utlimo, modellarlo su tutti i dati e poi fare previsioni
+# su date nuove per cui non abbiamo dati di vendite
 
 # esplorazione ristoranti ----
 
@@ -36,145 +41,42 @@
 
 
 
+# prophet con periodo accorciato ----
 
+library(prophet)
 
+# l'ultima settimana considerata è quella che va dal 30/12/19 al 05/01/20
+reference_date <- as.Date("2020-01-05", format = "%Y-%m-%d")
 
-# arima con regressori----
-
-# si può valutare anche modello SARIMA e VAR (per gestire + serie storiche)
-
-# bisogna provare con altre variabili: tipo is weekend, is holiday, 
-# noi utilizziamo ad ora solo variabili che sono legate al covid, non è troppo 
-# rigida questa scelta? I colori della zone sono abbastanza limitati, partendo da 
-# novembre essi agiscono su una piccola porzione di dati
-
-# ricordarsi come nel random forest modificare periodi pre e post covid, il periodo
-# pre dovrebbe fermarmi un pochino prima del picco
-
-
-
-# random forest con regressori----
-# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
-mape <- function(actual,pred){
-  mape <- mean(abs((actual - pred)/actual))*100
-  return (mape)
-}
-set.seed(100)
-library(randomForest)
-
-# selezione periodo pre covid per poi fare previsione sul periodo covid
-# bisogna considerar un periodo più corto altrimenti si è troppo vicini al covid,
-# e i dati potrebbero risentirne
-reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
-# vendite gionaliere pre covid
-vendite_giornaliere <- ristorazione %>%
-  filter(ristorazione$data < reference_date)
-
-# sistemazione NA
-sum(is.na(vendite_giornaliere))
-
-sum(is.na(vendite_giornaliere$vendite1))
-vendite_giornaliere$vendite1[is.na(vendite_giornaliere$vendite1)] <- 0 
-
-# divisione in train e tes
-index <- sample(1:nrow(vendite_giornaliere),size = 0.7*nrow(vendite_giornaliere))
-train <- vendite_giornaliere[index,]
-test <- vendite_giornaliere[-index,] 
-dim(train)
-dim(test)
-
-# implementazione modelli
-rf1 = randomForest(vendite1 ~ is_holiday + is_weekend + pioggia + covid + stagione 
-                  + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
-                  + tot_vaccini_emilia_romagna + mese, data = train)
-varImpPlot(rf1)
-print(rf1)
-
-# si selezionano le variabili più rilevanti
-rf2 = randomForest(vendite1 ~ weekday + is_weekend + mese + is_holiday + stagione,
-                   data = train)
-varImpPlot(rf2)
-print(rf2)
-
-predictions = predict(rf2, newdata = train)
-mape(train$vendite1, predictions)
-
-predictions = predict(rf2, newdata = test)
-mape(test$vendite1, predictions)
-
-RMSE.forest <- sqrt(mean((predictions-test$vendite1)^2))
-RMSE.forest
-
-MAE.forest <- mean(abs(predictions-test$vendite1))
-MAE.forest
-
-# predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
-
-# selezione periodo post covid
-reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
-# vendite giornaliere periodo covid
-vendite_giornaliere_forecast <- ristorazione %>%
-  filter(ristorazione$data >= reference_date)
-
-# si selezioanno le date in cui si registrano 0 vendite/scontrini
-vendite_giornaliere_forecast <- vendite_giornaliere_forecast[4:59,]
-
-# si utilizza il modello appena creato per fare previsioni sulle date in cui
-# si registrano 0 vendite/scontrini
-vendite_forecast <- predict(rf2, vendite_giornaliere_forecast)
-vendite_forecast <- as.data.frame(vendite_forecast)
-
-# si uniscono le tue serie storiche
-library("xts")
-
-# serie storica previsioni durante periodo covid
-interval <- seq(as.Date("2020-03-12"), as.Date("2020-05-06"), by = "day")
-gfg_date <- data.frame(date = interval, 
-                       val=vendite_forecast)
-gfg_date$date<-as.Date(gfg_date$date)  
-gfg_ts <- xts(gfg_date$val, gfg_date$date)
-    
-plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
-
-# serie storica dati reali fino a prima covid 
-reference_date_pre <- as.Date("2020-03-11", format = "%Y-%m-%d")
-vendite_pre <- ristorazione %>%
-  filter(ristorazione$data <= reference_date_pre) %>%
+prophet_vendite <- ristorazione %>% 
+  filter(data < reference_date) %>%
   select(data, vendite1)
 
-interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-03-11"), by = "day")
-gfg_date_pre <- data.frame(date = interval_pre, 
-                       val=vendite_pre$vendite1)
+colnames(prophet_vendite) <- c("ds", "y")
 
-gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
-gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+m <- prophet(prophet_vendite)
 
-# si uniscono le due serie storiche
-names(gfg_date)[1] <- "data"
-names(gfg_date)[2] <- "vendite"
+future <- make_future_dataframe(m, periods=365)
 
-names(gfg_date_pre)[1] <- "data"
-names(gfg_date_pre)[2] <- "vendite"
+forecast <- predict(m, future)
+tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
+# yhat containing the forecast. It has additional columns for uncertainty intervals and seasonal components
 
-merge_df <- rbind(gfg_date, gfg_date_pre)
-merge_df <- merge_df[order(merge_df$data), ]
-row.names(merge_df) <- NULL
+plot(m, forecast)
 
-# serie storica con previsioni
-plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
-ristorazione_temp <- ristorazione[1:1222,]
+prophet_plot_components(m, forecast)
 
-# serie storica originale
-ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
-plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
+df.cv <- cross_validation(m, initial=180, period=60, horizon=120, units='days')
+
+plot_cross_validation_metric(df.cv, metric='mape')
+
+dyplot.prophet(m, forecast)
 
 
-# sia per random forest sia per arima accorciare periodo pre covid altrimenti si 
-# prendono già giorni in cui le vendite stavano già andando a picco
 
-
-# random forest con periodo accorciato ----
-
+# random forest ----
+# periodo accorciato
+# il train si ferma al 5 gennaio
 # https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
 mape <- function(actual,pred){
   mape <- mean(abs((actual - pred)/actual))*100
@@ -186,7 +88,7 @@ library(randomForest)
 # selezione periodo pre covid per poi fare previsione sul periodo covid
 # bisogna considerar un periodo più corto altrimenti si è troppo vicini al covid,
 # e i dati potrebbero risentirne
-reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 # vendite gionaliere pre covid
 vendite_giornaliere <- ristorazione %>%
   filter(ristorazione$data < reference_date)
@@ -232,7 +134,7 @@ MAE.forest
 # predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
 
 # selezione periodo post covid
-reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 # vendite giornaliere periodo covid
 vendite_giornaliere_forecast <- ristorazione %>%
   filter(ristorazione$data >= reference_date)
@@ -249,7 +151,7 @@ vendite_forecast <- as.data.frame(vendite_forecast)
 library("xts")
 
 # serie storica previsioni durante periodo covid
-interval <- seq(as.Date("2020-01-01"), as.Date("2020-05-12"), by = "day")
+interval <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
 gfg_date <- data.frame(date = interval, 
                        val=vendite_forecast)
 gfg_date$date<-as.Date(gfg_date$date)  
@@ -258,12 +160,12 @@ gfg_ts <- xts(gfg_date$val, gfg_date$date)
 plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
 
 # serie storica dati reali fino a prima covid 
-reference_date_pre <- as.Date("2019-12-31", format = "%Y-%m-%d")
+reference_date_pre <- as.Date("2020-01-05", format = "%Y-%m-%d")
 vendite_pre <- ristorazione %>%
   filter(ristorazione$data <= reference_date_pre) %>%
   select(data, vendite1)
 
-interval_pre <- seq(as.Date("2017-01-01"), as.Date("2019-12-31"), by = "day")
+interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
 gfg_date_pre <- data.frame(date = interval_pre, 
                            val=vendite_pre$vendite1)
 
@@ -290,12 +192,55 @@ ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0
 plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
 
+
+
+# arima con regressori diversi ----
+
+# si può valutare anche modello SARIMA e VAR (per gestire + serie storiche)
+
+# bisogna provare con altre variabili: tipo is weekend, is holiday, 
+# noi utilizziamo ad ora solo variabili che sono legate al covid, non è troppo 
+# rigida questa scelta? I colori della zone sono abbastanza limitati, partendo da 
+# novembre essi agiscono su una piccola porzione di dati
+
+# ricordarsi come nel random forest modificare periodi pre e post covid, il periodo
+# pre dovrebbe fermarmi un pochino prima del picco
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # arima con periodo accorciato ----
+# nel main l'arima veniva usato su tutti i dati, qui si usa per fare previsioni per il periodo "post" covid,
+# quindi le vendite "pre" covid verranno divise in train e test
 
-# da modifcare da qui in poi
-
+# modifico temporaneamente il periodo considerato (presente in esplorazione rist 1)
 # si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
-reference_date <- as.Date("2020-01-01", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
 ristorante1_pre_covid_vendite <- ristorante1 %>%
@@ -309,7 +254,7 @@ vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequenc
 week_pre_covid_rist1 <- as.Date(cut(ristorante1_pre_covid_vendite$data, "week"))
 
 # si procede ad eliminare il giorno 1 gennaio 2017 che risulta essere domenica
-remove_dates <- as.Date(c('2017-01-01'))
+remove_dates <- as.Date(c('2016-12-26'))
 all_dates <- week_pre_covid_rist1
 week_pre_covid_rist1 <- all_dates[!all_dates %in% remove_dates]
 
@@ -322,6 +267,7 @@ vendite1_sett_avg_pre <- vendite1_sett_avg_pre$vendite
 vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52) 
 
 
+# procedo con modello (in rest analysis)
 
 
 
@@ -337,65 +283,10 @@ vendite1_sett_avg_pre <- ts(vendite1_sett_avg_pre,start=2017,frequency=52)
 
 
 
-# divisione in train e test
-vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
-train_auto_pre <- vendite1_sett_avg_pre_split_auto$train
-test_auto_pre <- vendite1_sett_avg_pre_split_auto$test
-
-autoplot(vendite1_sett_avg_pre) +
-  autolayer(train_auto_pre, series="Training") +
-  autolayer(train_auto_pre, series="Test")
-
-# auto.arima per selezione modello migliore
-arima_diag(train_auto_pre)
-M3 <- auto.arima(train_auto_pre, seasonal = T)
-# i dati vengono addestrati sul train e poi viene valutato il modello sul test
-
-# per valutare la qualità del modello si possono inizialmente plottare i grafici
-# ACF e PACF dei residui del modello
-tsdisplay(residuals(M3), lag.max=15, main='Seasonal Model Residuals')
-
-# AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
-
-accuracy(M3)
-# MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
-# MASE = 0.4430427, < 1, buon risultato
-
-summary(M3)
-
-# si vuole verificare che non ci sia correlazione tra gli errori
-checkresiduals(M3)
-check_res(M3)
-M3$residuals
-
-# A Ljung-Box test can also indicate the presence of these correlations. 
-# As long as we score a p-value > 0.05, there is a 95% chance the residuals are independent
-acf(M3$residuals, lag.max=20, na.action=na.pass)
-Box.test(M3$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
-hist(M3$residuals)
-
-#  considerando test set
-M3 %>%
-  forecast(h=50) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto_pre)
-
-# alternativa per verifica addatamento dati con test set
-forecast_covid <- M3 %>%
-  forecast(h=30)
 
 
-par(mfrow=c(1,1))
-plot(forecast_covid)
-lines(test_auto_pre, col="red")
-legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
-# valutazione qualità previsioni
-accuracy(forecast_covid, test_auto_pre)
 
-# si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
-# per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
-M3 %>%
-  forecast(h=106) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(vendite1_sett_avg)
+
 
