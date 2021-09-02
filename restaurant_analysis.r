@@ -1,10 +1,13 @@
 # SETTING PROGETTO --------------------------------------------------------
 
+set.seed(100)
+
 # setting librerie
 # Package names
 packages <- c("readxl",  "readr", "forecast", "dplyr", "magrittr", "ggplot2",
               "forcats", "lubridate", "RQuantLib", "devtools", "patchwork", "KFAS",
-              "caret", "tseries", "urca", "TSstudio", "gridExtra") 
+              "caret", "tseries", "urca", "TSstudio", "gridExtra", "randomForest",
+              "prophet", "xts") 
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -21,6 +24,12 @@ invisible(lapply(packages, library, character.only = TRUE))
 #working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
 working_dir = "~/Desktop/progetti uni github/progetto_dslab/dati"
 setwd(working_dir)
+
+# functions 
+mape <- function(actual,pred){
+  mape <- mean(abs((actual - pred)/actual))*100
+  return (mape)
+}
 
 # lettura dataset
 ristorazione_original <- read_excel("Ristorazione.xls")
@@ -469,8 +478,11 @@ ristorante1$rapprto_v_s[is.na(ristorante1$rapprto_v_s)] <- 0
 ristorante1$chiuso <- 0
 ristorante1$chiuso <- ifelse(ristorante1$rapprto_v_s == 0, 1, 0)
 ristorante1$chiuso <- as.factor(ristorante1$chiuso)
-ristorante1$covid <- ristorazione$covid
-ristorante1$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante1 <- merge(x = ristorante1, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+# ristorante1$covid <- ristorazione$covid
+# ristorante1$rossa <- ristorazione$rossa_emilia_romagna
 
 
 #ristorante2
@@ -483,8 +495,11 @@ ristorante2$rapprto_v_s[is.na(ristorante2$rapprto_v_s)] <- 0
 ristorante2$chiuso <- 0
 ristorante2$chiuso <- ifelse(ristorante2$rapprto_v_s == 0, 1, 0)
 ristorante2$chiuso <- as.factor(ristorante2$chiuso)
-ristorante2$covid <- ristorazione$covid
-ristorante2$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante2 <- merge(x = ristorante2, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+# ristorante2$covid <- ristorazione$covid
+# ristorante2$rossa <- ristorazione$rossa_emilia_romagna
 
 
 #ristorante3
@@ -497,8 +512,12 @@ ristorante3$rapprto_v_s[is.na(ristorante3$rapprto_v_s)] <- 0
 ristorante3$chiuso <- 0
 ristorante3$chiuso <- ifelse(ristorante3$rapprto_v_s == 0, 1, 0)
 ristorante3$chiuso <- as.factor(ristorante3$chiuso)
-ristorante3$covid <- ristorazione$covid
-ristorante3$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante3 <- merge(x = ristorante3, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+
+# ristorante3$covid <- ristorazione$covid
+# ristorante3$rossa <- ristorazione$rossa_emilia_romagna
 
 
 #ristorante4
@@ -511,8 +530,11 @@ ristorante4$rapprto_v_s[is.na(ristorante4$rapprto_v_s)] <- 0
 ristorante4$chiuso <- 0
 ristorante4$chiuso <- ifelse(ristorante4$rapprto_v_s == 0, 1, 0)
 ristorante4$chiuso <- as.factor(ristorante4$chiuso)
-ristorante4$covid <- ristorazione$covid
-ristorante4$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante4 <- merge(x = ristorante4, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+# ristorante4$covid <- ristorazione$covid
+# ristorante4$rossa <- ristorazione$rossa_emilia_romagna
 
 #ristorante5
 ristorante5 <- data.frame(col_date, ristorazione$vendite5, ristorazione$scontrini5)
@@ -524,8 +546,11 @@ ristorante5$rapprto_v_s[is.na(ristorante5$rapprto_v_s)] <- 0
 ristorante5$chiuso <- 0
 ristorante5$chiuso <- ifelse(ristorante5$rapprto_v_s == 0, 1, 0)
 ristorante5$chiuso <- as.factor(ristorante5$chiuso)
-ristorante5$covid <- ristorazione$covid
-ristorante5$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante5 <- merge(x = ristorante5, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+# ristorante5$covid <- ristorazione$covid
+# ristorante5$rossa <- ristorazione$rossa_emilia_romagna
 
 
 #ristorante6
@@ -538,8 +563,11 @@ ristorante6$rapprto_v_s[is.na(ristorante6$rapprto_v_s)] <- 0
 ristorante6$chiuso <- 0
 ristorante6$chiuso <- ifelse(ristorante6$rapprto_v_s == 0, 1, 0)
 ristorante6$chiuso <- as.factor(ristorante6$chiuso)
-ristorante6$covid <- ristorazione$covid
-ristorante6$rossa <- ristorazione$rossa_emilia_romagna
+
+ristorante6 <- merge(x = ristorante6, y = ristorazione[ , -c(2:14)], by = "data", all.x=TRUE)
+
+# ristorante6$covid <- ristorazione$covid
+# ristorante6$rossa <- ristorazione$rossa_emilia_romagna
 
 # rimuovo le variabili che mi sono servite nella fase sopra
 rm(list = c('col_date','col_nomi'))
@@ -891,27 +919,126 @@ M3 %>%
 
 ### Random forest----
 # si opera su dati giornalieri
+ristorante1_pre_covid_vendite
+
+# vendite giornaliere pre covid ristorante 1
+ristorante1_pre_covid_vendite$vendite
+
+# divisione in train e test
+index <- sample(1:nrow(ristorante1_pre_covid_vendite),
+                size = 0.7*nrow(ristorante1_pre_covid_vendite))
+train <- ristorante1_pre_covid_vendite[index,]
+test <- ristorante1_pre_covid_vendite[-index,] 
+dim(train)
+dim(test)
+
+# implementazione modelli
+M4 = randomForest(vendite ~ is_holiday + is_weekend + pioggia + covid + stagione 
+                   + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
+                   + tot_vaccini_emilia_romagna + mese, data = train)
+varImpPlot(M4)
+print(M4)
+
+# si selezionano le variabili più rilevanti
+M5 = randomForest(vendite ~ weekday + is_weekend + mese + is_holiday + stagione,
+                   data = train)
+varImpPlot(M5)
+print(M5)
+
+predictions = predict(M5, newdata = train)
+mape(train$vendite, predictions)
+
+predictions = predict(M5, newdata = test)
+mape(test$vendite, predictions)
+
+RMSE.forest <- sqrt(mean((predictions-test$vendite)^2))
+RMSE.forest
+
+MAE.forest <- mean(abs(predictions-test$vendite))
+MAE.forest
+
+# predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
+
+# selezione periodo post covid
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
+# vendite giornaliere periodo covid
+vendite_giornaliere_forecast <- ristorante1 %>%
+  filter(ristorante1$data >= reference_date)
+
+# si selezioanno le date in cui si registrano 0 vendite/scontrini, in questo modo si
+# seleziona la lunghezza del periodo da prevedere
+vendite_giornaliere_forecast <- vendite_giornaliere_forecast[1:133,]
+
+# si utilizza il modello appena creato per fare previsioni sulle date in cui
+# si registrano 0 vendite/scontrini
+vendite_forecast <- predict(M5, vendite_giornaliere_forecast)
+vendite_forecast <- as.data.frame(vendite_forecast)
+
+# si uniscono le tue serie storiche
+
+# serie storica previsioni durante periodo covid
+interval <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
+gfg_date <- data.frame(date = interval, 
+                       val=vendite_forecast)
+gfg_date$date<-as.Date(gfg_date$date)  
+gfg_ts <- xts(gfg_date$val, gfg_date$date)
+
+plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+
+# serie storica dati reali fino a prima covid 
+ristorante1_pre_covid_vendite$vendite
 
 
+interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
+gfg_date_pre <- data.frame(date = interval_pre, 
+                           val=ristorante1_pre_covid_vendite$vendite)
+
+gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
+gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+
+# si uniscono le due serie storiche
+names(gfg_date)[1] <- "data"
+names(gfg_date)[2] <- "vendite"
+
+names(gfg_date_pre)[1] <- "data"
+names(gfg_date_pre)[2] <- "vendite"
+
+merge_df <- rbind(gfg_date, gfg_date_pre)
+merge_df <- merge_df[order(merge_df$data), ]
+row.names(merge_df) <- NULL
+
+# serie storica con previsioni
+plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+
+# serie storica originale
+ristorazione_temp <- ristorazione[1:1228,]
+ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
+plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
 
 ### Prophet----
 # si opera su dati giornalieri
 
+prophet_vendite <- ristorante1_pre_covid_vendite %>% 
+  select(data, vendite)
 
+colnames(prophet_vendite) <- c("ds", "y")
 
+M6 <- prophet(prophet_vendite)
 
+future <- make_future_dataframe(M6, periods=365)
 
+forecast <- predict(M6, future)
+tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
+# yhat containing the forecast. It has additional columns for uncertainty intervals and seasonal components
 
+plot(M6, forecast)
 
+prophet_plot_components(M6, forecast)
+df.cv <- cross_validation(M6, initial=180, period=60, horizon=120, units='days')
 
-
-
-
-
-
-
-
+plot_cross_validation_metric(df.cv, metric='mape')  # CHECK IT
+dyplot.prophet(M6, forecast)
 
 
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------

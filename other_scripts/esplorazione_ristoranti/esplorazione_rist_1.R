@@ -66,8 +66,8 @@ reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # vendite ristorante 1 pre covid
 ristorante1_pre_covid_vendite <- ristorante1 %>%
-  filter(ristorante1$data < reference_date) %>%
-  select(vendite, data)
+  filter(ristorante1$data < reference_date) #%>%
+  #select(vendite, data)
 
 # vendite giornaliere primo ristorante pre covid
 vendite1_day_pre <- ts(ristorante1_pre_covid_vendite$vendite,start=2017,frequency=365) 

@@ -72,12 +72,7 @@ dyplot.prophet(m, forecast)
 # periodo accorciato
 # il train si ferma al 5 gennaio
 # https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
-mape <- function(actual,pred){
-  mape <- mean(abs((actual - pred)/actual))*100
-  return (mape)
-}
-set.seed(100)
-library(randomForest)
+
 
 # selezione periodo pre covid per poi fare previsione sul periodo covid
 # bisogna considerar un periodo più corto altrimenti si è troppo vicini al covid,
