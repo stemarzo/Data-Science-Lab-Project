@@ -1,11 +1,5 @@
 # WORKING IN PROGRESS #
 
-# - DECIDERE PER CIASCUN MODELLO QUALI DATI UTILIZZARE (es. arima manuale modellare solo dati pre covid ecc ...) 
-# - ANALISI RAPPORTO VENDITE SCONTRINI (ste)
-# - potremmo per tutti i modelli fare train sul periodo pre covid e poi fare previsioni sul periodo post covid
-# e poi vedendo qual è modello migliore, utilizzare ques'utlimo, modellarlo su tutti i dati e poi fare previsioni
-# su date nuove per cui non abbiamo dati di vendite
-
 # esplorazione ristoranti ----
 
 # evidenziare che maggio 2020 (post covid) registra più vendite rispetto a maggio 2019

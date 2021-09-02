@@ -700,8 +700,14 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 
 
 
-# PREVISIONE FATTURATO NO COVID LISCIAMENTO ESPONENZIALE PRIMO RISTORANTE  -------------------------------------------
 
+
+
+
+# PREVISIONE FATTURATO PERIODO COVID PRIMO RISTORANTE -------------------------------------------
+
+### HoltWinters----
+# metodo lisciamento esponenziale
 M0 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
 plot(M0)
 
@@ -722,7 +728,6 @@ prev <- predict(M0, 10, prediction.interval=TRUE)
 plot(M0, prev)
 
 
-# PREVISIONE FATTURATO NO COVID ARIMA PRIMO RISTORANTE -------------------------------------------
 
 ### Arima manuale----
 # le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
@@ -814,7 +819,7 @@ autoplot(forecast(M2, h=50)) + autolayer(test)
 # optando per il modello il cui valore di AIC è minore
 
 
-### Auto Arima----
+### Auto Arima senza regressori ----
 # le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
 # i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
@@ -883,6 +888,33 @@ M3 %>%
   forecast(h=106) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(vendite1_sett_avg)
 
+
+### Random forest----
+# si opera su dati giornalieri
+
+
+
+
+### Prophet----
+# si opera su dati giornalieri
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
 
 ### Auto Arima con regressori----
 #  il modello viene addestrato su tutti i dati a disposizione (vendite1_sett_avg) 
@@ -956,7 +988,7 @@ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", metho
 # regressori: "covid_bin", "rossa_sum", "chiuso_sum" (check se serve as.factor())
 
 M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
-                  xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
+                 xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
 summary(M4)  # AIC: 3453.91   
 checkresiduals(M4)
 tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
@@ -1056,7 +1088,18 @@ autoplot(forecast_2021)
 # ritenuto giusto anche questo
 
 
-# PREVISIONE FATTURATO NO COVID RANDOM FOREST PRIMO RISTORANTE -------------------------------------------
+
+
+
+
+
+### Random forest----
+
+
+### Prophet----
+
+
+
 
 # CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
 
@@ -1087,3 +1130,8 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_est
 
 # confronto estati ristorante 6
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
+
+
+
+
+# ANALISI TREND SCONTRINI --------------------------------

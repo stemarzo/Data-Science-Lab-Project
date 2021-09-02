@@ -59,7 +59,7 @@ print(
 ### analisi vendite considerando il periodo pre covid ----
 
 # si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
-reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # vendite Ristorante 5 pre covid
 ristorante5_pre_covid_vendite <- ristorante5 %>%
@@ -173,7 +173,7 @@ print(
 ### analisi scontrini considerando il periodo pre covid ----
 
 # si procede ad analizzare ciascun ristorante nel periodo antecedente il covid-19 
-reference_date <- as.Date("2020-03-09", format = "%Y-%m-%d")
+reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
 
 # scontrini Ristorante 5 pre covid
 ristorante5_pre_covid_scontrini <- ristorante5 %>%
