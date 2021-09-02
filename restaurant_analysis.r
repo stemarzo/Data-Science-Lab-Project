@@ -892,10 +892,12 @@ accuracy(forecast_covid, test_auto_pre)
 M3 %>%
   forecast(h=106) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(vendite1_sett_avg)
+# CHECK IT ULTIMI GRAFICI (controllare da dove parte previsione)
 
 
 ### Random forest----
 # si opera su dati giornalieri
+# si addestra il modello sui dati pre covid e si prevedono le vendite nel periodo covid
 ristorante1_pre_covid
 
 # vendite giornaliere pre covid ristorante 1
@@ -995,7 +997,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 
 ### Prophet----
 # si opera su dati giornalieri
-
+# si addestra il modello sui dati pre covid e si prevedono le vendite nel periodo covid
 prophet_vendite <- ristorante1_pre_covid %>% 
   select(data, vendite)
 
