@@ -734,29 +734,6 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 
 # PREVISIONE FATTURATO PERIODO COVID PRIMO RISTORANTE -------------------------------------------
 
-### HoltWinters----
-# metodo lisciamento esponenziale
-M0 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
-plot(M0)
-
-# parametri
-M0$alpha
-M0$beta
-M0$gamma
-
-# analisi residui
-acf(residuals(M0), lag = 52)
-
-# previsione
-prev <- forecast(M0, h=10)
-autoplot(prev)
-
-# in alternativa
-prev <- predict(M0, 10, prediction.interval=TRUE)
-plot(M0, prev)
-
-
-
 ### Arima manuale----
 # le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
 # i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
@@ -1043,6 +1020,26 @@ dyplot.prophet(M6, forecast)
 
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
 
+### HoltWinters----
+# metodo lisciamento esponenziale
+M0 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
+plot(M0)
+
+# parametri
+M0$alpha
+M0$beta
+M0$gamma
+
+# analisi residui
+acf(residuals(M0), lag = 52)
+
+# previsione
+prev <- forecast(M0, h=10)
+autoplot(prev)
+
+# in alternativa
+prev <- predict(M0, 10, prediction.interval=TRUE)
+plot(M0, prev)
 ### Auto Arima con regressori----
 #  il modello viene addestrato su tutti i dati a disposizione (vendite1_sett_avg) 
 # per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
