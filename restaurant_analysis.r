@@ -989,7 +989,7 @@ colnames(prophet_vendite) <- c("ds", "y")
 M5 <- prophet(prophet_vendite)
 
 # vengono fatte le previsioni
-future_prophet <- make_vendite_forecast_prophet_dataframe(M5, periods=365)
+future_prophet <- make_future_dataframe(M5, periods=365)
 vendite_forecast_prophet <- predict(M5, future_prophet)
 tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 # yhat containing the vendite_forecast_prophet. It has additional columns for uncertainty 
