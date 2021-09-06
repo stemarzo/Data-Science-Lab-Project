@@ -742,83 +742,72 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
 # rimozione stagionalità
-vendite1_sett_avg_pre_dest <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
-autoplot(vendite1_sett_avg_pre_dest) + autolayer(vendite1_sett_avg_pre)
+vendite1_sett_avg_pre_dest_arima <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
+autoplot(vendite1_sett_avg_pre_dest_arima) + autolayer(vendite1_sett_avg_pre)
 
 # verifica se necessario differenziare
-ndiffs(vendite1_sett_avg_pre_dest)
-nsdiffs(vendite1_sett_avg_pre_dest)
+ndiffs(vendite1_sett_avg_pre_dest_arima)
+nsdiffs(vendite1_sett_avg_pre_dest_arima)
 
 # rimozione trend con differenziazione
-vendite1_sett_avg_pre_dest_diff <- diff(vendite1_sett_avg_pre_dest)
-autoplot(vendite1_sett_avg_pre_dest_diff)
+vendite1_sett_avg_pre_dest_diff_arima <- diff(vendite1_sett_avg_pre_dest_arima)
+autoplot(vendite1_sett_avg_pre_dest_diff_arima)
 
 # verifica stazionarietà
-
-adf.test(vendite1_sett_avg_pre_dest_diff, alternative = "stationary")  
+adf.test(vendite1_sett_avg_pre_dest_diff_arima, alternative = "stationary")  
 # The null-hypothesis for an ADF test is that the data are non-stationary. 
 # So p-value greater than 0.05 indicates non-stationarity, and  p-values less than 
 # 0.05 suggest stationarity.
 # risulta essere stazionaria
 
-kpss.test(vendite1_sett_avg_pre_dest_diff)
+kpss.test(vendite1_sett_avg_pre_dest_diff_arima)
 # In this case, the null-hypothesis is that the data are stationary. In this case, 
 # p-value less than 0.05 indicates non-stationary series and p-value greater than 
 # 0.05 indicates stationary series.
 # risulta essere stazionaria
 
-summary(ur.kpss(vendite1_sett_avg_pre_dest_diff ))
-ndiffs(vendite1_sett_avg_pre_dest_diff)
-nsdiffs(vendite1_sett_avg_pre_dest_diff)
+summary(ur.kpss(vendite1_sett_avg_pre_dest_diff_arima ))
+ndiffs(vendite1_sett_avg_pre_dest_diff_arima)
+nsdiffs(vendite1_sett_avg_pre_dest_diff_arima)
 
 # una volta ottenuta la serie storica stazionaria si procede con la creazione
 # di train e test
-vendite1_sett_avg_pre_split <- ts_split(vendite1_sett_avg_pre_dest_diff)
+vendite1_sett_avg_pre_split_arima <- ts_split(vendite1_sett_avg_pre_dest_diff_arima)
 
 # divisione in train e test
-train <- vendite1_sett_avg_pre_split$train
-test <- vendite1_sett_avg_pre_split$test
-autoplot(train)
-autoplot(test)
+train_arima <- vendite1_sett_avg_pre_split_arima$train_arima
+test_arima <- vendite1_sett_avg_pre_split_arima$test_arima
+autoplot(train_arima)
+autoplot(test_arima)
 
-autoplot(vendite1_sett_avg_pre_dest_diff) +
-  autolayer(train, series="Training") +
-  autolayer(test, series="Test")
-
-# # scelta di parametri p e q con acf e pacf
-# acf<-ggAcf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # q = 2
-# pacf<-ggPacf(train, lag.max = 52)+ggtitle("Vendite1 day pre diff")  # p = 2
-# grid.arrange(acf, pacf, ncol=2)
-# 
-# # creazione modello arima
-# M1<-Arima(train, order = c(2,0,2))
-# summary(M1) 
-# checkresiduals(M1)
-# 
-# # autoplot(forecast(M1, h=50))+autolayer(test)
+autoplot(vendite1_sett_avg_pre_dest_diff_arima) +
+  autolayer(train_arima, series="train_arima") +
+  autolayer(test_arima, series="test_arima")
 
 # si analizzano acf e pacf del train, per la scelta dei parametri p e q
-acf <- ggAcf(train, lag.max = 52) + ggtitle("Vendite1 day pre diff")
-pacf <- ggPacf(train, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+acf <- ggAcf(train_arima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(train_arima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
 # si inzia provando con un ar 2, osservando che nel pacf due lag sono 
 # significativamente correlati
-M2 <- Arima(train, order = c(2,0,0))
+M1 <- Arima(train_arima, order = c(2,0,0))
 
 # si analizzano pacf e acf dei residui 
-acf <- ggAcf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
-pacf <- ggPacf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
-# si osserva che il lag 52 è molto correlato nell'acf
-M2 <- Arima(train, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
-summary(M2)
-acf <- ggAcf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
-pacf <- ggPacf(M2$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+# si osserva che il lag 52 è molto correlato nell'acf, si corregge il modello
+M1 <- Arima(train_arima, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
+summary(M1)
+
+# si analizzano nuovamente pacf e acf dei residui 
+acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
-checkresiduals(M2)  # tutte le autocorrelazioni si trovano all'interno della banda, questo significa che i residui si comportano come un white noise
-autoplot(forecast(M2, h=50)) + autolayer(test)
+checkresiduals(M1)  # tutte le autocorrelazioni si trovano all'interno della banda, questo significa che i residui si comportano come un white noise
+autoplot(forecast(M1, h=50)) + autolayer(test_arima)
 
 # si potrebbe procedere selezionando altri modelli variando i parametri p e q,
 # optando per il modello il cui valore di AIC è minore
@@ -829,67 +818,70 @@ autoplot(forecast(M2, h=50)) + autolayer(test)
 # i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
-# covid, durante il quale le vendite effettive invece sono state pari a zero
+# covid, durante il quale per alcune settimane le vendite effettive invece sono 
+# state pari a zero
+
+# non è necessario rendere la serie storica stazionaria, ciò viene fatto in modo
+# automatico da auto arima
 
 # divisione in train e test
-vendite1_sett_avg_pre_split_auto <- ts_split(vendite1_sett_avg_pre)
-train_auto_pre <- vendite1_sett_avg_pre_split_auto$train
-test_auto_pre <- vendite1_sett_avg_pre_split_auto$test
+vendite1_sett_avg_pre_split_auto_arima <- ts_split(vendite1_sett_avg_pre)
+train_auto_arima <- vendite1_sett_avg_pre_split_auto_arima$train
+test_auto_arima <- vendite1_sett_avg_pre_split_auto_arima$test
 
 autoplot(vendite1_sett_avg_pre) +
-  autolayer(train_auto_pre, series="Training") +
-  autolayer(train_auto_pre, series="Test")
+  autolayer(train_auto_arima, series="Training") +
+  autolayer(train_auto_arima, series="Test")
 
 # auto.arima per selezione modello migliore
-arima_diag(train_auto_pre)
-M3 <- auto.arima(train_auto_pre, seasonal = T)
+arima_diag(train_auto_arima)
+M2 <- auto.arima(train_auto_arima, seasonal = T)
 # i dati vengono addestrati sul train e poi viene valutato il modello sul test
 
 # per valutare la qualità del modello si possono inizialmente plottare i grafici
 # ACF e PACF dei residui del modello
-tsdisplay(residuals(M3), lag.max=15, main='Seasonal Model Residuals')
+tsdisplay(residuals(M2), lag.max=15, main='Seasonal Model Residuals')
 
 # AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
 
-accuracy(M3)
+accuracy(M2)
 # MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
 # MASE = 0.4430427, < 1, buon risultato
 
-summary(M3)
+summary(M2)
 
 # si vuole verificare che non ci sia correlazione tra gli errori
-checkresiduals(M3)
-check_res(M3)
-M3$residuals
+checkresiduals(M2)
+check_res(M2)
+M2$residuals
 
 # A Ljung-Box test can also indicate the presence of these correlations. 
 # As long as we score a p-value > 0.05, there is a 95% chance the residuals are independent
-acf(M3$residuals, lag.max=20, na.action=na.pass)
-Box.test(M3$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
-hist(M3$residuals)
+acf(M2$residuals, lag.max=20, na.action=na.pass)
+Box.test(M2$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
+hist(M2$residuals)
 
 #  considerando test set
-M3 %>%
+M2 %>%
   forecast(h=50) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto_pre)
+  autoplot() + autolayer(test_auto_arima)
 
 # alternativa per verifica addatamento dati con test set
-forecast_covid <- M3 %>%
+forecast_covid_auto_arima <- M2 %>%
   forecast(h=30)
 
-
 par(mfrow=c(1,1))
-plot(forecast_covid)
-lines(test_auto_pre, col="red")
+plot(forecast_covid_auto_arima)
+lines(test_auto_arima, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
-accuracy(forecast_covid, test_auto_pre)
+accuracy(forecast_covid_auto_arima, test_auto_arima)
 
 # si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
-M3 %>%
+M2 %>%
   forecast(h=106) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(vendite1_sett_avg)
 # CHECK IT ULTIMI GRAFICI (controllare da dove parte previsione)
@@ -897,97 +889,88 @@ M3 %>%
 
 ### Random forest----
 # si opera su dati giornalieri
-# si addestra il modello sui dati pre covid e si prevedono le vendite nel periodo covid
-ristorante1_pre_covid
-
-# vendite giornaliere pre covid ristorante 1
-ristorante1_pre_covid$vendite
+# si addestra il modello sui dati pre covid (ristorante1_pre_covid$vendite) e 
+# si prevedono le vendite nel periodo covid
 
 # divisione in train e test
-index <- sample(1:nrow(ristorante1_pre_covid),
+index_rf <- sample(1:nrow(ristorante1_pre_covid),
                 size = 0.7*nrow(ristorante1_pre_covid))
-train <- ristorante1_pre_covid[index,]
-test <- ristorante1_pre_covid[-index,] 
-dim(train)
-dim(test)
+train_rf <- ristorante1_pre_covid[index_rf,]
+test_rf <- ristorante1_pre_covid[-index_rf,] 
 
 # implementazione modelli
-M4 = randomForest(vendite ~ is_holiday + is_weekend + pioggia + covid + stagione 
+M3 <- randomForest(vendite ~ is_holiday + is_weekend + pioggia + covid + stagione 
                    + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
-                   + tot_vaccini_emilia_romagna + mese, data = train)
+                   + tot_vaccini_emilia_romagna + mese, data = train_rf)
+varImpPlot(M3)
+print(M3)
+
+# si selezionano le variabili più rilevanti
+M4 <- randomForest(vendite ~ weekday + is_weekend + mese + is_holiday + stagione,
+                   data = train_rf)
 varImpPlot(M4)
 print(M4)
 
-# si selezionano le variabili più rilevanti
-M5 = randomForest(vendite ~ weekday + is_weekend + mese + is_holiday + stagione,
-                   data = train)
-varImpPlot(M5)
-print(M5)
+predictions_rf <- predict(M5, newdata = train_rf)
+mape(train_rf$vendite, predictions_rf)
 
-predictions = predict(M5, newdata = train)
-mape(train$vendite, predictions)
+predictions_rf <- predict(M5, newdata = test_rf)
+mape(test_rf$vendite, predictions_rf)
 
-predictions = predict(M5, newdata = test)
-mape(test$vendite, predictions)
+RMSE.rf <- sqrt(mean((predictions_rf-test_rf$vendite)^2))
+RMSE.rf
 
-RMSE.forest <- sqrt(mean((predictions-test$vendite)^2))
-RMSE.forest
-
-MAE.forest <- mean(abs(predictions-test$vendite))
-MAE.forest
+MAE.rf <- mean(abs(predictions_rf-test_rf$vendite))
+MAE.rf
 
 # predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
 
-# selezione periodo post covid
-reference_date <- as.Date("2020-01-06", format = "%Y-%m-%d")
-# vendite giornaliere periodo covid
-vendite_giornaliere_forecast <- ristorante1 %>%
-  filter(ristorante1$data >= reference_date)
+# selezione periodo covid (su cui verranno fatte le previsioni)
+reference_date_rf <- as.Date("2020-01-06", format = "%Y-%m-%d")
+ristorante1_periodo_covid <- ristorante1 %>%
+  filter(ristorante1$data >= reference_date_rf)
 
-# si selezioanno le date in cui si registrano 0 vendite/scontrini, in questo modo si
-# seleziona la lunghezza del periodo da prevedere
-vendite_giornaliere_forecast <- vendite_giornaliere_forecast[1:133,]
+# si seleziona la lunghezza del periodo da prevedere
+# viene selezionato un periodo che include i giorni in cui si registrano 0 
+# vendite/scontrini
+ristorante1_periodo_covid <- ristorante1_periodo_covid[1:133,]
 
-# si utilizza il modello appena creato per fare previsioni sulle date in cui
-# si registrano 0 vendite/scontrini
-vendite_forecast <- predict(M5, vendite_giornaliere_forecast)
-vendite_forecast <- as.data.frame(vendite_forecast)
-
-# si uniscono le tue serie storiche
-
-# serie storica previsioni durante periodo covid
-interval <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
-gfg_date <- data.frame(date = interval, 
-                       val=vendite_forecast)
-gfg_date$date<-as.Date(gfg_date$date)  
-gfg_ts <- xts(gfg_date$val, gfg_date$date)
-
-plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
-
-# serie storica dati reali fino a prima covid 
-ristorante1_pre_covid$vendite
-
-
-interval_pre <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
-gfg_date_pre <- data.frame(date = interval_pre, 
-                           val=ristorante1_pre_covid$vendite)
-
-gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
-gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+# si utilizza il modello appena creato per fare previsioni
+vendite_forecast_rf <- predict(M4, ristorante1_periodo_covid)
+vendite_forecast_rf <- as.data.frame(vendite_forecast_rf)
 
 # si uniscono le due serie storiche
-names(gfg_date)[1] <- "data"
-names(gfg_date)[2] <- "vendite"
 
-names(gfg_date_pre)[1] <- "data"
-names(gfg_date_pre)[2] <- "vendite"
+# serie storica previsioni durante periodo covid
+interval_covid <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
+interval_covid_df <- data.frame(date = interval_covid, 
+                       val=vendite_forecast_rf)
+interval_covid_df$date <- as.Date(interval_covid_df$date)  
+interval_covid_ts <- xts(interval_covid_df$val, interval_covid_df$date)
 
-merge_df <- rbind(gfg_date, gfg_date_pre)
-merge_df <- merge_df[order(merge_df$data), ]
-row.names(merge_df) <- NULL
+plot(interval_covid_df$date, interval_covid_df$vendite_forecast_rf, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+
+# serie storica dati reali fino a prima covid (ristorante1_pre_covid$vendite)
+interval_pre_covid <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
+interval_pre_covid_df <- data.frame(date = interval_pre_covid, 
+                           val=ristorante1_pre_covid$vendite)
+
+interval_pre_covid_df$date<-as.Date(interval_pre_covid_df$date)  
+interval_covid_ts_pre <- xts(interval_pre_covid_df$val, interval_pre_covid_df$date)
+
+# si uniscono le due serie storiche
+names(interval_covid_df)[1] <- "data"
+names(interval_covid_df)[2] <- "vendite"
+
+names(interval_pre_covid_df)[1] <- "data"
+names(interval_pre_covid_df)[2] <- "vendite"
+
+interval_complete <- rbind(interval_covid_df, interval_pre_covid_df)
+interval_complete <- interval_complete[order(interval_complete$data), ]
+row.names(interval_complete) <- NULL
 
 # serie storica con previsioni
-plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+plot(interval_complete$data, interval_complete$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
 
 # serie storica originale
 ristorazione_temp <- ristorazione[1:1228,]
@@ -1000,24 +983,23 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 # si addestra il modello sui dati pre covid e si prevedono le vendite nel periodo covid
 prophet_vendite <- ristorante1_pre_covid %>% 
   select(data, vendite)
-
 colnames(prophet_vendite) <- c("ds", "y")
 
-M6 <- prophet(prophet_vendite)
+# si crea il modello
+M5 <- prophet(prophet_vendite)
 
-future <- make_future_dataframe(M6, periods=365)
+# vengono fatte le previsioni
+future_prophet <- make_vendite_forecast_prophet_dataframe(M5, periods=365)
+vendite_forecast_prophet <- predict(M5, future_prophet)
+tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
+# yhat containing the vendite_forecast_prophet. It has additional columns for uncertainty 
+# intervals and seasonal components
 
-forecast <- predict(M6, future)
-tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
-# yhat containing the forecast. It has additional columns for uncertainty intervals and seasonal components
-
-plot(M6, forecast)
-
-prophet_plot_components(M6, forecast)
-df.cv <- cross_validation(M6, initial=180, period=60, horizon=120, units='days')
-
-plot_cross_validation_metric(df.cv, metric='mape')  # CHECK IT
-dyplot.prophet(M6, forecast)
+plot(M5, vendite_forecast_prophet)
+prophet_plot_components(M5, vendite_forecast_prophet)
+df.cv_prophet <- cross_validation(M5, initial=180, period=60, horizon=120, units='days')
+plot_cross_validation_metric(df.cv_prophet, metric='mape')  # CHECK IT
+dyplot.prophet(M5, vendite_forecast_prophet)
 
 
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
