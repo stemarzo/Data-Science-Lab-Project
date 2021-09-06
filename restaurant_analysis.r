@@ -911,10 +911,10 @@ M4 <- randomForest(vendite ~ weekday + is_weekend + mese + is_holiday + stagione
 varImpPlot(M4)
 print(M4)
 
-predictions_rf <- predict(M5, newdata = train_rf)
+predictions_rf <- predict(M4, newdata = train_rf)
 mape(train_rf$vendite, predictions_rf)
 
-predictions_rf <- predict(M5, newdata = test_rf)
+predictions_rf <- predict(M4, newdata = test_rf)
 mape(test_rf$vendite, predictions_rf)
 
 RMSE.rf <- sqrt(mean((predictions_rf-test_rf$vendite)^2))
