@@ -894,7 +894,7 @@ M2 %>%
 
 # divisione in train e test
 index_rf <- sample(1:nrow(ristorante1_pre_covid),
-                size = 0.7*nrow(ristorante1_pre_covid))
+                   size = 0.7*nrow(ristorante1_pre_covid))
 train_rf <- ristorante1_pre_covid[index_rf,]
 test_rf <- ristorante1_pre_covid[-index_rf,] 
 
@@ -944,7 +944,7 @@ vendite_forecast_rf <- as.data.frame(vendite_forecast_rf)
 # serie storica previsioni durante periodo covid
 interval_covid <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
 interval_covid_df <- data.frame(date = interval_covid, 
-                       val=vendite_forecast_rf)
+                                val=vendite_forecast_rf)
 interval_covid_df$date <- as.Date(interval_covid_df$date)  
 interval_covid_ts <- xts(interval_covid_df$val, interval_covid_df$date)
 
@@ -953,7 +953,7 @@ plot(interval_covid_df$date, interval_covid_df$vendite_forecast_rf, xlab = "data
 # serie storica dati reali fino a prima covid (ristorante1_pre_covid$vendite)
 interval_pre_covid <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
 interval_pre_covid_df <- data.frame(date = interval_pre_covid, 
-                           val=ristorante1_pre_covid$vendite)
+                                    val=ristorante1_pre_covid$vendite)
 
 interval_pre_covid_df$date<-as.Date(interval_pre_covid_df$date)  
 interval_covid_ts_pre <- xts(interval_pre_covid_df$val, interval_pre_covid_df$date)
@@ -1243,3 +1243,4 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_est
 
 
 # ANALISI TREND SCONTRINI --------------------------------
+
