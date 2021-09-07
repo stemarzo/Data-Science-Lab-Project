@@ -310,14 +310,14 @@ ristorazione$tot_vaccini_emilia_romagna[is.na(ristorazione$tot_vaccini_emilia_ro
 sum(is.na(ristorazione$data))  # 0 NA 
 
 sum(is.na(ristorazione$data_anno_prec))  # 68 NA, viene 
-which(is.na(ristorazione$data_anno_prec))
+# which(is.na(ristorazione$data_anno_prec))
 
 # per ogni ristorante viene verificata la presenza di valori NA o meno
 # i seguenti NA potrebbero essere dovuti a giorni senza vendite oppure ad errori di imputazione
 
 sum(is.na(ristorazione$vendite1))  # 68 NA
-which(is.na(ristorazione$vendite1))
-subset(ristorazione[,c(1,3)], is.na(ristorazione$vendite1))
+# which(is.na(ristorazione$vendite1))
+# subset(ristorazione[,c(1,3)], is.na(ristorazione$vendite1))
 # 26 febbraio 2018 - 2 marzo 2018: ondata di gelo e neve
 # 31 maggio 2018: ?
 # 12 marzo 2020 - 6 maggio 2020: covid
@@ -326,24 +326,24 @@ subset(ristorazione[,c(1,3)], is.na(ristorazione$vendite1))
 
 
 sum(is.na(ristorazione$vendite2))  # 55 NA
-which(is.na(ristorazione$vendite2))
-subset(ristorazione[,c(1,5)], is.na(ristorazione$vendite2))
+# which(is.na(ristorazione$vendite2))
+# subset(ristorazione[,c(1,5)], is.na(ristorazione$vendite2))
 # 12 marzo 2020 - 3 maggio 2020: covid
 # 25 dicembre 2020: festa
 # 4 aprile 2021: pasqua
 
 
 sum(is.na(ristorazione$vendite3))  # 1096 NA
-which(is.na(ristorazione$vendite3))
-subset(ristorazione[,c(1,7)], is.na(ristorazione$vendite3))
+# which(is.na(ristorazione$vendite3))
+# subset(ristorazione[,c(1,7)], is.na(ristorazione$vendite3))
 # fino al 8 novembre 2019: ristorante non attivo, se non per alcuni giorni (test)
 # 12 marzo 2020 - 6 maggio 2020: covid
 # 25-26 dicembre 2020, 1 gennaio 2021: feste
 # 4-5 aprile 2021: pasqua
 
 sum(is.na(ristorazione$vendite4))  # 108 NA
-which(is.na(ristorazione$vendite4))
-subset(ristorazione[,c(1,9)], is.na(ristorazione$vendite4))
+# which(is.na(ristorazione$vendite4))
+# subset(ristorazione[,c(1,9)], is.na(ristorazione$vendite4))
 # 1 gennaio 2014: feste
 # 16-17 aprile 2017: pasqua
 # 15 agosto 2017: ferragosto
@@ -362,8 +362,8 @@ subset(ristorazione[,c(1,9)], is.na(ristorazione$vendite4))
 
 
 sum(is.na(ristorazione$vendite5))  # 62 NA
-which(is.na(ristorazione$vendite5))
-subset(ristorazione[,c(1,11)], is.na(ristorazione$vendite5))
+# which(is.na(ristorazione$vendite5))
+# subset(ristorazione[,c(1,11)], is.na(ristorazione$vendite5))
 # 9 aprile - 13 aprile 2018: ?
 # 16 maggio 2018: ?
 # 5 giugno 2018: ?
@@ -373,8 +373,8 @@ subset(ristorazione[,c(1,11)], is.na(ristorazione$vendite5))
 
 
 sum(is.na(ristorazione$vendite6))  # 319 NA
-which(is.na(ristorazione$vendite6))
-subset(ristorazione[,c(1,13)], is.na(ristorazione$vendite6))
+# which(is.na(ristorazione$vendite6))
+# subset(ristorazione[,c(1,13)], is.na(ristorazione$vendite6))
 # 1 gennaio - 20 settembre 2017: ristorante non attivo
 # 14 maggio 2018: ?
 # 12 marzo 2020 - 3 maggio 2020: covid
@@ -775,8 +775,8 @@ nsdiffs(vendite1_sett_avg_pre_dest_diff_arima)
 vendite1_sett_avg_pre_split_arima <- ts_split(vendite1_sett_avg_pre_dest_diff_arima)
 
 # divisione in train e test
-train_arima <- vendite1_sett_avg_pre_split_arima$train_arima
-test_arima <- vendite1_sett_avg_pre_split_arima$test_arima
+train_arima <- vendite1_sett_avg_pre_split_arima$train
+test_arima <- vendite1_sett_avg_pre_split_arima$test
 autoplot(train_arima)
 autoplot(test_arima)
 
