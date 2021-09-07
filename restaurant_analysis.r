@@ -1244,5 +1244,7 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_est
 
 
 # ANALISI TREND SCONTRINI --------------------------------
-
-
+ts_analisi_scontrini <- data.frame(ristorante1$rapprto_v_s ,ristorante1$scontrini)
+names(ts_analisi_scontrini) <- c("prezzo medio scontrino", "scontrini fatti")
+ts_analisi_scontrini <- ts(ts_analisi_scontrini, start = 2017,frequency = 365)
+autoplot(ts_analisi_scontrini, facets = 1, main = "Ristorante 1: analisi trend scontrini")
