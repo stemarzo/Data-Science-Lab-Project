@@ -888,6 +888,7 @@ M2 %>%
 
 
 ### Random forest----
+# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
 # si opera su dati giornalieri
 # si addestra il modello sui dati pre covid (ristorante1_pre_covid$vendite) e 
 # si prevedono le vendite nel periodo covid
