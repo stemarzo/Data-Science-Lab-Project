@@ -20,9 +20,9 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 
 # setting working directory
-#working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
+working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
 #working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
-working_dir = "~/Desktop/progetti uni github/progetto_dslab/dati"
+#working_dir = "~/Desktop/progetti uni github/progetto_dslab/dati"
 setwd(working_dir)
 
 # functions 
@@ -709,23 +709,23 @@ ggplot(ristorante6, aes(data, vendite)) +
 
 # esplorazione ristorante 1
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
-# source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
+source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
 
 # esplorazione ristorante 2
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
-
+source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
 # esplorazione ristorante 3
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
-
+source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
 # esplorazione ristorante 4
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
-
+source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
 # esplorazione ristorante 5
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
-
+source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
 # esplorazione ristorante 6
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
-
+source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
 
@@ -1066,10 +1066,10 @@ ristorante1$chiuso <- as.factor(ristorante1$chiuso)
 
 
 # dati rossa su base settimanale (somma, si contano i giorni della settimana in cui c'è zona rossa)
-ristorante1$rossa <- as.numeric(as.character(ristorante1$rossa))
-week_rossa_sum <- aggregate(rossa ~ week_rist1, ristorante1[-c(1,1563),], sum)
-week_rossa_sum <- week_rossa_sum$rossa
-ristorante1$rossa <- as.factor(ristorante1$rossa)
+ristorante1$rossa_emilia_romagna <- as.numeric(as.character(ristorante1$rossa_emilia_romagna))
+week_rossa_sum <- aggregate(rossa_emilia_romagna ~ week_rist1, ristorante1[-c(1,1563),], sum)
+week_rossa_sum <- week_rossa_sum$rossa_emilia_romagna
+ristorante1$rossa_emilia_romagna <- as.factor(ristorante1$rossa_emilia_romagna)
 
 
 regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
@@ -1104,15 +1104,15 @@ tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
 
 # verifica p-value
 valori <- M4$coef["week_chiuso_sum"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_chiuso_sum"] ,221)
+pvalue = 2*pt(valori["week_chiuso_sum"] ,219)
 pvalue
 
 valori <- M4$coef["week_covid_bin"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_covid_bin"] ,221)
+pvalue = 2*pt(valori["week_covid_bin"] ,219)
 pvalue
 
 valori <- M4$coef["week_rossa_sum"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_rossa_sum"] ,221)
+pvalue = 2*pt(valori["week_rossa_sum"] ,219)
 pvalue
 
 # verifica adattamento modello
@@ -1244,4 +1244,5 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_est
 
 
 # ANALISI TREND SCONTRINI --------------------------------
+
 
