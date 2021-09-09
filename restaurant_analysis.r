@@ -1103,9 +1103,9 @@ checkresiduals(M4)
 tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
 
 # verifica p-value
-valori <- M4$coef["week_chiuso_sum"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_chiuso_sum"] ,219)
-pvalue
+#valori <- M4$coef["week_chiuso_sum"]/sqrt(diag(M4$var.coef))
+#pvalue = 2*pt(valori["week_chiuso_sum"] ,219)
+#pvalue
 
 valori <- M4$coef["week_covid_bin"]/sqrt(diag(M4$var.coef))
 pvalue = 2*pt(valori["week_covid_bin"] ,220)
@@ -1205,7 +1205,198 @@ autoplot(forecast_2021)
 ### Random forest----
 
 
+vendite_giornaliere_prev_post_aprile <- ristorazione
+
+# sistemazione NA
+sum(is.na(vendite_giornaliere_prev_post_aprile))
+
+sum(is.na(vendite_giornaliere_prev_post_aprile$vendite1))
+vendite_giornaliere_prev_post_aprile$vendite1[is.na(vendite_giornaliere_prev_post_aprile$vendite1)] <- 0 
+
+
+# implementazione modelli
+M8 = randomForest(vendite1 ~ is_holiday + is_weekend +pioggia+  covid + stagione 
+                                    + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
+                                    + tot_vaccini_emilia_romagna + mese, data = vendite_giornaliere_prev_post_aprile)
+varImpPlot(M8)
+print(M8)
+
+# si selezionano le variabili più rilevanti
+M9 = randomForest(vendite1 ~ weekday + is_weekend + covid + rossa_emilia_romagna + mese,
+                                    data = vendite_giornaliere_prev_post_aprile)
+varImpPlot(M9)
+print(M9)
+
+vendite_giornaliere_prev_post_aprile <- data.frame(vendite_giornaliere_prev_post_aprile$data,vendite_giornaliere_prev_post_aprile$vendite1, vendite_giornaliere_prev_post_aprile$weekday,
+                                                   vendite_giornaliere_prev_post_aprile$is_weekend,vendite_giornaliere_prev_post_aprile$covid, vendite_giornaliere_prev_post_aprile$rossa_emilia_romagna,
+                                                   vendite_giornaliere_prev_post_aprile$mese)
+names(vendite_giornaliere_prev_post_aprile)<- c("data", "vendite1","weekday","is_weekend","covid","rossa_emilia_romagna","mese")
+
+#creo nuovo dataframe per le variabili previsione
+
+data = seq(from = as.Date("2021-04-13"), to = as.Date("2021-08-12"), by = 'day')
+
+vendite_giornaliere_prev_post_aprile_forecast <- data.frame(data)
+vendite_giornaliere_prev_post_aprile_forecast$mese <- month(vendite_giornaliere_prev_post_aprile_forecast$data)
+
+
+# colonna giorni festivi e feriali
+vendite_giornaliere_prev_post_aprile_forecast <- vendite_giornaliere_prev_post_aprile_forecast %>%
+  mutate(weekday = wday(data, week_start = getOption("lubridate.week.start", 1))) %>%
+  mutate(tipo_giorno = case_when(
+    (weekday %in% c(6,7)) ~ "weekend"
+    , (weekday < 7) ~ "weekday"
+    , TRUE ~ "other"
+  )
+  )
+vendite_giornaliere_prev_post_aprile_forecast$weekday <- as.factor(vendite_giornaliere_prev_post_aprile_forecast$weekday)
+vendite_giornaliere_prev_post_aprile_forecast["tipo_giorno"][vendite_giornaliere_prev_post_aprile_forecast["tipo_giorno"] == "weekend"] <- "1"
+vendite_giornaliere_prev_post_aprile_forecast["tipo_giorno"][vendite_giornaliere_prev_post_aprile_forecast["tipo_giorno"] == "weekday"] <- "0"
+colnames(vendite_giornaliere_prev_post_aprile_forecast)[which(names(vendite_giornaliere_prev_post_aprile_forecast) == "tipo_giorno")] <- "is_weekend"
+vendite_giornaliere_prev_post_aprile_forecast$is_weekend <- as.factor(vendite_giornaliere_prev_post_aprile_forecast$is_weekend)
+
+# covid aggiornato fino al 12 agosto
+vendite_giornaliere_prev_post_aprile_forecast$covid <- 1  # il covid è presente
+
+
+# colori aggiornati fino al 12 agosto 2021
+
+colori_zone_aggiornato <- read_csv("colori_zone_aggiornato.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
+
+colori_emilia_romagna_new <- colori_zone_aggiornato %>% 
+  filter(denominazione_regione == "Emilia-Romagna")
+names(colori_emilia_romagna_new)[3] <- "colore_emilia_romagna"
+
+reference_date_colori <- as.Date("2021-04-12", format = "%Y-%m-%d")  
+
+colori_emilia_romagna_new <- colori_emilia_romagna_new  %>% 
+  filter(data > reference_date_colori)
+
+
+# creazione df (dal 12 aprile 2021 al 12 agosto 2021) 
+vendite_giornaliere_prev_post_aprile_forecast$colore_emilia_romagna <- colori_emilia_romagna_new$colore_emilia_romagna  # deve essere l'analogo di regressori_forecast_day
+
+
+# colonna zona rossa
+vendite_giornaliere_prev_post_aprile_forecast$rossa_emilia_romagna <- ifelse(vendite_giornaliere_prev_post_aprile_forecast$colore_emilia_romagna == "rosso", 1, 0)  # no zone rosse
+vendite_giornaliere_prev_post_aprile_forecast$rossa_emilia_romagna<- as.factor(vendite_giornaliere_prev_post_aprile_forecast$rossa_emilia_romagna)
+vendite_giornaliere_prev_post_aprile_forecast$covid<- as.factor(vendite_giornaliere_prev_post_aprile_forecast$covid)
+vendite_giornaliere_prev_post_aprile_forecast$colore_emilia_romagna <- as.factor(vendite_giornaliere_prev_post_aprile_forecast$colore_emilia_romagna)
+vendite_giornaliere_prev_post_aprile_forecast$mese<- as.factor(vendite_giornaliere_prev_post_aprile_forecast$mese)
+
+vendite_giornaliere_prev_post_aprile_forecast$vendite1 <- 0
+
+vendite_giornaliere_prev_post_aprile_forecast <- data.frame(vendite_giornaliere_prev_post_aprile_forecast$data,vendite_giornaliere_prev_post_aprile_forecast$vendite1, vendite_giornaliere_prev_post_aprile_forecast$weekday,
+                                                            vendite_giornaliere_prev_post_aprile_forecast$is_weekend,vendite_giornaliere_prev_post_aprile_forecast$covid, vendite_giornaliere_prev_post_aprile_forecast$rossa_emilia_romagna,
+                                                            vendite_giornaliere_prev_post_aprile_forecast$mese)
+names(vendite_giornaliere_prev_post_aprile_forecast)<- c("data", "vendite1","weekday","is_weekend","covid","rossa_emilia_romagna","mese")
+
+totale <-rbind(vendite_giornaliere_prev_post_aprile, vendite_giornaliere_prev_post_aprile_forecast)
+
+
+
+
+# si utilizza il modello appena creato per fare previsioni sul futuro
+vendite_forecast <- predict(M9, totale[1563:1685,])
+vendite_forecast <- as.data.frame(vendite_forecast)
+
+# si uniscono le tue serie storiche
+library("xts")
+
+# serie storica previsioni 
+interval <- seq(as.Date("2021-04-12"), as.Date("2021-08-12"), by = "day")
+gfg_date <- data.frame(date = interval, 
+                       val=vendite_forecast)
+gfg_date$date<-as.Date(gfg_date$date)  
+gfg_ts <- xts(gfg_date$val, gfg_date$date)
+
+plot(gfg_date$date, gfg_date$vendite_forecast, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+
+# serie storica dati reali fino ad aprile 2021
+reference_date_pre <- as.Date("2021-04-11", format = "%Y-%m-%d")
+vendite_pre <- ristorazione %>%
+  filter(ristorazione$data <= reference_date_pre) %>%
+  select(data, vendite1)
+
+interval_pre <- seq(as.Date("2017-01-01"), as.Date("2021-04-11"), by = "day")
+gfg_date_pre <- data.frame(date = interval_pre, 
+                           val=vendite_pre$vendite1)
+
+gfg_date_pre$date<-as.Date(gfg_date_pre$date)  
+gfg_ts_pre <- xts(gfg_date_pre$val, gfg_date_pre$date)
+
+# si uniscono le due serie storiche
+names(gfg_date)[1] <- "data"
+names(gfg_date)[2] <- "vendite"
+
+names(gfg_date_pre)[1] <- "data"
+names(gfg_date_pre)[2] <- "vendite"
+
+merge_df <- rbind(gfg_date, gfg_date_pre)
+merge_df <- merge_df[order(merge_df$data), ]
+row.names(merge_df) <- NULL
+merge_df$vendite[is.na(merge_df$vendite)] <- 0 
+
+# serie storica con previsioni
+plot(merge_df$data, merge_df$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+ristorazione_temp <- ristorazione
+
+# serie storica originale
+ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
+plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
+
+
+RMSE.rf <- sqrt(mean((M9$predicted - ristorante1$vendite)^2))
+RMSE.rf
+
+
 ### Prophet----
+
+library(rstan)
+library(prophet)
+
+df <- data.frame(ristorante1$data, ristorante1$vendite)
+tail(df)
+
+names(df) <- c('ds', 'y') 
+
+M10 <- prophet(df, daily.seasonality=FALSE)
+
+future <- make_future_dataframe(M10, periods=90)
+
+forecast <- predict(M10, future)
+tail(forecast)
+
+dyplot.prophet(M10, forecast)
+prophet_plot_components(M10, forecast)
+
+df.cv <- cross_validation(M10, initial=180, period=60, horizon=120, units='days')
+tail(df.cv)
+
+plot_cross_validation_metric(df.cv, metric = 'rmse')
+
+### Prophet più regressori ----
+
+covid <- function(ds) {
+  dates <- as.Date(ds)
+  reference_date_pre <- as.Date("2020-01-05", format = "%Y-%m-%d")
+  as.numeric(dates > reference_date_pre)
+}
+df$covid <- covid(df$ds)
+
+M11 <- prophet(daily.seasonality=FALSE)
+M11 <- add_regressor(M11, 'covid')
+M11 <- fit.prophet(M11, df)
+
+future$covid <- covid(future$ds)
+
+forecast <- predict(M11, future)
+prophet_plot_components(M11, forecast)
+dyplot.prophet(M11, forecast)
+df.cv11 <- cross_validation(M11, initial=180, period=60, horizon=120, units='days')
+tail(df.cv11)
+
+plot_cross_validation_metric(df.cv11, metric = 'rmse')
 
 
 

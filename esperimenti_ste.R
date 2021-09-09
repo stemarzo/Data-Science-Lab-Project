@@ -841,7 +841,7 @@ autoplot(forecast_2021)
 
 ### RANDOM FOREST --------------------------
 
-# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
+# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-
 mape <- function(actual,pred){
   mape <- mean(abs((actual - pred)/actual))*100
   return (mape)
@@ -1202,3 +1202,28 @@ tail(df.cv)
 
 plot_cross_validation_metric(df.cv, metric = 'rmse')
 
+
+
+regressori_week$week_covid_bin <- as.numeric(regressori_week$week_covid_bin)
+regressori_week$week_chiuso_bin <- as.numeric(regressori_week$week_chiuso_bin )
+regressori_week$week_rossa_bin <- as.numeric(regressori_week$week_rossa_bin)
+
+
+regressori_forecast_week$week_covid_bin <- as.numeric(regressori_forecast_week$week_covid_bin)
+regressori_forecast_week$week_chiuso_bin <- as.numeric(regressori_forecast_week$week_chiuso_bin )
+regressori_forecast_week$week_rossa_bin <- as.numeric(regressori_forecast_week$week_rossa_bin)
+
+
+
+M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
+                 xreg = regressori_week$week_chiuso_bin )
+summary(M4)  # AIC: 3453.91 
+
+forecast_2021 <- M4 %>%
+  forecast(h=18,  xreg =regressori_forecast_week$) 
+
+regressori_forecast_week[10:18,"week_chiuso_bin"] <-0
+
+
+autoplot(fc.c1)
+fc.c1 <- forecast(M4, xreg = regressori_forecast_week$week_chiuso_bin)
