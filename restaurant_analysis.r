@@ -1077,15 +1077,15 @@ regressori_week <- data.frame(week_covid_sum, week_chiuso_sum, week_rossa_sum)
 # trasformazione colonne precedenti in valori binari
 regressori_week <- regressori_week %>%
   mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))  # se almeno un giorno durante la settimana ha registrato il covid allora tale settimana viene etichettata come settimana covid
-regressori_week$week_covid_bin <- as.factor(regressori_week$week_covid_bin)
+#regressori_week$week_covid_bin <- as.factor(regressori_week$week_covid_bin)
 
 regressori_week <- regressori_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))  # se un ristorante durante la settimana rimane chiuso per più di 4 giorni allora tale settimana viene etichettata come settimana chiusa
-regressori_week$week_chiuso_bin <- as.factor(regressori_week$week_chiuso_bin)
+#regressori_week$week_chiuso_bin <- as.factor(regressori_week$week_chiuso_bin)
 
 regressori_week <- regressori_week %>%
   mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))  # se un ristorante durante la settimana è in zona rossa per più di 4 giorni allora tale settimana viene etichettata come settimana rossa
-regressori_week$week_rossa_bin <- as.factor(regressori_week$week_rossa_bin)
+#regressori_week$week_rossa_bin <- as.factor(regressori_week$week_rossa_bin)
 
 # verifica collinearità variabili
 library(corrplot)
@@ -1097,7 +1097,7 @@ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", metho
 # regressori: "covid_bin", "rossa_sum", "chiuso_sum" (check se serve as.factor())
 
 M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
-                 xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")]))
+                 xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_bin")]))
 summary(M4)  # AIC: 3453.91   
 checkresiduals(M4)
 tsdisplay(residuals(M4), lag.max=52, main='Seasonal Model Residuals')
@@ -1108,11 +1108,11 @@ pvalue = 2*pt(valori["week_chiuso_sum"] ,219)
 pvalue
 
 valori <- M4$coef["week_covid_bin"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_covid_bin"] ,219)
+pvalue = 2*pt(valori["week_covid_bin"] ,220)
 pvalue
 
-valori <- M4$coef["week_rossa_sum"]/sqrt(diag(M4$var.coef))
-pvalue = 2*pt(valori["week_rossa_sum"] ,219)
+valori <- M4$coef["week_rossa_bin"]/sqrt(diag(M4$var.coef))
+pvalue = 2*pt(valori["week_rossa_bin"] ,220)
 pvalue
 
 # verifica adattamento modello
@@ -1176,20 +1176,20 @@ colnames(regressori_forecast_week) <- c("week_covid_sum", "week_chiuso_sum", "we
 # trasformazione colonne precedenti in valori binari
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_covid_bin = ifelse(week_covid_sum>0, 1, 0))
-regressori_forecast_week$week_covid_bin <- as.factor(regressori_forecast_week$week_covid_bin)
+#regressori_forecast_week$week_covid_bin <- as.factor(regressori_forecast_week$week_covid_bin)
 
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_rossa_bin = ifelse(week_rossa_sum>4, 1, 0))
-regressori_forecast_week$week_rossa_bin <- as.factor(regressori_forecast_week$week_rossa_bin)
+#regressori_forecast_week$week_rossa_bin <- as.factor(regressori_forecast_week$week_rossa_bin)
 
 regressori_forecast_week <- regressori_forecast_week %>%
   mutate(week_chiuso_bin = ifelse(week_chiuso_sum>4, 1, 0))
-regressori_forecast_week$week_chiuso_bin <- as.factor(regressori_forecast_week$week_chiuso_bin)
+#regressori_forecast_week$week_chiuso_bin <- as.factor(regressori_forecast_week$week_chiuso_bin)
 
 
 # previsione vendite settimanali su dati nuovi
 forecast_2021 <- M4 %>%
-  forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_sum", "week_chiuso_sum")])) 
+  forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_bin")])) 
 
 autoplot(forecast_2021)
 
