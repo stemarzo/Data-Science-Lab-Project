@@ -1163,6 +1163,10 @@ tail(df)
 
 names(df) <- c('ds', 'y') 
 
+m <- prophet(holidays = holidays)
+m <- add_country_holidays(m, country_name = 'IT')
+m <- fit.prophet(m, df)
+
 m <- prophet(df, daily.seasonality=FALSE)
 
 future <- make_future_dataframe(m, periods=90)
@@ -1179,19 +1183,38 @@ tail(df.cv)
 
 plot_cross_validation_metric(df.cv, metric = 'rmse')
 
+
+
 ###covid con prophet e regressore-----
 covid <- function(ds) {
   dates <- as.Date(ds)
-  reference_date_pre <- as.Date("2020-01-05", format = "%Y-%m-%d")
+  reference_date_pre <- as.Date("2020-03-09", format = "%Y-%m-%d")
   as.numeric(dates > reference_date_pre)
 }
+
+data = seq(from = as.Date("2021-04-13"), to = as.Date("2021-07-11"), by = 'day')
+
+rossa_emilia<- data.frame(ristorante1$data, ristorante1$rossa_emilia_romagna)
+names(rossa_emilia) <- c("data", "rossa")
+rossa_emilia_tot <- data.frame(data)
+rossa_emilia_tot$rossa <-0
+rossa_emilia_tot <- rbind(rossa_emilia, rossa_emilia_tot)
+
+
+
+
 df$covid <- covid(df$ds)
+df$rossa <- rossa_emilia$rossa
+
 
 m <- prophet(daily.seasonality=FALSE)
+m <- add_country_holidays(m, country_name = 'IT')
 m <- add_regressor(m, 'covid')
+m <- add_regressor(m, 'rossa')
 m <- fit.prophet(m, df)
 
 future$covid <- covid(future$ds)
+future$rossa <- rossa_emilia_tot$rossa
 
 forecast <- predict(m, future)
 prophet_plot_components(m, forecast)
@@ -1202,28 +1225,7 @@ tail(df.cv)
 
 plot_cross_validation_metric(df.cv, metric = 'rmse')
 
-
-
-regressori_week$week_covid_bin <- as.numeric(regressori_week$week_covid_bin)
-regressori_week$week_chiuso_bin <- as.numeric(regressori_week$week_chiuso_bin )
-regressori_week$week_rossa_bin <- as.numeric(regressori_week$week_rossa_bin)
-
-
-regressori_forecast_week$week_covid_bin <- as.numeric(regressori_forecast_week$week_covid_bin)
-regressori_forecast_week$week_chiuso_bin <- as.numeric(regressori_forecast_week$week_chiuso_bin )
-regressori_forecast_week$week_rossa_bin <- as.numeric(regressori_forecast_week$week_rossa_bin)
+sqrt(mean((df$y- forecast[1:1563,"yhat"])^2))
 
 
 
-M4 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
-                 xreg = regressori_week$week_chiuso_bin )
-summary(M4)  # AIC: 3453.91 
-
-forecast_2021 <- M4 %>%
-  forecast(h=18,  xreg =regressori_forecast_week$) 
-
-regressori_forecast_week[10:18,"week_chiuso_bin"] <-0
-
-
-autoplot(fc.c1)
-fc.c1 <- forecast(M4, xreg = regressori_forecast_week$week_chiuso_bin)

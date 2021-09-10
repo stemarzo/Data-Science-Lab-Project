@@ -1347,58 +1347,47 @@ RMSE.rf <- sqrt(mean((M9$predicted - ristorante1$vendite)^2))
 RMSE.rf
 
 
-### Prophet----
-# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi fare previsioni
-# per il periodo post aprile, periodo per cui non si hanno a disposizione valori 
-# relativi a vendite e scontrini
-
-prophet_vendite_totali <- ristorante1 %>% 
-  select(data, vendite)
-colnames(prophet_vendite_totali) <- c("ds", "y")
-
-# si crea il modello
-M10 <- prophet(prophet_vendite_totali, daily.seasonality=FALSE)
-
-# vengono fatte le previsioni
-future_prophet_new <- make_future_dataframe(M10, periods=90)
-vendite_forecast_prophet_new <- predict(M10, future_prophet_new)
-tail(vendite_forecast_prophet_new[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
-
-plot(M10, vendite_forecast_prophet_new)
-prophet_plot_components(M10, vendite_forecast_prophet_new)
-prophet_vendite_totali.cv <- cross_validation(M10, initial=180, period=60, 
-                                              horizon=120, units='days')
-plot_cross_validation_metric(prophet_vendite_totali.cv, metric = 'rmse')
-dyplot.prophet(M10, vendite_forecast_prophet_new)
-
-
 ### Prophet più regressori ----
 covid <- function(ds) {
   dates <- as.Date(ds)
   reference_date_pre <- as.Date("2020-03-09", format = "%Y-%m-%d")
-  as.numeric(dates >= reference_date_pre)
+  as.numeric(dates > reference_date_pre)
 }
 
-prophet_vendite_totali$covid <- covid(prophet_vendite_totali$ds)
+data = seq(from = as.Date("2021-04-13"), to = as.Date("2021-07-11"), by = 'day')
 
-# si crea il modello
-M11 <- prophet(daily.seasonality=FALSE)
-M11 <- add_regressor(M11, 'covid')
-M11 <- fit.prophet(M11, prophet_vendite_totali)
+rossa_emilia<- data.frame(ristorante1$data, ristorante1$rossa_emilia_romagna)
+names(rossa_emilia) <- c("data", "rossa")
+rossa_emilia_tot <- data.frame(data)
+rossa_emilia_tot$rossa <-0
+rossa_emilia_tot <- rbind(rossa_emilia, rossa_emilia_tot)
 
-# vengono fatte le previsioni
 
-future_prophet_new$covid <- covid(future_prophet_new$ds)
 
-vendite_forecast_prophet_new_regr <- predict(M11, future_prophet_new)
-tail(vendite_forecast_prophet_new_regr[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 
-plot(M11, vendite_forecast_prophet_new_regr)
-prophet_plot_components(M11, vendite_forecast_prophet_new_regr)
-prophet_vendite_totali.cv <- cross_validation(M11, initial=180, period=60, 
-                                              horizon=120, units='days')
-plot_cross_validation_metric(prophet_vendite_totali.cv, metric = 'rmse')
-dyplot.prophet(M11, vendite_forecast_prophet_new_regr)
+df$covid <- covid(df$ds)
+df$rossa <- rossa_emilia$rossa
+
+
+m <- prophet(daily.seasonality=FALSE)
+m <- add_country_holidays(m, country_name = 'IT')
+m <- add_regressor(m, 'covid')
+m <- add_regressor(m, 'rossa')
+m <- fit.prophet(m, df)
+
+future$covid <- covid(future$ds)
+future$rossa <- rossa_emilia_tot$rossa
+
+forecast <- predict(m, future)
+prophet_plot_components(m, forecast)
+plot(m, forecast)
+dyplot.prophet(m, forecast)
+df.cv <- cross_validation(m, initial=180, period=60, horizon=120, units='days')
+tail(df.cv)
+
+plot_cross_validation_metric(df.cv, metric = 'rmse')
+
+sqrt(mean((df$y- forecast[1:1563,"yhat"])^2))
 
 
 # CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
