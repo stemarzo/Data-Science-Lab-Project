@@ -732,6 +732,76 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 # source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
+# CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
+
+# seleziono un periodo temporale che corrisponde all'estate
+# ricavo due serie storiche, per 2019 e 2020
+
+inizio_estate_2019 <- as.Date("2019-06-21", format = "%Y-%m-%d")
+fine_estate_2019 <- as.Date("2019-09-22", format = "%Y-%m-%d")
+
+inizio_estate_2020 <- as.Date("2020-06-21", format = "%Y-%m-%d")
+fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
+
+
+# confronto estati ristorante 1
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
+
+# confronto estati ristorante 2
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
+
+# confronto estati ristorante 3
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
+
+# confronto estati ristorante 4
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
+
+# confronto estati ristorante 5
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
+
+# confronto estati ristorante 6
+source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
+
+
+
+
+# ANALISI TREND SCONTRINI --------------------------------
+
+# ristorante 1
+trend_scontrini_df_rist1 <- data.frame(ristorante1$rapprto_v_s ,ristorante1$scontrini)
+names(trend_scontrini_df_rist1) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist1 <- ts(trend_scontrini_df_rist1, start = 2017,frequency = 365)
+autoplot(trend_scontrini_ts_rist1, facets = 1, main = "Ristorante 1: analisi trend scontrini")
+
+# ristorante 2
+trend_scontrini_df_rist2 <- data.frame(ristorante2$rapprto_v_s ,ristorante2$scontrini)
+names(trend_scontrini_df_rist2) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist2 <- ts(trend_scontrini_df_rist2, start = 2017,frequency = 365)
+autoplot(trend_scontrini_ts_rist2, facets = 1, main = "Ristorante 2: analisi trend scontrini")
+
+# ristorante 3
+trend_scontrini_df_rist3 <- data.frame(ristorante3$rapprto_v_s ,ristorante3$scontrini)
+names(trend_scontrini_df_rist3) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist3 <- ts(trend_scontrini_df_rist3, start = decimal_date(as.Date("2019-11-04")),frequency = 365)
+autoplot(trend_scontrini_ts_rist3, facets = 1, main = "Ristorante 3: analisi trend scontrini")
+
+# ristorante 4
+trend_scontrini_df_rist4 <- data.frame(ristorante4$rapprto_v_s ,ristorante4$scontrini)
+names(trend_scontrini_df_rist4) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist4 <- ts(trend_scontrini_df_rist4, start = 2017,frequency = 365)
+autoplot(trend_scontrini_ts_rist4, facets = 1, main = "Ristorante 4: analisi trend scontrini")
+
+# ristorante 5
+trend_scontrini_df_rist5 <- data.frame(ristorante5$rapprto_v_s ,ristorante5$scontrini)
+names(trend_scontrini_df_rist5) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist5 <- ts(trend_scontrini_df_rist5, start = 2017,frequency = 365)
+autoplot(trend_scontrini_ts_rist5, facets = 1, main = "Ristorante 5: analisi trend scontrini")
+
+# ristorante 6
+trend_scontrini_df_rist6 <- data.frame(ristorante6$rapprto_v_s ,ristorante6$scontrini)
+names(trend_scontrini_df_rist6) <- c("prezzo medio scontrino", "scontrini registrati")
+trend_scontrini_ts_rist6 <- ts(trend_scontrini_df_rist6, start = decimal_date(as.Date("2017-09-21")),frequency = 365)
+autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi trend scontrini")
 
 
 
@@ -1007,8 +1077,8 @@ tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 
 plot(M5, vendite_forecast_prophet)
 prophet_plot_components(M5, vendite_forecast_prophet)
-prophet_vendite.cv <- cross_validation(M5, initial=180, period=60, horizon=120, units='days')
-plot_cross_validation_metric(prophet_vendite.cv, metric='mape')  # CHECK IT
+# prophet_vendite.cv <- cross_validation(M5, initial=180, period=60, horizon=120, units='days')
+# plot_cross_validation_metric(prophet_vendite.cv, metric='mape')
 dyplot.prophet(M5, vendite_forecast_prophet)
 
 
@@ -1347,116 +1417,57 @@ RMSE.rf <- sqrt(mean((M9$predicted - ristorante1$vendite)^2))
 RMSE.rf
 
 
-### Prophet più regressori ----
+### Prophet con regressori ----
+# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
+# fare previsioni per il periodo post aprile, periodo per cui non si hanno a 
+# disposizione valori relativi a vendite e scontrini
+
 covid <- function(ds) {
   dates <- as.Date(ds)
   reference_date_pre <- as.Date("2020-03-09", format = "%Y-%m-%d")
   as.numeric(dates > reference_date_pre)
 }
 
+# periodo pre aprile
+vendite_pre_aprile_prophet <- data.frame(ristorante1$data, 
+                                         ristorante1$rossa_emilia_romagna)
+names(vendite_pre_aprile_prophet) <- c("data", "rossa")
+
+# periodo post aprile
 data = seq(from = as.Date("2021-04-13"), to = as.Date("2021-07-11"), by = 'day')
+vendite_post_aprile_prophet <- data.frame(data)
+vendite_post_aprile_prophet$rossa <- 0
 
-rossa_emilia<- data.frame(ristorante1$data, ristorante1$rossa_emilia_romagna)
-names(rossa_emilia) <- c("data", "rossa")
-rossa_emilia_tot <- data.frame(data)
-rossa_emilia_tot$rossa <-0
-rossa_emilia_tot <- rbind(rossa_emilia, rossa_emilia_tot)
+# unione periodo pre aprile e periodo post aprile
+vendite_pre_post_aprile_prophet <- rbind(vendite_pre_aprile_prophet, 
+                                         vendite_post_aprile_prophet)
 
+# si considerano le vendite fino ad aprile 2021
+prophet_vendite_totali <- ristorante1 %>% 
+  select(data, vendite)
+colnames(prophet_vendite_totali) <- c("ds", "y")
+prophet_vendite_totali$covid <- covid(prophet_vendite_totali$ds)
+prophet_vendite_totali$rossa <- vendite_pre_aprile_prophet$rossa
 
+# si crea il modello
+M10 <- prophet(daily.seasonality=FALSE)
+M10 <- add_country_holidays(M10, country_name = 'IT')
+M10 <- add_regressor(M10, 'covid')
+M10 <- add_regressor(M10, 'rossa')
+M10 <- fit.prophet(M10, prophet_vendite_totali)
 
+# vengono fatte le previsioni
+future_prophet_regr <- make_future_dataframe(M10, periods=90)
 
-df$covid <- covid(df$ds)
-df$rossa <- rossa_emilia$rossa
+future_prophet_regr$covid <- covid(future_prophet_regr$ds)
+future_prophet_regr$rossa <- vendite_pre_post_aprile_prophet$rossa
 
+vendite_forecast_prophet_regr <- predict(M10, future_prophet_regr)
 
-m <- prophet(daily.seasonality=FALSE)
-m <- add_country_holidays(m, country_name = 'IT')
-m <- add_regressor(m, 'covid')
-m <- add_regressor(m, 'rossa')
-m <- fit.prophet(m, df)
+plot(M10, vendite_forecast_prophet_regr)
+prophet_plot_components(M10, vendite_forecast_prophet_regr)
+# prophet_vendite_totali.cv <- cross_validation(M10, initial=180, period=60, horizon=120, units='days')
+# plot_cross_validation_metric(prophet_vendite_totali.cv, metric = 'rmse')
+dyplot.prophet(M10, vendite_forecast_prophet_regr)
 
-future$covid <- covid(future$ds)
-future$rossa <- rossa_emilia_tot$rossa
-
-forecast <- predict(m, future)
-prophet_plot_components(m, forecast)
-plot(m, forecast)
-dyplot.prophet(m, forecast)
-df.cv <- cross_validation(m, initial=180, period=60, horizon=120, units='days')
-tail(df.cv)
-
-plot_cross_validation_metric(df.cv, metric = 'rmse')
-
-sqrt(mean((df$y- forecast[1:1563,"yhat"])^2))
-
-
-# CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
-
-# seleziono un periodo temporale che corrisponde all'estate
-# ricavo due serie storiche, per 2019 e 2020
-
-inizio_estate_2019 <- as.Date("2019-06-21", format = "%Y-%m-%d")
-fine_estate_2019 <- as.Date("2019-09-22", format = "%Y-%m-%d")
-
-inizio_estate_2020 <- as.Date("2020-06-21", format = "%Y-%m-%d")
-fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
-
-
-# confronto estati ristorante 1
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
-
-# confronto estati ristorante 2
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
-
-# confronto estati ristorante 3
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
-
-# confronto estati ristorante 4
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
-
-# confronto estati ristorante 5
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
-
-# confronto estati ristorante 6
-source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
-
-
-
-
-# ANALISI TREND SCONTRINI --------------------------------
-
-# ristorante 1
-trend_scontrini_df_rist1 <- data.frame(ristorante1$rapprto_v_s ,ristorante1$scontrini)
-names(trend_scontrini_df_rist1) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist1 <- ts(trend_scontrini_df_rist1, start = 2017,frequency = 365)
-autoplot(trend_scontrini_ts_rist1, facets = 1, main = "Ristorante 1: analisi trend scontrini")
-
-# ristorante 2
-trend_scontrini_df_rist2 <- data.frame(ristorante2$rapprto_v_s ,ristorante2$scontrini)
-names(trend_scontrini_df_rist2) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist2 <- ts(trend_scontrini_df_rist2, start = 2017,frequency = 365)
-autoplot(trend_scontrini_ts_rist2, facets = 1, main = "Ristorante 2: analisi trend scontrini")
-
-# ristorante 3
-trend_scontrini_df_rist3 <- data.frame(ristorante3$rapprto_v_s ,ristorante3$scontrini)
-names(trend_scontrini_df_rist3) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist3 <- ts(trend_scontrini_df_rist3, start = decimal_date(as.Date("2019-11-04")),frequency = 365)
-autoplot(trend_scontrini_ts_rist3, facets = 1, main = "Ristorante 3: analisi trend scontrini")
-
-# ristorante 4
-trend_scontrini_df_rist4 <- data.frame(ristorante4$rapprto_v_s ,ristorante4$scontrini)
-names(trend_scontrini_df_rist4) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist4 <- ts(trend_scontrini_df_rist4, start = 2017,frequency = 365)
-autoplot(trend_scontrini_ts_rist4, facets = 1, main = "Ristorante 4: analisi trend scontrini")
-
-# ristorante 5
-trend_scontrini_df_rist5 <- data.frame(ristorante5$rapprto_v_s ,ristorante5$scontrini)
-names(trend_scontrini_df_rist5) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist5 <- ts(trend_scontrini_df_rist5, start = 2017,frequency = 365)
-autoplot(trend_scontrini_ts_rist5, facets = 1, main = "Ristorante 5: analisi trend scontrini")
-
-# ristorante 6
-trend_scontrini_df_rist6 <- data.frame(ristorante6$rapprto_v_s ,ristorante6$scontrini)
-names(trend_scontrini_df_rist6) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist6 <- ts(trend_scontrini_df_rist6, start = decimal_date(as.Date("2017-09-21")),frequency = 365)
-autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi trend scontrini")
+sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"])^2))
