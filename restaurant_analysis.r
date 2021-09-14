@@ -1085,7 +1085,7 @@ dyplot.prophet(M5, vendite_forecast_prophet)
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
 
 ### HoltWinters----
-# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi fare previsioni
+# si addestra il modello su tutti i dati a disposizione (settimanali) per poi fare previsioni
 # per il periodo post aprile, periodo per cui non si hanno a disposizione valori 
 # relativi a vendite e scontrini
 
