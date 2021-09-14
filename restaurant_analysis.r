@@ -886,7 +886,7 @@ acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 pacf <- ggPacf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 checkresiduals(M1)  # tutte le autocorrelazioni si trovano all'interno della banda, questo significa che i residui si comportano come un white noise
-autoplot(forecast(M1, h=50)) + autolayer(test_arima)
+autoplot(forecast(M1, h=47)) + autolayer(test_arima)
 
 # si potrebbe procedere selezionando altri modelli variando i parametri p e q,
 # optando per il modello il cui valore di AIC è minore
@@ -942,12 +942,12 @@ hist(M2$residuals)
 
 #  considerando test set
 M2 %>%
-  forecast(h=50) %>%  # h Number of periods for forecasting
+  forecast(h=47) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(test_auto_arima)
 
 # alternativa per verifica addatamento dati con test set
 forecast_covid_auto_arima <- M2 %>%
-  forecast(h=30)
+  forecast(h=47)
 
 par(mfrow=c(1,1))
 plot(forecast_covid_auto_arima)
@@ -961,7 +961,7 @@ accuracy(forecast_covid_auto_arima, test_auto_arima)
 # per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
 M2 %>%
-  forecast(h=106) %>%  # h Number of periods for forecasting
+  forecast(h=76) %>%  # h Number of periods for forecasting, DA MODIFICARE
   autoplot() + autolayer(vendite1_sett_avg)
 # CHECK IT ULTIMI GRAFICI (controllare da dove parte previsione)
 
@@ -1021,7 +1021,7 @@ vendite_forecast_rf <- as.data.frame(vendite_forecast_rf)
 
 # si uniscono le due serie storiche
 
-# serie storica previsioni durante periodo covid
+# serie storica previsioni durante periodo covid 
 interval_covid <- seq(as.Date("2020-01-06"), as.Date("2020-05-17"), by = "day")
 interval_covid_df <- data.frame(date = interval_covid, 
                                 val=vendite_forecast_rf)
@@ -1053,7 +1053,7 @@ row.names(interval_complete) <- NULL
 plot(interval_complete$data, interval_complete$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
 
 # serie storica originale
-ristorazione_temp <- ristorazione[1:1228,]
+ristorazione_temp <- ristorazione[1:1228,]  # fino al 12 maggio 2020
 ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
 plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
@@ -1068,7 +1068,7 @@ colnames(prophet_vendite) <- c("ds", "y")
 # si crea il modello
 M5 <- prophet(prophet_vendite)
 
-# vengono fatte le previsioni
+# vengono fatte le previsioni, DA METTERE FINO AL 17 MAGGIO
 future_prophet <- make_future_dataframe(M5, periods=365)
 vendite_forecast_prophet <- predict(M5, future_prophet)
 tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
@@ -1103,7 +1103,7 @@ M6 %>%
 rmse_tbats <- sqrt(M6$variance)  # 1056.667
 mape_tbats <- mape(vendite_forecast_tbats$mean, test_tbats)  # 17.01783
 
-# previsioni periodo covid
+# previsioni periodo covid, DA METTERE FINO AL 17 MAGGIO
 M6 %>%
   forecast(h=463) %>%  # fino a metà maggio circa
   autoplot() + autolayer(train_tbats)
@@ -1113,6 +1113,10 @@ autoplot(ts(vendite1_day[1:1233], start=2017,frequency=365))
 
 
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
+
+
+# LA DATA LIMITE E' 12 AGOSTO
+
 
 ### HoltWinters----
 # si addestra il modello su tutti i dati a disposizione (settimanali) per poi fare previsioni
