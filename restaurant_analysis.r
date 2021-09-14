@@ -1082,6 +1082,36 @@ prophet_plot_components(M5, vendite_forecast_prophet)
 dyplot.prophet(M5, vendite_forecast_prophet)
 
 
+### Tabts----
+# https://robjhyndman.com/hyndsight/seasonal-periods/
+vendite1_day_pre_split_tbats <- ts_split(vendite1_day_pre)
+train_tbats <- vendite1_day_pre_split_tbats$train
+test_tbats <- vendite1_day_pre_split_tbats$test
+
+tbats_data <- msts(train_tbats, seasonal.periods=c(7,365.25))
+M6 <- tbats(tbats_data)
+
+#  considerando test set
+vendite_forecast_tbats <- forecast(M6, h=length(test_tbats))
+autoplot(vendite_forecast_tbats, vendite1_day_pre.colour = 'black')
+
+M6 %>%
+  forecast(h=length(test_tbats)) %>%  
+  autoplot() + autolayer(test_tbats)
+
+# performance
+rmse_tbats <- sqrt(M6$variance)  # 1056.667
+mape_tbats <- mape(vendite_forecast_tbats$mean, test_tbats)  # 17.01783
+
+# previsioni periodo covid
+M6 %>%
+  forecast(h=463) %>%  # fino a metà maggio circa
+  autoplot() + autolayer(train_tbats)
+
+# cofronto con valori reali
+autoplot(ts(vendite1_day[1:1233], start=2017,frequency=365))
+
+
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
 
 ### HoltWinters----
@@ -1090,24 +1120,24 @@ dyplot.prophet(M5, vendite_forecast_prophet)
 # relativi a vendite e scontrini
 
 # metodo lisciamento esponenziale
-M6 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
-plot(M6)
+M7 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
+plot(M7)
 
 # parametri
-M6$alpha
-M6$beta
-M6$gamma
+M7$alpha
+M7$beta
+M7$gamma
 
 # analisi residui
-acf(residuals(M6), lag = 52)
+acf(residuals(M7), lag = 52)
 
 # previsione
-prev <- forecast(M6, h=10)
+prev <- forecast(M7, h=10)
 autoplot(prev)
 
 # in alternativa
-prev <- predict(M6, 10, prediction.interval=TRUE)
-plot(M6, prev)
+prev <- predict(M7, 10, prediction.interval=TRUE)
+plot(M7, prev)
 
 ### Auto Arima con regressori----
 # il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
@@ -1176,22 +1206,22 @@ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", metho
 
 # regressori: "week_covid_bin", "week_rossa_bin"
 
-M7 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
+M8 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
                  xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_bin")]))
-summary(M7)  # AIC: 3548.42; RMSE: 667.4276   
-checkresiduals(M7)
-tsdisplay(residuals(M7), lag.max=52, main='Seasonal Model Residuals')
+summary(M8)  # AIC: 3548.42; RMSE: 667.4276   
+checkresiduals(M8)
+tsdisplay(residuals(M8), lag.max=52, main='Seasonal Model Residuals')
 
-valori <- M7$coef["week_covid_bin"]/sqrt(diag(M7$var.coef))
+valori <- M8$coef["week_covid_bin"]/sqrt(diag(M8$var.coef))
 pvalue = 2*pt(valori["week_covid_bin"] ,220)
 pvalue
 
-valori <- M7$coef["week_rossa_bin"]/sqrt(diag(M7$var.coef))
+valori <- M8$coef["week_rossa_bin"]/sqrt(diag(M8$var.coef))
 pvalue = 2*pt(valori["week_rossa_bin"] ,220)
 pvalue
 
 # verifica adattamento modello
-autoplot(M7$fitted) + autolayer(vendite1_sett_avg)
+autoplot(M8$fitted) + autolayer(vendite1_sett_avg)
 
 # si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # in particolare si cerca di prevedere le vendite dopo aprile 2021, date per cui 
@@ -1262,7 +1292,7 @@ regressori_forecast_week <- regressori_forecast_week %>%
 
 
 # previsione vendite settimanali su dati nuovi
-forecast_2021 <- M7 %>%
+forecast_2021 <- M8 %>%
   forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_bin")])) 
 
 autoplot(forecast_2021)
@@ -1274,17 +1304,17 @@ autoplot(forecast_2021)
 # relativi a vendite e scontrini
 
 # implementazione modelli
-M8 <- randomForest(vendite ~ is_holiday + is_weekend +pioggia+  covid + stagione 
+M9 <- randomForest(vendite ~ is_holiday + is_weekend +pioggia+  covid + stagione 
                   + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
                   + tot_vaccini_emilia_romagna + mese, data = ristorante1)
-varImpPlot(M8)
-print(M8)
-
-# si selezionano le variabili più rilevanti
-M9 <- randomForest(vendite ~ weekday + is_weekend + covid + rossa_emilia_romagna + mese,
-                                    data = ristorante1)
 varImpPlot(M9)
 print(M9)
+
+# si selezionano le variabili più rilevanti
+M10 <- randomForest(vendite ~ weekday + is_weekend + covid + rossa_emilia_romagna + mese,
+                                    data = ristorante1)
+varImpPlot(M10)
+print(M10)
 
 # si seleziona il periodo su cui verranno fatte le previsioni
 interval_post_aprile = seq(from = as.Date("2021-04-13"), 
@@ -1363,7 +1393,7 @@ ristorante1_pre_post_aprile <-rbind(ristorante1[,c("data", "vendite", "weekday",
 
 
 # si utilizza il modello appena creato per fare previsioni sul futuro
-vendite_forecast_rf_new <- predict(M9, ristorante1_pre_post_aprile[1564:1685,])  # dal 13 aprile in poi compreso
+vendite_forecast_rf_new <- predict(M10, ristorante1_pre_post_aprile[1564:1685,])  # dal 13 aprile in poi compreso
 vendite_forecast_rf_new <- as.data.frame(vendite_forecast_rf_new)
 
 # si uniscono le tue serie storiche
@@ -1413,7 +1443,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data",
      ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
 
 # verifica performance modello
-RMSE.rf <- sqrt(mean((M9$predicted - ristorante1$vendite)^2))
+RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))
 RMSE.rf
 
 
@@ -1450,24 +1480,33 @@ prophet_vendite_totali$covid <- covid(prophet_vendite_totali$ds)
 prophet_vendite_totali$rossa <- vendite_pre_aprile_prophet$rossa
 
 # si crea il modello
-M10 <- prophet(daily.seasonality=FALSE)
-M10 <- add_country_holidays(M10, country_name = 'IT')
-M10 <- add_regressor(M10, 'covid')
-M10 <- add_regressor(M10, 'rossa')
-M10 <- fit.prophet(M10, prophet_vendite_totali)
+M11 <- prophet(daily.seasonality=FALSE)
+M11 <- add_country_holidays(M11, country_name = 'IT')
+M11 <- add_regressor(M11, 'covid')
+M11 <- add_regressor(M11, 'rossa')
+M11 <- fit.prophet(M11, prophet_vendite_totali)
 
 # vengono fatte le previsioni
-future_prophet_regr <- make_future_dataframe(M10, periods=90)
+future_prophet_regr <- make_future_dataframe(M11, periods=90)
 
 future_prophet_regr$covid <- covid(future_prophet_regr$ds)
 future_prophet_regr$rossa <- vendite_pre_post_aprile_prophet$rossa
 
-vendite_forecast_prophet_regr <- predict(M10, future_prophet_regr)
+vendite_forecast_prophet_regr <- predict(M11, future_prophet_regr)
 
-plot(M10, vendite_forecast_prophet_regr)
-prophet_plot_components(M10, vendite_forecast_prophet_regr)
-# prophet_vendite_totali.cv <- cross_validation(M10, initial=180, period=60, horizon=120, units='days')
+plot(M11, vendite_forecast_prophet_regr)
+prophet_plot_components(M11, vendite_forecast_prophet_regr)
+# prophet_vendite_totali.cv <- cross_validation(M11, initial=180, period=60, horizon=120, units='days')
 # plot_cross_validation_metric(prophet_vendite_totali.cv, metric = 'rmse')
-dyplot.prophet(M10, vendite_forecast_prophet_regr)
+dyplot.prophet(M11, vendite_forecast_prophet_regr)
 
 sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"])^2))
+
+
+### Tbats ----
+tbats_data <- msts(vendite1_day, seasonal.periods=c(7,365.25))
+M7 <- tbats(tbats_data)
+
+# previsioni post aprile 2021
+vendite_forecast_tbats <- forecast(M7, h=100)
+autoplot(vendite_forecast_tbats, tbats_data = 'black')
