@@ -961,9 +961,8 @@ accuracy(forecast_covid_auto_arima, test_auto_arima)
 # per capire come sarebbero andate le vendite se non ci fosse stato il covid
 
 M2 %>%
-  forecast(h=76) %>%  # h Number of periods for forecasting, DA MODIFICARE
+  forecast(h=66) %>%  # h Number of periods for forecasting, fino alla settimana 11-17 maggio 2020 compresa
   autoplot() + autolayer(vendite1_sett_avg)
-# CHECK IT ULTIMI GRAFICI (controllare da dove parte previsione)
 
 
 ### Random forest----
@@ -1068,8 +1067,8 @@ colnames(prophet_vendite) <- c("ds", "y")
 # si crea il modello
 M5 <- prophet(prophet_vendite)
 
-# vengono fatte le previsioni, DA METTERE FINO AL 17 MAGGIO
-future_prophet <- make_future_dataframe(M5, periods=365)
+# vengono fatte le previsioni
+future_prophet <- make_future_dataframe(M5, periods=133)  # fino al 17 maggio 2020
 vendite_forecast_prophet <- predict(M5, future_prophet)
 tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 # yhat containing the vendite_forecast_prophet. It has additional columns for uncertainty 
@@ -1103,7 +1102,7 @@ M6 %>%
 rmse_tbats <- sqrt(M6$variance)  # 1056.667
 mape_tbats <- mape(vendite_forecast_tbats$mean, test_tbats)  # 17.01783
 
-# previsioni periodo covid, DA METTERE FINO AL 17 MAGGIO
+# previsioni periodo covid
 M6 %>%
   forecast(h=463) %>%  # fino a metà maggio circa
   autoplot() + autolayer(train_tbats)
@@ -1113,9 +1112,6 @@ autoplot(ts(vendite1_day[1:1233], start=2017,frequency=365))
 
 
 # PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
-
-
-# LA DATA LIMITE E' 12 AGOSTO
 
 
 ### HoltWinters----
@@ -1135,13 +1131,13 @@ M7$gamma
 # analisi residui
 acf(residuals(M7), lag = 52)
 
-# previsione
-prev <- forecast(M7, h=10)
-autoplot(prev)
+# previsione, fino alla settimana 9-15 agosto 2021 compresa
+vendite_forecast_hw <- forecast(M7, h=18)
+autoplot(vendite_forecast_hw)
 
 # in alternativa
-prev <- predict(M7, 10, prediction.interval=TRUE)
-plot(M7, prev)
+vendite_forecast_hw <- predict(M7, 18, prediction.interval=TRUE)
+plot(M7, vendite_forecast_hw)
 
 ### Auto Arima con regressori----
 # il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
@@ -1299,7 +1295,7 @@ regressori_forecast_week <- regressori_forecast_week %>%
 forecast_2021 <- M8 %>%
   forecast(h=18,  xreg =data.matrix(regressori_forecast_week[, c("week_covid_bin", "week_rossa_bin")])) 
 
-autoplot(forecast_2021)
+autoplot(forecast_2021)  # fino alla settimana 9-15 agosto 2021 compresa
 
 
 ### Random forest----
@@ -1444,7 +1440,7 @@ ristorazione_temp <- ristorazione
 # serie storica originale
 ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
 plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", 
-     ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
+     ylab = "vendite", type="l", main = "Ristorante 1 dati reali")  # fino 12 agosto 2021
 
 # verifica performance modello
 RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))
@@ -1463,25 +1459,26 @@ covid <- function(ds) {
 }
 
 # periodo pre aprile
-vendite_pre_aprile_prophet <- data.frame(ristorante1$data, 
+ristorante1_pre_aprile_prophet <- data.frame(ristorante1$data, 
                                          ristorante1$rossa_emilia_romagna)
-names(vendite_pre_aprile_prophet) <- c("data", "rossa")
+names(ristorante1_pre_aprile_prophet) <- c("data", "rossa")
 
 # periodo post aprile
-data = seq(from = as.Date("2021-04-13"), to = as.Date("2021-07-11"), by = 'day')
-vendite_post_aprile_prophet <- data.frame(data)
-vendite_post_aprile_prophet$rossa <- 0
+ristorante1_post_aprile_prophet <- data.frame(interval_post_aprile)
+ristorante1_post_aprile_prophet$rossa <- 0
+names(ristorante1_post_aprile_prophet) <- c("data", "rossa")
+
 
 # unione periodo pre aprile e periodo post aprile
-vendite_pre_post_aprile_prophet <- rbind(vendite_pre_aprile_prophet, 
-                                         vendite_post_aprile_prophet)
+vendite_pre_post_aprile_prophet <- rbind(ristorante1_pre_aprile_prophet, 
+                                         ristorante1_post_aprile_prophet)
 
 # si considerano le vendite fino ad aprile 2021
 prophet_vendite_totali <- ristorante1 %>% 
   select(data, vendite)
 colnames(prophet_vendite_totali) <- c("ds", "y")
 prophet_vendite_totali$covid <- covid(prophet_vendite_totali$ds)
-prophet_vendite_totali$rossa <- vendite_pre_aprile_prophet$rossa
+prophet_vendite_totali$rossa <- ristorante1_pre_aprile_prophet$rossa
 
 # si crea il modello
 M11 <- prophet(daily.seasonality=FALSE)
@@ -1491,7 +1488,7 @@ M11 <- add_regressor(M11, 'rossa')
 M11 <- fit.prophet(M11, prophet_vendite_totali)
 
 # vengono fatte le previsioni
-future_prophet_regr <- make_future_dataframe(M11, periods=90)
+future_prophet_regr <- make_future_dataframe(M11, periods=122)  # fino al 12 agosto
 
 future_prophet_regr$covid <- covid(future_prophet_regr$ds)
 future_prophet_regr$rossa <- vendite_pre_post_aprile_prophet$rossa
@@ -1508,9 +1505,12 @@ sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"
 
 
 ### Tbats ----
+# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
+# fare previsioni per il periodo post aprile, periodo per cui non si hanno a 
+# disposizione valori relativi a vendite e scontrini
 tbats_data <- msts(vendite1_day, seasonal.periods=c(7,365.25))
-M7 <- tbats(tbats_data)
+M12 <- tbats(tbats_data)
 
 # previsioni post aprile 2021
-vendite_forecast_tbats <- forecast(M7, h=100)
+vendite_forecast_tbats <- forecast(M12, h=122)  # fino al 12 agosto 2021
 autoplot(vendite_forecast_tbats, tbats_data = 'black')
