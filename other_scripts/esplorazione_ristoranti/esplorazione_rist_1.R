@@ -96,6 +96,7 @@ vendite1_mens_pre <- vendite1_mens_pre$vendite
 vendite1_mens_pre <- ts(vendite1_mens_pre,start=2017,frequency=12) 
 
 vendite1_mens_avg_pre <- aggregate(vendite ~ month_pre_covid_rist1, ristorante1_pre_covid, mean)
+vendite1_mens_avg_pre <- head(vendite1_mens_avg_pre, - 1) 
 vendite1_mens_avg_pre <- vendite1_mens_avg_pre$vendite
 vendite1_mens_avg_pre <- ts(vendite1_mens_avg_pre,start=2017,frequency=12) 
 
