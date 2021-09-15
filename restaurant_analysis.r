@@ -21,7 +21,6 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 # setting working directory
 # working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
-#working_dir = "C:/Users/Lorenzo/Desktop/Progetto ds lab/progetto_dslab/dati"
 working_dir = "~/Desktop/progetti uni github/progetto_dslab/dati"
 setwd(working_dir)
 
@@ -33,9 +32,6 @@ mape <- function(actual,pred){
 
 # lettura dataset
 ristorazione_original <- read_excel("Ristorazione.xls")
-
-
-
 
 # SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES --------------------------
 
@@ -64,7 +60,6 @@ ristorazione[3:14] <- lapply(ristorazione[3:14], as.numeric)
 ristorazione$data <- substr(ristorazione$data, 3, 100)
 ristorazione$data <- parse_date(ristorazione$data, "%d %b %Y", locale = locale("it"))
 ristorazione$data_anno_prec <- parse_date(ristorazione$data_anno_prec, "%d %b %Y", locale = locale("it"))
-#ristorazione["giorno_settimana"] <- format(as.Date(ristorazione$data), "%a")  # ricavo il giorno_settimana della settimana
 
 # aggiunta colonna stagione
 getSeason <- function(DATES) {  # funzione per convertire da data a stagione
@@ -89,7 +84,6 @@ ristorazione$stagione[ristorazione$stagione == "Inverno"] <- 4
 ristorazione$stagione <- as.factor(ristorazione$stagione)
 
 # aggiunta colonna mese
-# ristorazione$mese <- format(ristorazione$data,"%B")
 ristorazione$mese <- month(ristorazione$data)
 ristorazione$mese <- as.factor(ristorazione$mese)
 
@@ -111,16 +105,6 @@ ristorazione$is_weekend <- as.factor(ristorazione$is_weekend)
 
 
 # colonna holiday
-# lista vacanze italiane
-# new_holiday = getHolidayList(calendar = "Italy", from=as.Date("2017-01-01"), to= as.Date("2021-04-12"), includeWeekends=FALSE)
-# new_holiday <- append(new_holiday, c(as.Date("2017-04-16"), as.Date("2018-04-01"),
-#                                      as.Date("2019-04-21"), as.Date("2021-04-04"), as.Date("2020-04-12")))
-# for (i in 1:nrow(ristorazione)) {
-#   ristorazione[i,"holiday"]<-ristorazione[i,"data"]%in% new_holiday
-# }
-# # conversione true/false -> 1/0
-# ristorazione$holiday <- as.integer(ristorazione$holiday)
-
 # risulta più comodo settare manulmente le i giorni di festività
 holidays_2017 <- as.Date(c("2017-01-01", "2017-01-06", "2017-02-14", "2017-04-16", 
                            "2017-04-17", "2017-04-25", "2017-05-01", "2017-06-02", 
@@ -170,7 +154,9 @@ colori_emilia_romagna <- colori_zone %>% filter(
 names(colori_emilia_romagna)[3] <- "colore_emilia_romagna"
 
 
-colori_lombardia_emilia_romagna <- merge(x = colori_lombardia, y = colori_emilia_romagna, by = "data", all.x = TRUE)
+colori_lombardia_emilia_romagna <- merge(x = colori_lombardia, 
+                                         y = colori_emilia_romagna, 
+                                         by = "data", all.x = TRUE)
 colori_lombardia_emilia_romagna <- colori_lombardia_emilia_romagna[,-c(2,4)]
 
 # faccio il join con ristorazione su data
@@ -271,7 +257,8 @@ date_range[!date_range %in% d]
 # resgistrate vaccinazioni
 
 # aggiungo date mancanti
-data_somministrazione <- seq(as.Date("2020-12-28", format = "%Y-%m-%d"), as.Date("2020-12-30", format = "%Y-%m-%d"), by = 1)
+data_somministrazione <- seq(as.Date("2020-12-28", format = "%Y-%m-%d"), 
+                             as.Date("2020-12-30", format = "%Y-%m-%d"), by = 1)
 area = rep("EMR", times = 3)
 totale = rep(0, times = 3)
 missing_dates_28_30 <- data.frame(data_somministrazione, area, totale)
@@ -324,14 +311,12 @@ sum(is.na(ristorazione$vendite1))  # 68 NA
 # 25-26 dicembre 2020, 1,6 gennaio 2021: feste
 # 4-5 aprile 2021: pasqua
 
-
 sum(is.na(ristorazione$vendite2))  # 55 NA
 # which(is.na(ristorazione$vendite2))
 # subset(ristorazione[,c(1,5)], is.na(ristorazione$vendite2))
 # 12 marzo 2020 - 3 maggio 2020: covid
 # 25 dicembre 2020: festa
 # 4 aprile 2021: pasqua
-
 
 sum(is.na(ristorazione$vendite3))  # 1096 NA
 # which(is.na(ristorazione$vendite3))
@@ -360,7 +345,6 @@ sum(is.na(ristorazione$vendite4))  # 108 NA
 # 25-26 dicembre 2020: feste
 # 4-5 aprile 2021: pasqua
 
-
 sum(is.na(ristorazione$vendite5))  # 62 NA
 # which(is.na(ristorazione$vendite5))
 # subset(ristorazione[,c(1,11)], is.na(ristorazione$vendite5))
@@ -370,7 +354,6 @@ sum(is.na(ristorazione$vendite5))  # 62 NA
 # 12 marzo 2020 - 3 maggio 2020: covid
 # 25 dicembre 2020: festa
 # 4 aprile 2021: pasqua
-
 
 sum(is.na(ristorazione$vendite6))  # 319 NA
 # which(is.na(ristorazione$vendite6))
@@ -445,13 +428,6 @@ ristorazione[1309:1369, "black_friday_saldi_emilia_romagna"] <- 1
 ristorazione[1427, "black_friday_saldi_emilia_romagna"] <- 1
 ristorazione[1491:1550, "black_friday_saldi_emilia_romagna"] <- 1
 ristorazione$black_friday_saldi_emilia_romagna <- as.factor(ristorazione$black_friday_saldi_emilia_romagna)
-
-
-# aggiunta colonna neve
-# meteo <- read_delim("meteo2.csv", ";", escape_double = FALSE, trim_ws = TRUE)
-# meteo <- meteo[, -c(1)]
-# meteo$data<-as.Date(meteo$data, format = "%d/%m/%Y")
-# ristorazione<-merge(x=ristorazione,y=meteo,by="data",all.x=TRUE)
 
 # aggiunta colonna covid
 ristorazione$covid <- 0
@@ -576,30 +552,32 @@ rm(list = c('col_date','col_nomi'))
 
 
 # ESPLORAZIONE DATASET ------------------------------------------------------------
-
-# un aspetto da osservare potrebbe essere: i ristoranti aperti da più tempo hanno reagito meglio o peggio rispetto al covid , rispetto a ristoranti magari aperti da poco ? 
-# nei plot sarebbe bello inserire le date degli eventi principali: chiusura ristoranti, inizio vaccinazione ecc (tipo https://statisticsglobe.com/draw-time-series-plot-with-events-using-ggplot2-in-r)
-
 ## analisi vendite giornaliere considerando tutti gli anni e tutti i ristoranti ----
 par(mfrow=c(3,2))
 
 # ristorante 1
-plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+plot(ristorante1$data, ristorante1$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 1")
 abline(h=mean(as.integer(ristorante1$vendite)))
 
-plot(ristorante2$data, ristorante2$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 2")
+plot(ristorante2$data, ristorante2$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 2")
 abline(h=mean(as.integer(ristorante2$vendite)))
 
-plot(ristorante3$data, ristorante3$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 3")
+plot(ristorante3$data, ristorante3$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 3")
 abline(h=mean(as.integer(ristorante3$vendite)))
 
-plot(ristorante4$data, ristorante4$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 4")
+plot(ristorante4$data, ristorante4$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 4")
 abline(h=mean(as.integer(ristorante4$vendite)))
 
-plot(ristorante5$data, ristorante5$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 5")
+plot(ristorante5$data, ristorante5$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 5")
 abline(h=mean(as.integer(ristorante5$vendite)))
 
-plot(ristorante6$data, ristorante6$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 6")
+plot(ristorante6$data, ristorante6$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 6")
 abline(h=mean(as.integer(ristorante6$vendite)))
 
 
@@ -608,7 +586,8 @@ abline(h=mean(as.integer(ristorante6$vendite)))
 # ristorante 1
 ggplot(ristorante1, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante1$data[yday(ristorante1$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante1$data[yday(ristorante1$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -624,7 +603,8 @@ ggplot(ristorante1, aes(data, vendite)) +
 # ristorante 2
 ggplot(ristorante2, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante2$data[yday(ristorante2$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante2$data[yday(ristorante2$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -641,7 +621,8 @@ ggplot(ristorante2, aes(data, vendite)) +
 # ristorante 3
 ggplot(ristorante3, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante3$data[yday(ristorante3$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante3$data[yday(ristorante3$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -657,7 +638,8 @@ ggplot(ristorante3, aes(data, vendite)) +
 # ristorante 4
 ggplot(ristorante4, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante4$data[yday(ristorante4$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante4$data[yday(ristorante4$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -673,7 +655,8 @@ ggplot(ristorante4, aes(data, vendite)) +
 # ristorante 5
 ggplot(ristorante5, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante5$data[yday(ristorante5$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante5$data[yday(ristorante5$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -689,7 +672,8 @@ ggplot(ristorante5, aes(data, vendite)) +
 # ristorante 6
 ggplot(ristorante6, aes(data, vendite)) +
   geom_line() +
-  geom_vline(xintercept=as.numeric(ristorante6$data[yday(ristorante6$data)==1]), size=1.2, color= "red") +
+  geom_vline(xintercept=as.numeric(ristorante6$data[yday(ristorante6$data)==1]), 
+             size=1.2, color= "red") +
   
   scale_x_date(date_labels=paste(c(rep(" ",11), "%b"), collapse=""), 
                date_breaks="month", expand=c(0,0)) +
@@ -701,9 +685,6 @@ ggplot(ristorante6, aes(data, vendite)) +
         panel.grid.minor.x = element_blank(),
         panel.border = element_rect(colour="grey70"),
         panel.spacing=unit(0,"cm"))
-
-
-
 
 ## esplorazioni dettagliate dei ristoranti ----
 
@@ -734,8 +715,8 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 
 # CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
 
-# seleziono un periodo temporale che corrisponde all'estate
-# ricavo due serie storiche, per 2019 e 2020
+# si seleziona un periodo temporale che corrisponde all'estate
+# si ricavano due serie storiche, per 2019 e 2020
 
 inizio_estate_2019 <- as.Date("2019-06-21", format = "%Y-%m-%d")
 fine_estate_2019 <- as.Date("2019-09-22", format = "%Y-%m-%d")
@@ -763,8 +744,6 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_est
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
 
 
-
-
 # ANALISI TREND SCONTRINI --------------------------------
 
 # ristorante 1
@@ -782,7 +761,8 @@ autoplot(trend_scontrini_ts_rist2, facets = 1, main = "Ristorante 2: analisi tre
 # ristorante 3
 trend_scontrini_df_rist3 <- data.frame(ristorante3$rapprto_v_s ,ristorante3$scontrini)
 names(trend_scontrini_df_rist3) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist3 <- ts(trend_scontrini_df_rist3, start = decimal_date(as.Date("2019-11-04")),frequency = 365)
+trend_scontrini_ts_rist3 <- ts(trend_scontrini_df_rist3, start = decimal_date(as.Date("2019-11-04")),
+                               frequency = 365)
 autoplot(trend_scontrini_ts_rist3, facets = 1, main = "Ristorante 3: analisi trend scontrini")
 
 # ristorante 4
@@ -800,15 +780,14 @@ autoplot(trend_scontrini_ts_rist5, facets = 1, main = "Ristorante 5: analisi tre
 # ristorante 6
 trend_scontrini_df_rist6 <- data.frame(ristorante6$rapprto_v_s ,ristorante6$scontrini)
 names(trend_scontrini_df_rist6) <- c("prezzo medio scontrino", "scontrini registrati")
-trend_scontrini_ts_rist6 <- ts(trend_scontrini_df_rist6, start = decimal_date(as.Date("2017-09-21")),frequency = 365)
+trend_scontrini_ts_rist6 <- ts(trend_scontrini_df_rist6, start = decimal_date(as.Date("2017-09-21")),
+                               frequency = 365)
 autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi trend scontrini")
-
-
 
 
 # PREVISIONE FATTURATO PERIODO COVID PRIMO RISTORANTE -------------------------------------------
 # NOTA BENE:
-# per i modelli a  seguire è stata scelta coem data di inizio covid (colonna covid)
+# per i modelli a  seguire è stata scelta come data di inizio covid (colonna covid)
 # il 9 marzo, data in cui l'Italia entra in lockdown. Il 5 gennaio invece viene 
 # scelto come data di split tra train e test set in modo tale che il train non subisca
 # influenze del covid
@@ -880,6 +859,9 @@ grid.arrange(acf, pacf, ncol=2)
 # si osserva che il lag 52 è molto correlato nell'acf, si corregge il modello
 M1 <- Arima(train_arima, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
 summary(M1)
+# considerando il training set:
+# AIC 1612.29
+# BIC 1625.75
 
 # si analizzano nuovamente pacf e acf dei residui 
 acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
@@ -916,18 +898,14 @@ autoplot(vendite1_sett_avg_pre) +
 arima_diag(train_auto_arima)
 M2 <- auto.arima(train_auto_arima, seasonal = T)
 # i dati vengono addestrati sul train e poi viene valutato il modello sul test
+summary(M2)
+# considerando il training set:
+# AIC 918
+# BIC 922.09
 
 # per valutare la qualità del modello si possono inizialmente plottare i grafici
 # ACF e PACF dei residui del modello
 tsdisplay(residuals(M2), lag.max=15, main='Seasonal Model Residuals')
-
-# AIC = 1052.04, si ottiene un valore migliore rispetto al modello precedente
-
-accuracy(M2)
-# MAPE = 6.050572, < 10, highly accurate forecasting (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
-# MASE = 0.4430427, < 1, buon risultato
-
-summary(M2)
 
 # si vuole verificare che non ci sia correlazione tra gli errori
 checkresiduals(M2)
@@ -955,7 +933,10 @@ lines(test_auto_arima, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
 
 # valutazione qualità previsioni
-accuracy(forecast_covid_auto_arima, test_auto_arima)
+# (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
+accuracy(forecast_covid_auto_arima, test_auto_arima)[,1:5]
+# RMSE 797.8461
+# MAPE 8.145823
 
 # si procede ora utilizzando il modello ottenuto per fare previsioni su dati nuovi,
 # per capire come sarebbero andate le vendite se non ci fosse stato il covid
@@ -966,10 +947,14 @@ M2 %>%
 
 
 ### Random forest----
+# le vendite giornaliere pre covid (ristorante1_pre_covid$vendite) vengono divise 
+# in train e test per cercare di modellare i dati a disposizione e cercare di valutarne 
+# la qualità del modello ottenuto.
+# Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
+# particolar modo per prevedere come le vendite sarebbero andate durante il periodo
+# covid, durante il quale per alcune settimane le vendite effettive invece sono 
+# state pari a zero
 # https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
-# si opera su dati giornalieri
-# si addestra il modello sui dati pre covid (ristorante1_pre_covid$vendite) e 
-# si prevedono le vendite nel periodo covid
 
 # divisione in train e test
 index_rf <- sample(1:nrow(ristorante1_pre_covid),
@@ -983,24 +968,25 @@ M3 <- randomForest(vendite ~ is_holiday + is_weekend + pioggia + covid + stagion
                    + tot_vaccini_emilia_romagna + mese, data = train_rf)
 varImpPlot(M3)
 print(M3)
+# % Var explained: 78.46
 
 # si selezionano le variabili più rilevanti
 M4 <- randomForest(vendite ~ weekday + is_weekend + mese + is_holiday + stagione,
                    data = train_rf)
 varImpPlot(M4)
 print(M4)
+# % Var explained: 73
 
+# si valutano le performance del modello sul train e test set
 predictions_rf <- predict(M4, newdata = train_rf)
-mape(train_rf$vendite, predictions_rf)
+# mape(train_rf$vendite, predictions_rf)
 
 predictions_rf <- predict(M4, newdata = test_rf)
-mape(test_rf$vendite, predictions_rf)
+# mape(test_rf$vendite, predictions_rf)
 
-RMSE.rf <- sqrt(mean((predictions_rf-test_rf$vendite)^2))
-RMSE.rf
-
-MAE.rf <- mean(abs(predictions_rf-test_rf$vendite))
-MAE.rf
+accuracy(predictions_rf, test_rf$vendite)
+# RMSE 1333.147
+# MAPE 17.53987
 
 # predizioni su valori nuovi (sul periodo covid dove nei dati reali si hanno 0)
 
@@ -1027,7 +1013,8 @@ interval_covid_df <- data.frame(date = interval_covid,
 interval_covid_df$date <- as.Date(interval_covid_df$date)  
 interval_covid_ts <- xts(interval_covid_df$val, interval_covid_df$date)
 
-plot(interval_covid_df$date, interval_covid_df$vendite_forecast_rf, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1")
+plot(interval_covid_df$date, interval_covid_df$vendite_forecast_rf, xlab = "data", 
+     ylab = "vendite", type="l", main = "Ristorante 1")
 
 # serie storica dati reali fino a prima covid (ristorante1_pre_covid$vendite)
 interval_pre_covid <- seq(as.Date("2017-01-01"), as.Date("2020-01-05"), by = "day")
@@ -1049,17 +1036,24 @@ interval_complete <- interval_complete[order(interval_complete$data), ]
 row.names(interval_complete) <- NULL
 
 # serie storica con previsioni
-plot(interval_complete$data, interval_complete$vendite, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 previsioni")
+plot(interval_complete$data, interval_complete$vendite, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 1 previsioni")
 
 # serie storica originale
 ristorazione_temp <- ristorazione[1:1228,]  # fino al 12 maggio 2020
 ristorazione_temp$vendite1[is.na(ristorazione_temp$vendite1)] <- 0 
-plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", type="l", main = "Ristorante 1 dati reali")
+plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "vendite", 
+     type="l", main = "Ristorante 1 dati reali")
 
 
 ### Prophet----
-# si opera su dati giornalieri
-# si addestra il modello sui dati pre covid e si prevedono le vendite nel periodo covid
+# le vendite giornaliere pre covid vengono divise in train e test per cercare di modellare
+# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
+# particolar modo per prevedere come le vendite sarebbero andate durante il periodo
+# covid, durante il quale per alcune settimane le vendite effettive invece sono 
+# state pari a zero
+
 prophet_vendite <- ristorante1_pre_covid %>% 
   select(data, vendite)
 colnames(prophet_vendite) <- c("ds", "y")
@@ -1080,6 +1074,9 @@ prophet_plot_components(M5, vendite_forecast_prophet)
 # plot_cross_validation_metric(prophet_vendite.cv, metric='mape')
 dyplot.prophet(M5, vendite_forecast_prophet)
 
+sqrt(mean((prophet_vendite$y- vendite_forecast_prophet[1:1100,"yhat"])^2))
+# RMSE 1144.782
+
 
 ### Tabts----
 # https://robjhyndman.com/hyndsight/seasonal-periods/
@@ -1099,8 +1096,9 @@ M6 %>%
   autoplot() + autolayer(test_tbats)
 
 # performance
-rmse_tbats <- sqrt(M6$variance)  # 1056.667
-mape_tbats <- mape(vendite_forecast_tbats$mean, test_tbats)  # 17.01783
+accuracy(vendite_forecast_tbats$mean, test_tbats)
+# RMSE 1431.843
+# MAPE 14.83464
 
 # previsioni periodo covid
 M6 %>%
@@ -1124,9 +1122,9 @@ M7 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e
 plot(M7)
 
 # parametri
-M7$alpha
-M7$beta
-M7$gamma
+M7$alpha  # 0.6926003 
+M7$beta  # 0
+M7$gamma  # 1
 
 # analisi residui
 acf(residuals(M7), lag = 52)
@@ -1208,7 +1206,14 @@ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", metho
 
 M8 <- auto.arima(vendite1_sett_avg, seasonal = TRUE, 
                  xreg = data.matrix(regressori_week[, c("week_covid_bin", "week_rossa_bin")]))
-summary(M8)  # AIC: 3548.42; RMSE: 667.4276   
+summary(M8) 
+# AIC 3548.42
+# BIC 3568.87
+
+# considerando il training set
+# RMSE 667.4276
+# MAPE Inf
+
 checkresiduals(M8)
 tsdisplay(residuals(M8), lag.max=52, main='Seasonal Model Residuals')
 
@@ -1300,7 +1305,7 @@ autoplot(forecast_2021)  # fino alla settimana 9-15 agosto 2021 compresa
 
 ### Random forest----
 # si addestra il modello su tutti i dati a disposizione (giornalieri) per poi fare previsioni
-# per il periodo post aprile, periodo per cui non si hanno a disposizione valori 
+# per il periodo post aprile 2021, periodo per cui non si hanno a disposizione valori 
 # relativi a vendite e scontrini
 
 # implementazione modelli
@@ -1309,12 +1314,14 @@ M9 <- randomForest(vendite ~ is_holiday + is_weekend +pioggia+  covid + stagione
                   + tot_vaccini_emilia_romagna + mese, data = ristorante1)
 varImpPlot(M9)
 print(M9)
+# % Var explained: 82.7
 
 # si selezionano le variabili più rilevanti
 M10 <- randomForest(vendite ~ weekday + is_weekend + covid + rossa_emilia_romagna + mese,
                                     data = ristorante1)
 varImpPlot(M10)
 print(M10)
+# % Var explained: 65.33
 
 # si seleziona il periodo su cui verranno fatte le previsioni
 interval_post_aprile = seq(from = as.Date("2021-04-13"), 
@@ -1443,13 +1450,12 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data",
      ylab = "vendite", type="l", main = "Ristorante 1 dati reali")  # fino 12 agosto 2021
 
 # verifica performance modello
-RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))
-RMSE.rf
+RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))  # 1333.147
 
 
 ### Prophet con regressori ----
 # si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
-# fare previsioni per il periodo post aprile, periodo per cui non si hanno a 
+# fare previsioni per il periodo post aprile 2021, periodo per cui non si hanno a 
 # disposizione valori relativi a vendite e scontrini
 
 covid <- function(ds) {
@@ -1502,15 +1508,42 @@ prophet_plot_components(M11, vendite_forecast_prophet_regr)
 dyplot.prophet(M11, vendite_forecast_prophet_regr)
 
 sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"])^2))
+# RMSE 1344.155
 
 
 ### Tbats ----
 # si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
-# fare previsioni per il periodo post aprile, periodo per cui non si hanno a 
+# fare previsioni per il periodo post aprile 2021, periodo per cui non si hanno a 
 # disposizione valori relativi a vendite e scontrini
-tbats_data <- msts(vendite1_day, seasonal.periods=c(7,365.25))
-M12 <- tbats(tbats_data)
+tbats_data_new <- msts(vendite1_day, seasonal.periods=c(7,365.25))
+M12 <- tbats(tbats_data_new)
 
 # previsioni post aprile 2021
-vendite_forecast_tbats <- forecast(M12, h=122)  # fino al 12 agosto 2021
-autoplot(vendite_forecast_tbats, tbats_data = 'black')
+vendite_forecast_tbats_new <- forecast(M12, h=122)  # fino al 12 agosto 2021
+autoplot(vendite_forecast_tbats_new, tbats_data = 'black')
+
+# in alternativa con divisone in train e test
+vendite1_day_split_tbats_new <- ts_split(vendite1_day)
+train_tbats_new <- vendite1_day_split_tbats_new$train
+test_tbats_new <- vendite1_day_split_tbats_new$test
+
+tbats_data_new <- msts(train_tbats_new, seasonal.periods=c(7,365.25))
+M12 <- tbats(tbats_data_new)
+
+#  considerando test set
+vendite_forecast_tbats_new <- forecast(M12, h=length(test_tbats_new))
+autoplot(vendite_forecast_tbats_new, vendite1_day.colour = 'black')
+
+M12 %>%
+  forecast(h=length(test_tbats_new)) %>%  
+  autoplot() + autolayer(test_tbats_new)
+
+# performance
+accuracy(vendite_forecast_tbats_new$mean, test_tbats_new)
+# RMSE 3867.893
+# MAPE Inf
+
+# previsioni periodo covid
+M12 %>%
+  forecast(h=591) %>%  # fino al 12 agosto
+  autoplot() + autolayer(train_tbats_new)
