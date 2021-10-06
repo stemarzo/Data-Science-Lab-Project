@@ -792,7 +792,7 @@ autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi tre
 # scelto come data di split tra train e test set in modo tale che il train non subisca
 # influenze del covid
 
-### Arima manuale----
+### SARIMA manuale----
 # le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
 # i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
 # Il seguente modello non viene utilizzato per fare previsioni
@@ -800,56 +800,56 @@ autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi tre
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
 
 # rimozione stagionalità
-vendite1_sett_avg_pre_dest_arima <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
-autoplot(vendite1_sett_avg_pre_dest_arima) + autolayer(vendite1_sett_avg_pre)
+vendite1_sett_avg_pre_dest_sarima <- seasadj(stl(vendite1_sett_avg_pre, s.window = 52))
+autoplot(vendite1_sett_avg_pre_dest_sarima) + autolayer(vendite1_sett_avg_pre)
 
 # verifica se necessario differenziare
-ndiffs(vendite1_sett_avg_pre_dest_arima)
-nsdiffs(vendite1_sett_avg_pre_dest_arima)
+ndiffs(vendite1_sett_avg_pre_dest_sarima)
+nsdiffs(vendite1_sett_avg_pre_dest_sarima)
 
 # rimozione trend con differenziazione
-vendite1_sett_avg_pre_dest_diff_arima <- diff(vendite1_sett_avg_pre_dest_arima)
-autoplot(vendite1_sett_avg_pre_dest_diff_arima)
+vendite1_sett_avg_pre_dest_diff_sarima <- diff(vendite1_sett_avg_pre_dest_sarima)
+autoplot(vendite1_sett_avg_pre_dest_diff_sarima)
 
 # verifica stazionarietà
-adf.test(vendite1_sett_avg_pre_dest_diff_arima, alternative = "stationary")  
+adf.test(vendite1_sett_avg_pre_dest_diff_sarima, alternative = "stationary")  
 # The null-hypothesis for an ADF test is that the data are non-stationary. 
 # So p-value greater than 0.05 indicates non-stationarity, and  p-values less than 
 # 0.05 suggest stationarity.
 # risulta essere stazionaria
 
-kpss.test(vendite1_sett_avg_pre_dest_diff_arima)
+kpss.test(vendite1_sett_avg_pre_dest_diff_sarima)
 # In this case, the null-hypothesis is that the data are stationary. In this case, 
 # p-value less than 0.05 indicates non-stationary series and p-value greater than 
 # 0.05 indicates stationary series.
 # risulta essere stazionaria
 
-summary(ur.kpss(vendite1_sett_avg_pre_dest_diff_arima ))
-ndiffs(vendite1_sett_avg_pre_dest_diff_arima)
-nsdiffs(vendite1_sett_avg_pre_dest_diff_arima)
+summary(ur.kpss(vendite1_sett_avg_pre_dest_diff_sarima ))
+ndiffs(vendite1_sett_avg_pre_dest_diff_sarima)
+nsdiffs(vendite1_sett_avg_pre_dest_diff_sarima)
 
 # una volta ottenuta la serie storica stazionaria si procede con la creazione
 # di train e test
-vendite1_sett_avg_pre_split_arima <- ts_split(vendite1_sett_avg_pre_dest_diff_arima)
+vendite1_sett_avg_pre_split_sarima <- ts_split(vendite1_sett_avg_pre_dest_diff_sarima)
 
 # divisione in train e test
-train_arima <- vendite1_sett_avg_pre_split_arima$train
-test_arima <- vendite1_sett_avg_pre_split_arima$test
-autoplot(train_arima)
-autoplot(test_arima)
+train_sarima <- vendite1_sett_avg_pre_split_sarima$train
+test_sarima <- vendite1_sett_avg_pre_split_sarima$test
+autoplot(train_sarima)
+autoplot(test_sarima)
 
-autoplot(vendite1_sett_avg_pre_dest_diff_arima) +
-  autolayer(train_arima, series="train_arima") +
-  autolayer(test_arima, series="test_arima")
+autoplot(vendite1_sett_avg_pre_dest_diff_sarima) +
+  autolayer(train_sarima, series="train_sarima") +
+  autolayer(test_sarima, series="test_sarima")
 
 # si analizzano acf e pacf del train, per la scelta dei parametri p e q
-acf <- ggAcf(train_arima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
-pacf <- ggPacf(train_arima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+acf <- ggAcf(train_sarima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
+pacf <- ggPacf(train_sarima, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
 # si inzia provando con un ar 2, osservando che nel pacf due lag sono 
 # significativamente correlati
-M1 <- Arima(train_arima, order = c(2,0,0))
+M1 <- arima(train_sarima, order = c(2,0,0))
 
 # si analizzano pacf e acf dei residui 
 acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
@@ -857,7 +857,7 @@ pacf <- ggPacf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 
 # si osserva che il lag 52 è molto correlato nell'acf, si corregge il modello
-M1 <- Arima(train_arima, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
+M1 <- arima(train_sarima, order = c(2,0,0),seasonal =  list(order=c(0,0,1),period=52)) # in alternativa seasonal: (1,0,0)
 summary(M1)
 # considerando il training set:
 # AIC 1612.29
@@ -868,13 +868,13 @@ acf <- ggAcf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 pacf <- ggPacf(M1$residuals, lag.max = 52) + ggtitle("Vendite1 day pre diff")
 grid.arrange(acf, pacf, ncol=2)
 checkresiduals(M1)  # tutte le autocorrelazioni si trovano all'interno della banda, questo significa che i residui si comportano come un white noise
-autoplot(forecast(M1, h=47)) + autolayer(test_arima)
+autoplot(forecast(M1, h=47)) + autolayer(test_sarima)
 
 # si potrebbe procedere selezionando altri modelli variando i parametri p e q,
 # optando per il modello il cui valore di AIC è minore
 
 
-### Auto Arima senza regressori ----
+### SARIMA auto----
 # le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
 # i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
@@ -886,17 +886,17 @@ autoplot(forecast(M1, h=47)) + autolayer(test_arima)
 # automatico da auto arima
 
 # divisione in train e test
-vendite1_sett_avg_pre_split_auto_arima <- ts_split(vendite1_sett_avg_pre)
-train_auto_arima <- vendite1_sett_avg_pre_split_auto_arima$train
-test_auto_arima <- vendite1_sett_avg_pre_split_auto_arima$test
+vendite1_sett_avg_pre_split_auto_sarima <- ts_split(vendite1_sett_avg_pre)
+train_auto_sarima <- vendite1_sett_avg_pre_split_auto_sarima$train
+test_auto_sarima <- vendite1_sett_avg_pre_split_auto_sarima$test
 
 autoplot(vendite1_sett_avg_pre) +
-  autolayer(train_auto_arima, series="Training") +
-  autolayer(train_auto_arima, series="Test")
+  autolayer(train_auto_sarima, series="Training") +
+  autolayer(train_auto_sarima, series="Test")
 
-# auto.arima per selezione modello migliore
-arima_diag(train_auto_arima)
-M2 <- auto.arima(train_auto_arima, seasonal = T)
+# auto.sarima per selezione modello migliore
+arima_diag(train_auto_sarima)
+M2 <- auto.arima(train_auto_sarima, seasonal = T)
 # i dati vengono addestrati sul train e poi viene valutato il modello sul test
 summary(M2)
 # considerando il training set:
@@ -921,20 +921,20 @@ hist(M2$residuals)
 #  considerando test set
 M2 %>%
   forecast(h=47) %>%  # h Number of periods for forecasting
-  autoplot() + autolayer(test_auto_arima)
+  autoplot() + autolayer(test_auto_sarima)
 
 # alternativa per verifica addatamento dati con test set
-forecast_covid_auto_arima <- M2 %>%
+forecast_covid_auto_sarima <- M2 %>%
   forecast(h=47)
 
 par(mfrow=c(1,1))
-plot(forecast_covid_auto_arima)
-lines(test_auto_arima, col="red")
-legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","ARIMAPred"))
+plot(forecast_covid_auto_sarima)
+lines(test_auto_sarima, col="red")
+legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","sarimaPred"))
 
 # valutazione qualità previsioni
 # (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
-accuracy(forecast_covid_auto_arima, test_auto_arima)[,1:5]
+accuracy(forecast_covid_auto_sarima, test_auto_sarima)[,1:5]
 # RMSE 797.8461
 # MAPE 8.145823
 
@@ -1091,7 +1091,7 @@ accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
 # # MAPE Inf
 
 
-### Tabts----
+### TABTS----
 # https://robjhyndman.com/hyndsight/seasonal-periods/
 vendite1_day_pre_split_tbats <- ts_split(vendite1_day_pre)
 train_tbats <- vendite1_day_pre_split_tbats$train
@@ -1154,7 +1154,7 @@ plot(M7, vendite_forecast_hw)
 sqrt(mean((vendite1_sett_avg[53:223]- M7$fitted[,"xhat"])^2))  # 821.0211
 
 
-### Auto Arima con regressori----
+### SARIMAX----
 # il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
 # per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
 # disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
@@ -1528,7 +1528,7 @@ sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"
 # RMSE 1344.155
 
 
-### Tbats ----
+### TBATS----
 # si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
 # fare previsioni per il periodo post aprile 2021, periodo per cui non si hanno a 
 # disposizione valori relativi a vendite e scontrini
