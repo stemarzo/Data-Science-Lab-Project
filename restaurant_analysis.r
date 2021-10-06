@@ -1077,6 +1077,9 @@ dyplot.prophet(M5, vendite_forecast_prophet)
 sqrt(mean((prophet_vendite$y- vendite_forecast_prophet[1:1100,"yhat"])^2))
 # RMSE 1144.782
 
+mean(abs((prophet_vendite$y-vendite_forecast_prophet[1:1100,"yhat"])/prophet_vendite$y))*100
+# MAPE Inf
+
 
 ### Tabts----
 # https://robjhyndman.com/hyndsight/seasonal-periods/
@@ -1136,6 +1139,10 @@ autoplot(vendite_forecast_hw)
 # in alternativa
 vendite_forecast_hw <- predict(M7, 18, prediction.interval=TRUE)
 plot(M7, vendite_forecast_hw)
+
+# RMSE
+sqrt(mean((vendite1_sett_avg[53:223]- M7$fitted[,"xhat"])^2))  # 821.0211
+
 
 ### Auto Arima con regressori----
 # il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
@@ -1450,7 +1457,7 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data",
      ylab = "vendite", type="l", main = "Ristorante 1 dati reali")  # fino 12 agosto 2021
 
 # verifica performance modello
-RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))  # 1333.147
+RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))  # 1537.093
 
 
 ### Prophet con regressori ----
@@ -1521,6 +1528,16 @@ M12 <- tbats(tbats_data_new)
 # previsioni post aprile 2021
 vendite_forecast_tbats_new <- forecast(M12, h=122)  # fino al 12 agosto 2021
 autoplot(vendite_forecast_tbats_new, tbats_data = 'black')
+
+# RMSE
+sqrt(mean((vendite1_day- M12$fitted.values)^2))  # 1144.543
+
+
+
+
+
+
+
 
 # in alternativa con divisone in train e test
 vendite1_day_split_tbats_new <- ts_split(vendite1_day)
