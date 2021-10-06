@@ -1058,11 +1058,16 @@ prophet_vendite <- ristorante1_pre_covid %>%
   select(data, vendite)
 colnames(prophet_vendite) <- c("ds", "y")
 
+# divisione in train e test
+index_pr <- 770  # train 70% di prophet_vendite (1100), test 30% di prophet_vendite
+train_pr <- prophet_vendite[1:770,]
+test_pr <- prophet_vendite[771:1100,] 
+
 # si crea il modello
-M5 <- prophet(prophet_vendite)
+M5 <- prophet(train_pr)
 
 # vengono fatte le previsioni
-future_prophet <- make_future_dataframe(M5, periods=133)  # fino al 17 maggio 2020
+future_prophet <- make_future_dataframe(M5, periods=463)  # fino al 17 maggio 2020
 vendite_forecast_prophet <- predict(M5, future_prophet)
 tail(vendite_forecast_prophet[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 # yhat containing the vendite_forecast_prophet. It has additional columns for uncertainty 
@@ -1074,11 +1079,16 @@ prophet_plot_components(M5, vendite_forecast_prophet)
 # plot_cross_validation_metric(prophet_vendite.cv, metric='mape')
 dyplot.prophet(M5, vendite_forecast_prophet)
 
-sqrt(mean((prophet_vendite$y- vendite_forecast_prophet[1:1100,"yhat"])^2))
-# RMSE 1144.782
+# performance sul test set
+accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
+# RMSE 1353.581
+# MAPE 14.9611
 
-mean(abs((prophet_vendite$y-vendite_forecast_prophet[1:1100,"yhat"])/prophet_vendite$y))*100
-# MAPE Inf
+# sqrt(mean((prophet_vendite$y- vendite_forecast_prophet[1:1100,"yhat"])^2))
+# # RMSE 1144.782
+
+# mean(abs((prophet_vendite$y-vendite_forecast_prophet[1:1100,"yhat"])/prophet_vendite$y))*100
+# # MAPE Inf
 
 
 ### Tabts----
