@@ -36,7 +36,7 @@ ristorazione_original <- read_excel("Ristorazione.xls")
 # SISTEMAZIONE DATASET & AGGIUNTA NUOVE FEATURES --------------------------
 
 # sistemazione dataset
-ristorazione <- ristorazione_original # lavoro su una copia del dataset originale
+ristorazione <- ristorazione_original # si lavora su una copia del dataset originale
 ristorazione<-ristorazione[-c(1),-c(2,3,4,5,7,10)]  # header e colonne prive di dati
 colnames(ristorazione)[1]<- "data"
 colnames(ristorazione)[2]<- "data_anno_prec"
@@ -138,7 +138,6 @@ ristorazione$is_holiday[which(ristorazione$data %in% holidays_2017_to_2021)] <- 
 ristorazione$is_holiday <- as.factor(ristorazione$is_holiday)
 
 
-
 # colore zona in base alla data
 colori_zone <- read_csv("colori_zone.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
 # colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
@@ -159,7 +158,7 @@ colori_lombardia_emilia_romagna <- merge(x = colori_lombardia,
                                          by = "data", all.x = TRUE)
 colori_lombardia_emilia_romagna <- colori_lombardia_emilia_romagna[,-c(2,4)]
 
-# faccio il join con ristorazione su data
+# si fa il join con ristorazione su data
 ristorazione<-merge(x=ristorazione,y=colori_lombardia_emilia_romagna,by="data",all.x=TRUE)
 ristorazione$colore_lombardia[is.na(ristorazione$colore_lombardia)] <- "bianco"
 ristorazione$colore_emilia_romagna[is.na(ristorazione$colore_emilia_romagna)] <- "bianco"
@@ -173,11 +172,11 @@ ristorazione[1259:1405,"colore_emilia_romagna"]<-"giallo"
 ristorazione$colore_lombardia <- as.factor(ristorazione$colore_lombardia)
 ristorazione$colore_emilia_romagna <- as.factor(ristorazione$colore_emilia_romagna)
 
-# aggiungo colonna zona rossa lombardia
+# aggiunta colonna zona rossa lombardia
 ristorazione$rossa_lombardia <- ifelse(ristorazione$colore_lombardia == "rosso", 1, 0)
 ristorazione$rossa_lombardia <- as.factor(ristorazione$rossa_lombardia)
 
-# aggiungo colonna zona rossa emilia romagna
+# aggiunta colonna zona rossa emilia romagna
 ristorazione$rossa_emilia_romagna <- ifelse(ristorazione$colore_emilia_romagna == "rosso", 1, 0)
 ristorazione$rossa_emilia_romagna <- as.factor(ristorazione$rossa_emilia_romagna)
 
@@ -256,20 +255,20 @@ date_range[!date_range %in% d]
 # nei giorni "2020-12-28" "2020-12-29" "2020-12-30" "2021-01-01" non sono state
 # resgistrate vaccinazioni
 
-# aggiungo date mancanti
+# aggiunta date mancanti
 data_somministrazione <- seq(as.Date("2020-12-28", format = "%Y-%m-%d"), 
                              as.Date("2020-12-30", format = "%Y-%m-%d"), by = 1)
 area = rep("EMR", times = 3)
 totale = rep(0, times = 3)
 missing_dates_28_30 <- data.frame(data_somministrazione, area, totale)
 
-# aggiungo date mancanti
+# aggiunta date mancanti
 data_somministrazione <- as.Date("2021-01-01", format = "%Y-%m-%d")
 area = "EMR"
 totale = 0
 missing_dates_01_01 <- data.frame(data_somministrazione, area, totale)
 
-# aggiorno i dati per EMR
+# si aggiornano i dati per EMR
 vaccini_emilia_romagna = rbind(vaccini_emilia_romagna[1,],  # ora non ci sono più date mancanti
                                missing_dates_28_30,
                                vaccini_emilia_romagna[2,],
@@ -286,7 +285,7 @@ names(vaccini_emilia_romagna)[1] <- "data"
 vaccini_emilia_romagna$area <- NULL
 
 
-# integro con il file ristorazione
+# integrazione con il file ristorazione
 ristorazione <- merge(x = ristorazione, y = vaccini_lombardia, by = "data", all.x = TRUE)
 ristorazione <- merge(x = ristorazione, y = vaccini_emilia_romagna, by = "data", all.x = TRUE)
 ristorazione$tot_vaccini_lombardia[is.na(ristorazione$tot_vaccini_lombardia)] <- 0
@@ -437,7 +436,7 @@ ristorazione$covid  <- as.factor(ristorazione$covid )
 
 # CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
 
-# creo un dataframe per ciascun ristorante
+# si crea un dataframe per ciascun ristorante
 col_date <- subset(ristorazione, select = c(1, 2))
 col_nomi <- c("data", "data_anno_prec", "vendite", "scontrini")
 
@@ -918,7 +917,7 @@ acf(M2$residuals, lag.max=20, na.action=na.pass)
 Box.test(M2$residuals, lag=20, type="Ljung-Box")  # p-value > 0.05 -> independent residuals
 hist(M2$residuals)
 
-#  considerando test set
+# considerando test set
 M2 %>%
   forecast(h=47) %>%  # h Number of periods for forecasting
   autoplot() + autolayer(test_auto_sarima)
@@ -1083,12 +1082,6 @@ dyplot.prophet(M5, vendite_forecast_prophet)
 accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
 # RMSE 1353.581
 # MAPE 14.9611
-
-# sqrt(mean((prophet_vendite$y- vendite_forecast_prophet[1:1100,"yhat"])^2))
-# # RMSE 1144.782
-
-# mean(abs((prophet_vendite$y-vendite_forecast_prophet[1:1100,"yhat"])/prophet_vendite$y))*100
-# # MAPE Inf
 
 
 ### TABTS----
@@ -1541,36 +1534,3 @@ autoplot(vendite_forecast_tbats_new, tbats_data = 'black')
 
 # RMSE
 sqrt(mean((vendite1_day- M12$fitted.values)^2))  # 1144.543
-
-
-
-
-
-
-
-
-# in alternativa con divisone in train e test
-vendite1_day_split_tbats_new <- ts_split(vendite1_day)
-train_tbats_new <- vendite1_day_split_tbats_new$train
-test_tbats_new <- vendite1_day_split_tbats_new$test
-
-tbats_data_new <- msts(train_tbats_new, seasonal.periods=c(7,365.25))
-M12 <- tbats(tbats_data_new)
-
-#  considerando test set
-vendite_forecast_tbats_new <- forecast(M12, h=length(test_tbats_new))
-autoplot(vendite_forecast_tbats_new, vendite1_day.colour = 'black')
-
-M12 %>%
-  forecast(h=length(test_tbats_new)) %>%  
-  autoplot() + autolayer(test_tbats_new)
-
-# performance
-accuracy(vendite_forecast_tbats_new$mean, test_tbats_new)
-# RMSE 3867.893
-# MAPE Inf
-
-# previsioni periodo covid
-M12 %>%
-  forecast(h=591) %>%  # fino al 12 agosto
-  autoplot() + autolayer(train_tbats_new)
