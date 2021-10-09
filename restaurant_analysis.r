@@ -365,8 +365,6 @@ sum(is.na(ristorazione$vendite6))  # 319 NA
 
 # i seguenti valori NA verranno trattati nelle fasi di creazioni di df per ciascun ristorante
 # il numero di scontrini NA per ciascun ristorante corrisponde con il numero di vendite NA
-# effettuare check di consistenza: agli scontrini con vendite pari a 0 devono corrispondere 0 scontrini e cosi via 
-
 
 # sistemazione NA data_anno_prec
 first_date = ristorazione[421,"data_anno_prec"]+1
@@ -1085,6 +1083,13 @@ accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
 
 
 ### TABTS----
+# le vendite giornaliere pre covid vengono divise in train e test per cercare di modellare
+# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
+# particolar modo per prevedere come le vendite sarebbero andate durante il periodo
+# covid, durante il quale per alcune settimane le vendite effettive invece sono 
+# state pari a zero
+
 # https://robjhyndman.com/hyndsight/seasonal-periods/
 vendite1_day_pre_split_tbats <- ts_split(vendite1_day_pre)
 train_tbats <- vendite1_day_pre_split_tbats$train
