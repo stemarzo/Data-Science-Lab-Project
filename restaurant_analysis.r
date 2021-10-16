@@ -365,6 +365,8 @@ sum(is.na(ristorazione$vendite6))  # 319 NA
 
 # i seguenti valori NA verranno trattati nelle fasi di creazioni di df per ciascun ristorante
 # il numero di scontrini NA per ciascun ristorante corrisponde con il numero di vendite NA
+# effettuare check di consistenza: agli scontrini con vendite pari a 0 devono corrispondere 0 scontrini e cosi via 
+
 
 # sistemazione NA data_anno_prec
 first_date = ristorazione[421,"data_anno_prec"]+1
@@ -432,7 +434,7 @@ ristorazione[ristorazione$data > "2020-03-09",]$covid <- 1
 ristorazione$covid  <- as.factor(ristorazione$covid )
 
 
-# CREAZIONE DF PER CIASCUN RISTORANTE -------------------------------------
+# CREAZIONE DATAFRAME PER CIASCUN RISTORANTE -------------------------------------
 
 # si crea un dataframe per ciascun ristorante
 col_date <- subset(ristorazione, select = c(1, 2))
@@ -710,7 +712,7 @@ source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_
 # source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
-# CONFRONTO ESTATE COVID 2020 & ESTATE NO COVID 2019 --------------------------------
+# CONFRONTO ESTATE NO COVID 2019 & ESTATE COVID 2020 --------------------------------
 
 # si seleziona un periodo temporale che corrisponde all'estate
 # si ricavano due serie storiche, per 2019 e 2020
@@ -782,7 +784,12 @@ trend_scontrini_ts_rist6 <- ts(trend_scontrini_df_rist6, start = decimal_date(as
 autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi trend scontrini")
 
 
-# PREVISIONE FATTURATO PERIODO COVID PRIMO RISTORANTE -------------------------------------------
+# PREVISIONE ANDAMENTO VENDITE PERIODO COVID PRIMO RISTORANTE -------------------------------------------
+# I dati utilizzati per addestrare i modelli sono quelli relativi alle vendite del 
+# primo ristorante: in particolare è stato considerato il periodo compreso tra 
+# l'1 gennaio 2017 e il 5 gennaio 2020.
+# Si è proceduto dividendo il dataset in training (70%) e test (30%) set
+
 # NOTA BENE:
 # per i modelli a  seguire è stata scelta come data di inizio covid (colonna covid)
 # il 9 marzo, data in cui l'Italia entra in lockdown. Il 5 gennaio invece viene 
@@ -790,8 +797,9 @@ autoplot(trend_scontrini_ts_rist6, facets = 1, main = "Ristorante 6: analisi tre
 # influenze del covid
 
 ### SARIMA manuale----
-# le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
-# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# le vendite settimanali pre covid (vendite1_sett_avg_pre) vengono divise in train e test 
+# per cercare di modellare i dati a disposizione e cercare di valutarne la qualità 
+# del modello ottenuto.
 # Il seguente modello non viene utilizzato per fare previsioni
 
 # per rendere stazionaria la serie storica, bisogna eliminare stagionalità e trend
@@ -872,8 +880,9 @@ autoplot(forecast(M1, h=47)) + autolayer(test_sarima)
 
 
 ### SARIMA auto----
-# le vendite settimanali pre covid vengono divise in train e test per cercare di modellare
-# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# le vendite settimanali pre covid (vendite1_sett_avg_pre) vengono divise in train e test 
+# per cercare di modellare i dati a disposizione e cercare di valutarne la qualità 
+# del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
@@ -945,8 +954,8 @@ M2 %>%
 
 ### Random forest----
 # le vendite giornaliere pre covid (ristorante1_pre_covid$vendite) vengono divise 
-# in train e test per cercare di modellare i dati a disposizione e cercare di valutarne 
-# la qualità del modello ottenuto.
+# in train e test  per cercare di modellare i dati a disposizione e cercare di 
+# valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
@@ -1044,8 +1053,9 @@ plot(ristorazione_temp$data, ristorazione_temp$vendite1, xlab = "data", ylab = "
 
 
 ### Prophet----
-# le vendite giornaliere pre covid vengono divise in train e test per cercare di modellare
-# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# le vendite giornaliere pre covid (ristorante1_pre_covid$vendite) vengono divise 
+# in train e test  per cercare di modellare i dati a disposizione e cercare di 
+# valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
@@ -1083,14 +1093,15 @@ accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
 
 
 ### TABTS----
-# le vendite giornaliere pre covid vengono divise in train e test per cercare di modellare
-# i dati a disposizione e cercare di valutarne la qualità del modello ottenuto.
+# le vendite giornaliere pre covid (ristorante1_pre_covid$vendite) vengono divise 
+# in train e test  per cercare di modellare i dati a disposizione e cercare di 
+# valutarne la qualità del modello ottenuto.
 # Il seguente modello viene utilizzato per fare previsioni su valori futuri, in 
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
 # state pari a zero
-
 # https://robjhyndman.com/hyndsight/seasonal-periods/
+
 vendite1_day_pre_split_tbats <- ts_split(vendite1_day_pre)
 train_tbats <- vendite1_day_pre_split_tbats$train
 test_tbats <- vendite1_day_pre_split_tbats$test
@@ -1120,13 +1131,16 @@ M6 %>%
 autoplot(ts(vendite1_day[1:1233], start=2017,frequency=365))
 
 
-# PREVISIONE FATTURATO POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
+# PREVISIONE ANDAMENTO VENDITE POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
+# Le previsioni sonos tate fatte nel periodo compreso tra il 12 aprile 2021 e il 
+# 12 agosto 2021.
+# In questo caso non vi è una suddivisione in train e test dei dati a disposizione
 
 
 ### HoltWinters----
-# si addestra il modello su tutti i dati a disposizione (settimanali) per poi fare previsioni
-# per il periodo post aprile, periodo per cui non si hanno a disposizione valori 
-# relativi a vendite e scontrini
+# il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
+# per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
+# disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
 
 # metodo lisciamento esponenziale
 M7 <- HoltWinters(vendite1_sett_avg)  # il modello permette di catturare trend e stagionalità
@@ -1156,29 +1170,10 @@ sqrt(mean((vendite1_sett_avg[53:223]- M7$fitted[,"xhat"])^2))  # 821.0211
 # il modello viene addestrato su tutti i dati a disposizione (settimanali, vendite1_sett_avg) 
 # per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
 # disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
-# In questo caso non vi è una suddivisione in train e test (approccio statistico)
 
 # si considera la regione emilia-romagna
 
-# NOTA BENE
-# Splitting in Train and Test sets or not depends from the purpose of your analysis. 
-# You can follow a statistical approach or a machine learning approach.
-# 
-# In the classical, statistical approach, you fit a model on the whole batch of data. 
-# Your goal here is to check the sign of the variables' parameters, and whether 
-# they are significant or not. Scientifically speaking, each of those parameters 
-# represents the test of an hypothesis. <- è questo caso
-# 
-# In the machine learning approach, you want a model that is good at predicting 
-# data it has never seen before. You don't care whether a given variable has a 
-# positive or negative association with you dependend variable, you don't 
-# care whether your parameters are 95% significant or not, you just care 
-# that the model predicts the output as precisely as possible.
-
-# si procede considerando i dati su base settimanale
-
 # setting regressori
-
 # dati covid su base settimanale (somma, si contano i giorni della settimana in cui c'è il covid)
 ristorante1$covid <- as.numeric(as.character(ristorante1$covid))
 week_covid_sum <- aggregate(covid ~ week_rist1, ristorante1[-c(1,1563),], sum)  
@@ -1319,21 +1314,21 @@ autoplot(forecast_2021)  # fino alla settimana 9-15 agosto 2021 compresa
 
 
 ### Random forest----
-# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi fare previsioni
-# per il periodo post aprile 2021, periodo per cui non si hanno a disposizione valori 
-# relativi a vendite e scontrini
+# il modello viene addestrato su tutti i dati a disposizione (giornalieri, ristorante1$vendite) 
+# per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
+# disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
 
 # implementazione modelli
 M9 <- randomForest(vendite ~ is_holiday + is_weekend +pioggia+  covid + stagione 
-                  + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
-                  + tot_vaccini_emilia_romagna + mese, data = ristorante1)
+                   + weekday + solo_asporto_emilia_romagna + rossa_emilia_romagna
+                   + tot_vaccini_emilia_romagna + mese, data = ristorante1)
 varImpPlot(M9)
 print(M9)
 # % Var explained: 82.7
 
 # si selezionano le variabili più rilevanti
 M10 <- randomForest(vendite ~ weekday + is_weekend + covid + rossa_emilia_romagna + mese,
-                                    data = ristorante1)
+                    data = ristorante1)
 varImpPlot(M10)
 print(M10)
 # % Var explained: 65.33
@@ -1409,9 +1404,9 @@ names(ristorante1_post_aprile)<- c("data",
                                    "mese")
 
 ristorante1_pre_post_aprile <-rbind(ristorante1[,c("data", "vendite", "weekday",
-                                             "is_weekend", "covid", "rossa_emilia_romagna",
-                                             "mese")],
-                              ristorante1_post_aprile)
+                                                   "is_weekend", "covid", "rossa_emilia_romagna",
+                                                   "mese")],
+                                    ristorante1_post_aprile)
 
 
 # si utilizza il modello appena creato per fare previsioni sul futuro
@@ -1423,7 +1418,7 @@ vendite_forecast_rf_new <- as.data.frame(vendite_forecast_rf_new)
 # serie storica previsioni (dal 13 aprile fino al 12 agosto)
 # interval_post_aprile
 interval_post_aprile_df <- data.frame(date = interval_post_aprile, 
-                       val=vendite_forecast_rf_new)
+                                      val=vendite_forecast_rf_new)
 interval_post_aprile_df$date<-as.Date(interval_post_aprile_df$date)  
 interval_post_aprile_ts <- xts(interval_post_aprile_df$val, interval_post_aprile_df$date)
 
@@ -1438,7 +1433,7 @@ vendite_pre_aprile <- ristorante1 %>%
 
 interval_pre_aprile <- seq(as.Date("2017-01-01"), as.Date("2021-04-12"), by = "day")
 interval_pre_aprile_df <- data.frame(date = interval_pre_aprile, 
-                           val=vendite_pre_aprile$vendite)
+                                     val=vendite_pre_aprile$vendite)
 
 interval_pre_aprile_df$date<-as.Date(interval_pre_aprile_df$date)  
 interval_pre_aprile_ts <- xts(interval_pre_aprile_df$val, interval_pre_aprile_df$date)
@@ -1469,9 +1464,9 @@ RMSE.rf <- sqrt(mean((M10$predicted - ristorante1$vendite)^2))  # 1537.093
 
 
 ### Prophet con regressori ----
-# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
-# fare previsioni per il periodo post aprile 2021, periodo per cui non si hanno a 
-# disposizione valori relativi a vendite e scontrini
+# il modello viene addestrato su tutti i dati a disposizione (giornalieri, ristorante1$vendite) 
+# per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
+# disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
 
 covid <- function(ds) {
   dates <- as.Date(ds)
@@ -1481,7 +1476,7 @@ covid <- function(ds) {
 
 # periodo pre aprile
 ristorante1_pre_aprile_prophet <- data.frame(ristorante1$data, 
-                                         ristorante1$rossa_emilia_romagna)
+                                             ristorante1$rossa_emilia_romagna)
 names(ristorante1_pre_aprile_prophet) <- c("data", "rossa")
 
 # periodo post aprile
@@ -1527,9 +1522,10 @@ sqrt(mean((prophet_vendite_totali$y- vendite_forecast_prophet_regr[1:1563,"yhat"
 
 
 ### TBATS----
-# si addestra il modello su tutti i dati a disposizione (giornalieri) per poi 
-# fare previsioni per il periodo post aprile 2021, periodo per cui non si hanno a 
-# disposizione valori relativi a vendite e scontrini
+# il modello viene addestrato su tutti i dati a disposizione (giornalieri, ristorante1$vendite) 
+# per poi utilizzarlo per effettuare previsioni su date per cui non si hanno a 
+# disposizione i dati reali di vendite e scontrini, dunque oltre aprile 2021. 
+
 tbats_data_new <- msts(vendite1_day, seasonal.periods=c(7,365.25))
 M12 <- tbats(tbats_data_new)
 
