@@ -1,0 +1,22 @@
+R version 4.0.4 (2021-02-15)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.6         urca_1.3-0         pillar_1.6.1       compiler_4.0.4     tseries_0.10-48    tools_4.0.4       
+ [7] xts_0.12.1         nlme_3.1-152       lifecycle_1.0.0    tibble_3.1.2       gtable_0.3.0       lattice_0.20-41   
+[13] pkgconfig_2.0.3    rlang_0.4.11       DBI_1.1.1          curl_4.3           parallel_4.0.4     dplyr_1.0.6       
+[19] generics_0.1.0     vctrs_0.3.8        lmtest_0.9-38      grid_4.0.4         nnet_7.3-15        forecast_8.14     
+[25] tidyselect_1.1.0   glue_1.4.2         R6_2.5.0           fansi_0.5.0        TTR_0.24.2         ggplot2_3.3.5.9000
+[31] purrr_0.3.4        magrittr_2.0.1     scales_1.1.1       ellipsis_0.3.2     assertthat_0.2.1   quantmod_0.4.18   
+[37] timeDate_3043.102  colorspace_2.0-1   fracdiff_1.5-1     quadprog_1.5-8     utf8_1.2.1         munsell_0.5.0     
+[43] crayon_1.4.1       zoo_1.8-9         
