@@ -1,5 +1,3 @@
-
-Le librerie utilizzate sono indicate in: _requirements_info_.  
 La versione di R utilizzata è: 4.0.4 (2021-02-15).  
 
 [cartella dati](https://github.com/stemarzo/progetto_dslab/tree/main/dati): contiene i dataset utilizzati per le analisi svolte e per la creazione di nuove feature
