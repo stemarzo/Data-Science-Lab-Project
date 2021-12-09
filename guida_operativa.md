@@ -12,3 +12,6 @@ La versione di R utilizzata è: 4.0.4 (2021-02-15).
 
 
 [restaurant_analysis.r](https://github.com/stemarzo/progetto_dslab/blob/main/restaurant_analysis.r): risulta essere lo script principale contenente le analisi svolte sui ristoranti presi in esame.
+
+
+[Report](https://github.com/stemarzo/progetto_dslab/blob/main/report_ds_lab.pdf)
