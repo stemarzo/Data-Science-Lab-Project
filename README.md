@@ -21,6 +21,7 @@ esercizi di ristorazione in questione. Considerando, invece, i modelli prevision
 registrate dalla famiglia dei modelli ARIMA, è emersa la presenza di una ripresa, seppur contenuta, dei ristoranti per il periodo successivo ai mesi 
 di lockdown.
 
+[Report](https://github.com/stemarzo/progetto_dslab/blob/main/report_ds_lab.pdf)
 
 [Guida operativa](https://github.com/stemarzo/progetto_dslab/blob/main/guida_operativa.md)
 
