@@ -1,4 +1,3 @@
-setwd('C:/Users/stefano/Desktop/dslab')
 library(lubridate)
 library(chron)
 

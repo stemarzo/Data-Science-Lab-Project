@@ -121,8 +121,6 @@ print(
 
 ### analisi scontrini considerando tutti gli anni ----
 
-# eventualmente da mettere a confronto con l'andamento delle vendite (grafico sopra vendite e sotto scontrini)
-
 # scontrini giornalieri secondo ristorante 
 scontrini5_day <- ts(ristorante5$scontrini,start=2017,frequency=365) 
 
@@ -381,8 +379,8 @@ plot(components.ts_pre_5)
 # step.a <- y
 # step.c[] <- 0
 # step.a[] <- 0
-# step.c[(1167+1):length(y)] <- 1 #non so se vuoi usare la tua funzione per le date sono 12 mar  2020
-# step.a[(1222+1):length(y)] <- 1 #6 mag 2020
+# step.c[(1167+1):length(y)] <- 1 
+# step.a[(1222+1):length(y)] <- 1 
 # # step.c
 # # step.a
 # 

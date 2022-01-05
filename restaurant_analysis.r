@@ -20,7 +20,7 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 
 # setting working directory
-# working_dir = "C:/Users/Stefano/Documents/progetto_dslab/dati"
+# working_dir = percorso cartella dati
 working_dir = "~/Desktop/progetti uni github/progetto_dslab/dati"
 setwd(working_dir)
 
@@ -140,7 +140,6 @@ ristorazione$is_holiday <- as.factor(ristorazione$is_holiday)
 
 # colore zona in base alla data
 colori_zone <- read_csv("colori_zone.csv")  # https://github.com/imcatta/restrizioni_regionali_covid/blob/main/dataset.csv
-# colori_zone <- read_csv("C:/Users/Stefano/Documents/progetto_dslab/codice_progetto/dati/dataset.csv")
 
 # selezione regioni
 colori_lombardia <- colori_zone %>% filter(
@@ -363,10 +362,8 @@ sum(is.na(ristorazione$vendite6))  # 319 NA
 # 25 dicembre 2020: festa
 # 4 aprile 2021: pasqua
 
-# i seguenti valori NA verranno trattati nelle fasi di creazioni di df per ciascun ristorante
+# i seguenti valori NA verranno trattati nelle fasi di creazione di df per ciascun ristorante
 # il numero di scontrini NA per ciascun ristorante corrisponde con il numero di vendite NA
-# effettuare check di consistenza: agli scontrini con vendite pari a 0 devono corrispondere 0 scontrini e cosi via 
-
 
 # sistemazione NA data_anno_prec
 first_date = ristorazione[421,"data_anno_prec"]+1
@@ -688,28 +685,28 @@ ggplot(ristorante6, aes(data, vendite)) +
 ## esplorazioni dettagliate dei ristoranti ----
 
 # esplorazione ristorante 1
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_1.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
-# source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_1.R")
 
 # esplorazione ristorante 2
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_2.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
-# source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_2.R")
 
 # esplorazione ristorante 3
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_3.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
-# source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_3.R")
 
 # esplorazione ristorante 4
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_4.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
-# source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_4.R")
 
 # esplorazione ristorante 5
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_5.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
-# source("C://Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_5.R")
 
 # esplorazione ristorante 6
+# cartella other_scripts/esplorazione_ristoranti -> esplorazione_rist_6.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
-# source("C:/Users/Stefano/Documents/progetto_dslab/other_scripts/esplorazione_ristoranti/esplorazione_rist_6.R")
 
 
 # CONFRONTO ESTATE NO COVID 2019 & ESTATE COVID 2020 --------------------------------
@@ -725,21 +722,27 @@ fine_estate_2020 <- as.Date("2020-09-22", format = "%Y-%m-%d")
 
 
 # confronto estati ristorante 1
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_1.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_1.R")
 
 # confronto estati ristorante 2
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_2.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_2.R")
 
 # confronto estati ristorante 3
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_3.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_3.R")
 
 # confronto estati ristorante 4
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_4.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_4.R")
 
 # confronto estati ristorante 5
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_5.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_5.R")
 
 # confronto estati ristorante 6
+# cartella other_scripts/confronti_estati_ristoranti -> confronto_estati_rist_6.R
 source("~/Desktop/progetti uni github/progetto_dslab/other_scripts/confronti_estati_ristoranti/confronto_estati_rist_6.R")
 
 
@@ -939,7 +942,6 @@ lines(test_auto_sarima, col="red")
 legend("topleft",lty=1,bty = "n",col=c("red","blue"),c("testData","sarimaPred"))
 
 # valutazione qualità previsioni
-# (https://www.researchgate.net/publication/257812432_Using_the_R-MAPE_index_as_a_resistant_measure_of_forecast_accuracy)
 accuracy(forecast_covid_auto_sarima, test_auto_sarima)[,1:5]
 # RMSE 797.8461
 # MAPE 8.145823
@@ -960,7 +962,6 @@ M2 %>%
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
 # state pari a zero
-# https://www.pluralsight.com/guides/machine-learning-for-time-series-data-in-r
 
 # divisione in train e test
 index_rf <- sample(1:nrow(ristorante1_pre_covid),
@@ -1100,7 +1101,6 @@ accuracy(test_pr$y, vendite_forecast_prophet[771:1100, "yhat"])
 # particolar modo per prevedere come le vendite sarebbero andate durante il periodo
 # covid, durante il quale per alcune settimane le vendite effettive invece sono 
 # state pari a zero
-# https://robjhyndman.com/hyndsight/seasonal-periods/
 
 vendite1_day_pre_split_tbats <- ts_split(vendite1_day_pre)
 train_tbats <- vendite1_day_pre_split_tbats$train
@@ -1132,7 +1132,7 @@ autoplot(ts(vendite1_day[1:1233], start=2017,frequency=365))
 
 
 # PREVISIONE ANDAMENTO VENDITE POST APRILE 2021 PRIMO RISTORANTE -------------------------------------------
-# Le previsioni sonos tate fatte nel periodo compreso tra il 12 aprile 2021 e il 
+# Le previsioni sono state fatte nel periodo compreso tra il 12 aprile 2021 e il 
 # 12 agosto 2021.
 # In questo caso non vi è una suddivisione in train e test dei dati a disposizione
 
